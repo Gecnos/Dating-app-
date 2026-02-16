@@ -1,0 +1,2 @@
+Has job: YES
+Columns: id, name, email, email_verified_at, password, remember_token, created_at, updated_at, bio, intention_id, gender, date_of_birth, credits, blur_enabled, is_verified, interests, latitude, longitude, google_id, avatar, verification_selfie, job, education, height, languages, city

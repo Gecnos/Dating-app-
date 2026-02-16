@@ -1,34 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
-
-const tags = [
-    { label: '🏃‍♂️ Sport', id: 'sport' },
-    { label: '🎨 Art', id: 'art' },
-    { label: '🍕 Cuisine', id: 'cuisine' },
-    { label: '✈️ Voyage', id: 'voyage' },
-    { label: '🎸 Musique', id: 'musique' },
-    { label: '🎮 Gaming', id: 'gaming' },
-    { label: '🎬 Cinéma', id: 'cinema' },
-    { label: '📚 Lecture', id: 'lecture' },
-    { label: '💼 Entrepreneur', id: 'entrepreneur' },
-    { label: '💃 Danse', id: 'danse' },
-    { label: '🍸 Nightlife', id: 'nightlife' },
-    { label: '🐶 Animaux', id: 'animaux' },
-    { label: '📸 Photo', id: 'photo' },
-    { label: '🧘 Bien-être', id: 'bien-etre' },
-    { label: '🍷 Vin / Cocktails', id: 'vin' },
-];
+import axios from 'axios';
 
 export default function InterestsSelection() {
+    const [availableInterests, setAvailableInterests] = useState([]);
+    const [suggestion, setSuggestion] = useState('');
+    const [suggesting, setSuggesting] = useState(false);
+    const [suggestionSuccess, setSuggestionSuccess] = useState('');
+
     const { data, setData, post, processing } = useForm({
         interests: [],
     });
 
-    const toggleTag = (id) => {
-        const newInterests = data.interests.includes(id)
-            ? data.interests.filter((i) => i !== id)
-            : data.interests.length < 5 ? [...data.interests, id] : data.interests;
+    useEffect(() => {
+        axios.get('/api/interests').then(res => {
+            setAvailableInterests(res.data);
+        });
+    }, []);
+
+    const toggleTag = (label) => {
+        const newInterests = data.interests.includes(label)
+            ? data.interests.filter((i) => i !== label)
+            : data.interests.length < 5 ? [...data.interests, label] : data.interests;
         setData('interests', newInterests);
+    };
+
+    const handleSuggest = async (e) => {
+        e.preventDefault();
+        if (!suggestion) return;
+        setSuggesting(true);
+        try {
+            await axios.post('/api/interests/suggest', { label: suggestion });
+            setSuggestionSuccess('Suggestion envoyée !');
+            setSuggestion('');
+            setTimeout(() => setSuggestionSuccess(''), 3000);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setSuggesting(false);
+        }
     };
 
     const handleSubmit = (e) => {
@@ -59,19 +69,19 @@ export default function InterestsSelection() {
             </div>
 
             <div className="flex-1 flex flex-col space-y-6 z-10">
-                <div className="space-y-2">
+                <div className="space-y-4">
                     <h1 className="text-3xl font-black tracking-tight text-white leading-tight">Tes centres d'intérêt</h1>
                     <p className="text-white/60 text-sm font-medium leading-relaxed">Choisis de 3 à 5 tags pour affiner les affinités avec d'autres membres au Bénin.</p>
                 </div>
 
-                <div className="flex flex-wrap gap-3 pt-4">
-                    {tags.map((tag) => (
+                <div className="flex flex-wrap gap-2.5 pt-4">
+                    {availableInterests.map((tag) => (
                         <button
                             key={tag.id}
-                            onClick={() => toggleTag(tag.id)}
-                            className={`px-6 py-4 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all border ${data.interests.includes(tag.id)
+                            onClick={() => toggleTag(tag.label)}
+                            className={`px-5 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-wider transition-all border ${data.interests.includes(tag.label)
                                 ? 'bg-[#E1AD01] text-[#101322] border-[#E1AD01] shadow-xl shadow-[#E1AD01]/20 scale-[1.05]'
-                                : 'bg-white/5 text-white/60 border-white/5 hover:border-white/20'
+                                : 'bg-white/5 text-white/50 border-white/5 hover:border-white/20'
                                 }`}
                         >
                             {tag.label}
@@ -79,9 +89,31 @@ export default function InterestsSelection() {
                     ))}
                 </div>
 
+                {/* Suggestion Section */}
+                <div className="pt-6 space-y-3">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white/30">L'intérêt n'est pas dans la liste ?</p>
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            value={suggestion}
+                            onChange={e => setSuggestion(e.target.value)}
+                            placeholder="Suggérer un intérêt..."
+                            className="flex-1 bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-xs focus:ring-1 focus:ring-[#E1AD01] outline-none"
+                        />
+                        <button
+                            onClick={handleSuggest}
+                            disabled={suggesting || !suggestion}
+                            className="bg-white/10 hover:bg-white/20 px-4 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                        >
+                            {suggesting ? '...' : 'Suggérer'}
+                        </button>
+                    </div>
+                    {suggestionSuccess && <p className="text-green-400 text-[10px] font-bold uppercase">{suggestionSuccess}</p>}
+                </div>
+
                 <div className="mt-auto pb-8 space-y-6">
                     <div className="text-center">
-                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${data.interests.length >= 3 ? 'text-green-400' : 'text-white/40'}`}>
+                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${data.interests.length >= 3 ? 'text-[#E1AD01]' : 'text-white/40'}`}>
                             {data.interests.length} / 5 sélectionnés
                         </span>
                     </div>

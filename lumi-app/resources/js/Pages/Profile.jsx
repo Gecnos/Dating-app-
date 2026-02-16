@@ -102,8 +102,8 @@ export default function Profile({ user }) {
                 </button>
 
                 <button
-                    onClick={() => router.post('/logout')}
-                    className="mt-4 flex items-center justify-between p-4 bg-red-900/10 rounded-xl border border-red-900/20"
+                    onClick={() => router.post(route('logout'))}
+                    className="mt-4 flex items-center justify-between p-4 bg-red-900/10 rounded-xl border border-red-900/20 w-full"
                 >
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-red-900/30 flex items-center justify-center">

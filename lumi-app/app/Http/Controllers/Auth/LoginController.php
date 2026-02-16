@@ -33,13 +33,26 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
-            $isProfileComplete = $user->intention_id && $user->interests && $user->bio;
             
-            if ($isProfileComplete) {
-                return redirect()->intended(route('discovery'));
-            } else {
+            // Logique de redirection intelligente vers l'étape d'onboarding manquante
+            if (!$user->gender || !$user->date_of_birth) {
                 return redirect()->route('onboarding.basic');
             }
+            
+            if (!$user->intention_id) {
+                return redirect()->route('onboarding.intentions');
+            }
+
+            if (empty($user->interests) || count($user->interests) < 3) {
+                return redirect()->route('onboarding.interests');
+            }
+
+            if (!$user->avatar) {
+                return redirect()->route('onboarding.photos');
+            }
+
+            // Tout est bon, on va au deck de découverte
+            return redirect()->intended(route('discovery'));
         }
 
         return back()->withErrors([

@@ -8,6 +8,7 @@ export default function BasicInformation() {
         name: auth.user?.name || '',
         date_of_birth: '',
         gender: '',
+        job: '',
     });
 
     const handleSubmit = (e) => {
@@ -66,6 +67,17 @@ export default function BasicInformation() {
                                 value={data.date_of_birth}
                                 onChange={(e) => setData('date_of_birth', e.target.value)}
                                 className="w-full bg-white/5 border border-white/10 py-5 px-6 rounded-2xl focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none transition-all text-white font-semibold"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4AF37] ml-1">Métier / Profession</label>
+                            <input
+                                type="text"
+                                value={data.job}
+                                onChange={(e) => setData('job', e.target.value)}
+                                placeholder="Ex: Développeur, Commerçant..."
+                                className="w-full bg-white/5 border border-white/10 py-5 px-6 rounded-2xl focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent outline-none transition-all placeholder:text-white/20 text-white font-semibold"
                             />
                         </div>
 

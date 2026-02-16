@@ -22,7 +22,6 @@ Route::get('/login', [LoginController::class, 'showLink'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::get('/register', [LoginController::class, 'showRegister'])->name('register');
 Route::post('/register', [LoginController::class, 'register']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/onboarding/basic', function () {
     return Inertia::render('Onboarding/BasicInformation');
@@ -31,6 +30,8 @@ Route::post('/onboarding/basic', [UserController::class, 'storeBasicInfo']);
 Route::post('/onboarding/intentions', [UserController::class, 'storeIntentions']);
 Route::post('/onboarding/interests', [UserController::class, 'storeInterests']);
 Route::post('/onboarding/photos', [UserController::class, 'storePhotos']);
+Route::get('/api/interests', [UserController::class, 'getInterests']);
+Route::post('/api/interests/suggest', [UserController::class, 'suggestInterest'])->middleware('auth');
 
 Route::get('/onboarding/intentions', function () {
     return Inertia::render('Onboarding/MatchingIntentions');
@@ -45,16 +46,6 @@ Route::get('/onboarding/photos', function () {
 })->name('onboarding.photos');
 
 Route::get('/discovery', [UserController::class, 'discovery'])->name('discovery');
-
-Route::get('/my-profile', function () {
-    return Inertia::render('Profile', [
-        'user' => Auth::user()
-    ]);
-})->middleware(['auth'])->name('my.profile');
-
-// IMPORTANT: profile/edit MUST be before profile/{id} to avoid route conflict
-Route::get('/profile/edit', [UserController::class, 'edit'])->middleware(['auth'])->name('profile.edit');
-Route::post('/profile/update', [UserController::class, 'update'])->middleware(['auth'])->name('profile.update');
 
 Route::get('/profile/{id}', [UserController::class, 'show'])->name('profile');
 
@@ -82,6 +73,16 @@ Route::middleware(['auth'])->group(function () {
             'user2' => \App\Models\User::find($user2)
         ]);
     })->name('match.success');
+
+    Route::get('/my-profile', function () {
+        return Inertia::render('Profile', [
+            'user' => Auth::user()
+        ]);
+    })->name('my.profile');
+
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+    Route::post('/api/user/location', [UserController::class, 'updateLocation'])->name('user.location');
 
     Route::get('/api/messages/{user_id}', [ChatController::class, 'index']);
     Route::post('/api/messages', [ChatController::class, 'store']);

@@ -78,37 +78,73 @@ class UserController extends Controller
     }
 
     /**
-     * Page Explorer / Recherche.
+     * Page Explorer / Recherche avec filtres avancés.
      */
     public function explorer(Request $request)
     {
-        $query = User::with(['intention', 'photos'])->where('id', '!=', Auth::id());
+        $me = Auth::user();
+        $query = User::with(['intention', 'photos'])->where('id', '!=', $me->id);
 
-        // Filtre par recherche texte (Nom ou Bio ou Intérêt via JSON)
-        if ($request->has('search')) {
-            $s = $request->search;
-            $query->where(function($q) use ($s) {
-                $q->where('name', 'like', "%$s%")
-                  ->orWhere('bio', 'like', "%$s%")
-                  ->orWhere('city', 'like', "%$s%");
-            });
+        // Filtre par genre
+        if ($request->filled('gender')) {
+            $query->where('gender', $request->gender);
         }
 
-        // Filtre par ville
-        if ($request->has('city')) {
-            $query->where('city', 'like', '%' . $request->city . '%');
+        // Filtre par tranche d'âge
+        if ($request->filled('age_min')) {
+            $query->whereRaw('EXTRACT(YEAR FROM AGE(date_of_birth)) >= ?', [$request->age_min]);
+        }
+        if ($request->filled('age_max')) {
+            $query->whereRaw('EXTRACT(YEAR FROM AGE(date_of_birth)) <= ?', [$request->age_max]);
         }
 
         // Filtre par intention
-        if ($request->has('intention_id')) {
+        if ($request->filled('intention_id')) {
             $query->where('intention_id', $request->intention_id);
         }
 
-        $profiles = $query->limit(20)->get();
+        // Recherche textuelle (Nom, Bio, Ville, Intérêts)
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function($q) use ($s) {
+                $q->where('name', 'ilike', "%$s%")
+                  ->orWhere('bio', 'ilike', "%$s%")
+                  ->orWhere('city', 'ilike', "%$s%")
+                  ->orWhereRaw('interests::text ilike ?', ["%$s%"]);
+            });
+        }
+
+        // Filtre de proximité (Distance en KM)
+        if ($request->filled('distance') && $me->latitude && $me->longitude) {
+            $distanceKm = $request->distance;
+            $query->whereRaw("ST_DistanceSphere(ST_MakePoint(longitude, latitude), ST_MakePoint(?, ?)) <= ?", [
+                $me->longitude, $me->latitude, $distanceKm * 1000
+            ]);
+        }
+
+        // Calcul de la distance si les coordonnées sont dispos
+        if ($me->latitude && $me->longitude) {
+            $query->select('*')
+                  ->selectRaw("round((ST_DistanceSphere(ST_MakePoint(longitude, latitude), ST_MakePoint(?, ?)) / 1000)::numeric, 1) as distance_km", [
+                      $me->longitude, $me->latitude
+                  ]);
+        }
+
+        $profiles = $query->limit(40)->get()->map(function($user) {
+            // Calcul de l'âge réel
+            $user->age = $user->date_of_birth ? \Carbon\Carbon::parse($user->date_of_birth)->age : null;
+            
+            // Flou si activé
+            if ($user->blur_enabled && $user->avatar) {
+                $user->avatar = $this->cloudinary->getBlurredUrl($user->avatar);
+            }
+            return $user;
+        });
 
         return Inertia::render('Explorer', [
             'profiles' => $profiles,
-            'filters' => $request->all()
+            'filters' => $request->all(),
+            'intentions' => \App\Models\Intention::all()
         ]);
     }
 
@@ -156,6 +192,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'date_of_birth' => 'required|date',
             'gender' => 'required|string|in:Homme,Femme',
+            'job' => 'nullable|string|max:255',
         ]);
 
         $user->update($validated);
@@ -231,5 +268,47 @@ class UserController extends Controller
         }
 
         return redirect()->route('discovery');
+    }
+
+    /**
+     * Récupère la liste des intérêts approuvés.
+     */
+    public function getInterests()
+    {
+        return response()->json(\App\Models\Interest::where('is_approved', true)->get());
+    }
+
+    /**
+     * Propose un nouvel intérêt.
+     */
+    public function suggestInterest(Request $request)
+    {
+        $request->validate(['label' => 'required|string|max:50|unique:interests,label']);
+
+        \App\Models\Interest::create([
+            'label' => $request->label,
+            'slug' => str()->slug($request->label),
+            'is_approved' => false
+        ]);
+
+        return response()->json(['message' => 'Suggestion envoyée pour validation admin !']);
+    }
+
+    /**
+     * Met à jour la position GPS de l'utilisateur.
+     */
+    public function updateLocation(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+
+        Auth::user()->update([
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+        ]);
+
+        return response()->json(['message' => 'Position mise à jour.']);
     }
 }
