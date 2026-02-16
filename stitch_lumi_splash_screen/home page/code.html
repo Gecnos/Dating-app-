@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Discovery Swipe Deck</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0f2cbd",
+                        "mustard-gold": "#D4AF37",
+                        "pass-red": "#ef4444",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101322",
+                    },
+                    fontFamily: {
+                        "display": ["Be Vietnam Pro", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: "Be Vietnam Pro", sans-serif;
+        }
+        .profile-gradient {
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 30%, transparent 60%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111218] dark:text-white transition-colors duration-300">
+<div class="relative flex h-screen w-full max-w-[480px] mx-auto flex-col overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex items-center bg-white/80 dark:bg-background-dark/80 backdrop-blur-md p-4 pb-2 justify-between sticky top-0 z-20">
+<div class="flex size-12 items-center justify-start">
+<span class="material-symbols-outlined text-[#111218] dark:text-white cursor-pointer">tune</span>
+</div>
+<h2 class="text-[#111218] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Discovery</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex cursor-pointer items-center justify-center rounded-full h-12 bg-transparent text-[#111218] dark:text-white">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Swipe Deck Area -->
+<main class="flex-1 relative p-4 flex flex-col items-center justify-center">
+<!-- Profile Card -->
+<div class="relative w-full h-full max-h-[600px] rounded-xl overflow-hidden shadow-2xl bg-white dark:bg-gray-800">
+<!-- Image -->
+<div class="absolute inset-0 bg-center bg-cover" data-alt="Professional Beninese man smiling in stylish attire" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDMh1fch75xQkSWc_1P7BIbW8vvhEe9Kqfq5B6A5ZP4Ah0_cjbfDbpOwPPquYZTkJ040fwcceXDuVDdsuUwe76HeruvLzZMzcrPOANFOx9I7FnP8Onvlnn17aK6kB6GiCRrNOhq08-0jAkf0-pbwJH3-5myat2R0eWI-FyXsTmy4xOa3Hw0j-xcI9HiZn0DLWSJJl9E5Ifa7RJdMibvC5V_8rLMQ907jNQRwvHroZ7G5HvM2UDBnwD02xpkACUQkrd_Oi1PE2tsQsCC');">
+</div>
+<!-- Overlay Gradient for legibility -->
+<div class="absolute inset-0 profile-gradient"></div>
+<!-- Badge: Sérieux -->
+<div class="absolute top-4 right-4">
+<div class="flex h-8 items-center justify-center gap-x-1.5 rounded-full bg-mustard-gold/90 px-4 text-white shadow-lg backdrop-blur-sm">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1">ring_volume</span>
+<p class="text-xs font-bold uppercase tracking-wider">Sérieux</p>
+</div>
+</div>
+<!-- Profile Info -->
+<div class="absolute bottom-0 left-0 w-full p-6 text-white">
+<div class="flex items-baseline gap-2 mb-1">
+<h1 class="text-3xl font-bold tracking-tight">Koffi, 28</h1>
+<span class="material-symbols-outlined text-green-400 text-sm" style="font-variation-settings: 'FILL' 1">verified</span>
+</div>
+<div class="flex items-center gap-1.5 opacity-90 mb-4">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<p class="text-base font-medium">Cotonou, Benin</p>
+</div>
+<!-- Quick Attributes Chips -->
+<div class="flex gap-2 flex-wrap">
+<div class="flex h-7 items-center justify-center gap-x-1 rounded-full bg-white/20 px-3 backdrop-blur-md">
+<span class="material-symbols-outlined text-[16px]">business_center</span>
+<p class="text-xs font-medium">Entrepreneur</p>
+</div>
+<div class="flex h-7 items-center justify-center gap-x-1 rounded-full bg-white/20 px-3 backdrop-blur-md">
+<span class="material-symbols-outlined text-[16px]">height</span>
+<p class="text-xs font-medium">185 cm</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons Area -->
+<div class="flex w-full justify-center gap-6 py-6">
+<!-- Pass Button -->
+<button class="flex size-16 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-white dark:bg-gray-800 text-pass-red shadow-lg transition-transform active:scale-90 border border-gray-100 dark:border-gray-700">
+<span class="material-symbols-outlined text-3xl font-bold">close</span>
+</button>
+<!-- Like Button -->
+<button class="flex size-16 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-mustard-gold text-white shadow-lg transition-transform active:scale-90 shadow-mustard-gold/40">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1">favorite</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="flex gap-2 border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md px-4 pb-6 pt-2">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">style</span>
+</div>
+<p class="text-xs font-semibold leading-normal tracking-[0.015em]">Cards</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-gray-500 dark:text-gray-400" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">favorite</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Likes</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-gray-500 dark:text-gray-400" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">chat_bubble</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Messages</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-gray-500 dark:text-gray-400" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">person</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Profile</p>
+</a>
+</nav>
+<!-- iOS Home Indicator Spacing -->
+<div class="h-2 bg-white dark:bg-background-dark"></div>
+</div>
+</body></html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lumi Splash Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@100;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0f2cbd",
+                        "accent-gold": "#E1AD01",
+                        "midnight": "#0a0c1a",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101322",
+                    },
+                    fontFamily: {
+                        "display": ["Be Vietnam Pro", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .benin-pattern {
+            background-image: radial-gradient(#E1AD01 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+            opacity: 0.05;
+        }
+        .geometric-overlay {
+            background-image: linear-gradient(30deg, #0f2cbd 12%, transparent 12.5%, transparent 87%, #0f2cbd 87.5%, #0f2cbd),
+            linear-gradient(150deg, #0f2cbd 12%, transparent 12.5%, transparent 87%, #0f2cbd 87.5%, #0f2cbd),
+            linear-gradient(30deg, #0f2cbd 12%, transparent 12.5%, transparent 87%, #0f2cbd 87.5%, #0f2cbd),
+            linear-gradient(150deg, #0f2cbd 12%, transparent 12.5%, transparent 87%, #0f2cbd 87.5%, #0f2cbd),
+            linear-gradient(60deg, #0f2cbd77 25%, transparent 25.5%, transparent 75%, #0f2cbd77 75%, #0f2cbd77),
+            linear-gradient(60deg, #0f2cbd77 25%, transparent 25.5%, transparent 75%, #0f2cbd77 75%, #0f2cbd77);
+            background-size: 40px 70px;
+            background-position: 0 0, 0 0, 20px 35px, 20px 35px, 0 0, 20px 35px;
+            opacity: 0.1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-midnight font-display antialiased overflow-hidden">
+<!-- iOS Status Bar Spacer -->
+<div class="h-12 w-full"></div>
+<div class="relative flex h-screen w-full flex-col items-center justify-between bg-background-dark overflow-hidden px-8 pb-16">
+<!-- Cultural Pattern Overlays -->
+<div class="absolute inset-0 benin-pattern pointer-events-none"></div>
+<div class="absolute inset-0 geometric-overlay pointer-events-none"></div>
+<!-- Top Decorative Element -->
+<div class="mt-8 flex flex-col items-center opacity-40">
+<span class="material-symbols-outlined text-accent-gold text-sm">verified_user</span>
+<p class="text-[10px] uppercase tracking-[0.3em] text-accent-gold mt-1 font-semibold">Secure &amp; Verified</p>
+</div>
+<!-- Central Branding Section -->
+<div class="flex flex-col items-center justify-center flex-grow -mt-20">
+<!-- Logo Container -->
+<div class="relative w-32 h-32 flex items-center justify-center">
+<!-- Outer glow -->
+<div class="absolute inset-0 bg-accent-gold/20 rounded-full blur-2xl"></div>
+<!-- Main Logo Icon -->
+<div class="relative z-10 w-24 h-24 bg-accent-gold rounded-full flex items-center justify-center shadow-2xl shadow-accent-gold/40">
+<span class="material-symbols-outlined text-midnight text-5xl font-bold">flare</span>
+</div>
+<!-- Secondary Gold Accent Ring -->
+<div class="absolute inset-0 border-2 border-accent-gold/30 rounded-full scale-125"></div>
+</div>
+<!-- App Name -->
+<div class="mt-8 text-center">
+<h1 class="text-6xl font-bold tracking-tighter text-white">Lumi</h1>
+<div class="h-1 w-12 bg-accent-gold mx-auto mt-2 rounded-full"></div>
+<p class="text-accent-gold/80 mt-4 text-sm font-medium tracking-[0.2em] uppercase">Benin Premium Dating</p>
+</div>
+</div>
+<!-- Bottom Navigation/Progress Section -->
+<div class="w-full max-w-xs space-y-8">
+<!-- Goal-oriented matching hint -->
+<div class="flex items-center justify-center gap-2 opacity-60">
+<span class="material-symbols-outlined text-white text-xs">favorite</span>
+<p class="text-white text-[11px] tracking-wide">Connecting hearts in Cotonou &amp; beyond</p>
+</div>
+<!-- Loading Indicator Component (Based on ProgressBar) -->
+<div class="flex flex-col gap-3">
+<div class="flex justify-center">
+<p class="text-white/40 text-[10px] uppercase tracking-widest font-medium">Setting the stage...</p>
+</div>
+<div class="rounded-full bg-white/5 h-1.5 overflow-hidden">
+<div class="h-full rounded-full bg-accent-gold" style="width: 35%;"></div>
+</div>
+</div>
+</div>
+<!-- iOS Home Indicator Safe Area -->
+<div class="h-4"></div>
+</div>
+<!-- Background Image Component (as decorative shadow/visual depth) -->
+<div class="fixed inset-0 z-[-1] opacity-20">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="Deep blue background with subtle Beninese geometric patterns" style="background-image: linear-gradient(180deg, rgba(10, 12, 26, 0.9) 0%, rgba(15, 44, 189, 0.4) 100%);">
+</div>
+</div>
+</body></html>

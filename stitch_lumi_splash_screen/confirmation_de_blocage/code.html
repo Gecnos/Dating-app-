@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Confirmation de Blocage</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f20d0d",
+                        "background-light": "#f8f5f5",
+                        "background-dark": "#221010",
+                        "card-dark": "#2c1818", // Slightly lighter than background-dark for the modal
+                        "midnight-blue": "#191970",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        /* Custom scrollbar hiding */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white h-screen w-full flex flex-col overflow-hidden relative font-display">
+<!-- Mock Background Content (Profile View behind the modal) -->
+<div aria-hidden="true" class="absolute inset-0 z-0 flex flex-col pointer-events-none opacity-20 filter blur-sm">
+<!-- Header Mock -->
+<div class="flex items-center justify-between p-4">
+<span class="material-symbols-outlined text-3xl">arrow_back</span>
+<span class="material-symbols-outlined text-3xl">more_vert</span>
+</div>
+<!-- Profile Image Mock -->
+<div class="h-96 w-full bg-cover bg-center" data-alt="Portrait of a young man smiling" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDDFGpo-mvGzrzf-_LmAgiavsxALD16ZxI7ORFTUqxNhcc8y6FjWKOZi55FK2_7wsU9yoRUvdlJKIs7BFDEzxkEauTdPdPP8-E0B0hxq_XJ8e2GxjXUz6Ql8ixkB4bYUIrLfwmRfRZiyOQOF4KfXRJ7Op-mmNoZ0_hK7j57nAGQRQGPL0mqxOEvsxkal5FG4_yJsgL5uKOuDKRLJs-WvGXh1TAbFIHMvMV87qwGOWjTW4lPNWJZRp2_K2-OeCqhPCQY4iTkfQAILtEO");'></div>
+<!-- Content Mock -->
+<div class="p-4 space-y-4">
+<div class="h-8 bg-gray-300 dark:bg-gray-700 w-1/2 rounded"></div>
+<div class="h-4 bg-gray-300 dark:bg-gray-700 w-3/4 rounded"></div>
+<div class="h-20 bg-gray-300 dark:bg-gray-700 w-full rounded"></div>
+</div>
+</div>
+<!-- Overlay (Dimmed Background) -->
+<div class="absolute inset-0 z-10 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+<!-- Modal Card -->
+<div class="w-full max-w-sm bg-white dark:bg-[#1f1515] rounded-3xl shadow-2xl border border-gray-100 dark:border-white/10 overflow-hidden relative flex flex-col items-center p-6 text-center animate-in fade-in zoom-in duration-300">
+<!-- Warning Icon -->
+<div class="mb-5 h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[32px]">block</span>
+</div>
+<!-- Title -->
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+                Bloquer Kevin ?
+            </h2>
+<!-- Warning Text -->
+<p class="text-base text-slate-600 dark:text-gray-300 leading-relaxed mb-8">
+                Cette action est irréversible. Vous ne pourrez plus vous voir, ni vous envoyer de messages.
+            </p>
+<!-- Action Buttons -->
+<div class="w-full space-y-3">
+<!-- Primary Action: Block -->
+<button class="w-full h-14 bg-primary hover:bg-red-700 active:scale-[0.98] transition-all rounded-xl flex items-center justify-center text-white font-bold text-base tracking-wide shadow-lg shadow-primary/30">
+                    Bloquer cet utilisateur
+                </button>
+<!-- Secondary Action: Cancel -->
+<button class="w-full h-14 bg-transparent border-2 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 active:scale-[0.98] transition-all rounded-xl flex items-center justify-center text-slate-700 dark:text-gray-300 font-bold text-base tracking-wide">
+                    Annuler
+                </button>
+</div>
+</div>
+</div>
+</body></html>

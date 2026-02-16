@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Modifier le profil - Photos</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0f2cbd",
+                        "mustard": "#E1AD01",
+                        "background-light": "#f8f9fa",
+                        "background-dark": "#101322",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1rem",
+                        "2xl": "1.25rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        :root {
+            --primary-color: #0f2cbd;
+            --mustard-gold: #E1AD01;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body {
+            min-height: 100dvh;
+        }
+        .photo-slot {
+            aspect-ratio: 3/4;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111218] dark:text-white">
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 px-4 py-4">
+<div class="flex items-center justify-between max-w-lg mx-auto">
+<button class="flex items-center text-gray-800 dark:text-white">
+<span class="material-symbols-outlined">chevron_left</span>
+<span class="font-bold">Retour</span>
+</button>
+<h1 class="text-lg font-extrabold">Modifier le profil</h1>
+<button class="text-primary font-bold">Terminé</button>
+</div>
+</header>
+<main class="max-w-lg mx-auto pb-32 px-6">
+<div class="mt-6 p-4 bg-mustard/10 border border-mustard/20 rounded-2xl flex items-start gap-3">
+<span class="material-symbols-outlined text-mustard">lightbulb</span>
+<p class="text-sm font-semibold text-gray-800 dark:text-gray-100">
+            Des photos claires augmentent vos chances de match.
+        </p>
+</div>
+<div class="mt-8 grid grid-cols-3 gap-3">
+<div class="relative photo-slot rounded-[20px] overflow-hidden bg-gray-200 dark:bg-gray-800 border-2 border-primary shadow-lg group">
+<img alt="Profile photo 1" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2SmiBc8CjZzVEkBmjnEw9SXbdEH8gsV8P51RPRSXO-tK1Kyvy4-ZfEwmgJ_L3o8Ar9ufyRfU2ko09cxfYreNaq4hTqesGjFYxs9eL9N04uCwIBfzDgeuPGhxN5MOYiTN-irhZYrodzJ2zlDwyd85hzRrDoLFfWOn7-QBXKA5wxfNBd1pJSjwmc_9eqN_Aj82bJnYV1xpFFoK_divjZnsU3H9pxSDbrTaKKj99ET5L_YLM8aV93RJ__gjpPJXW0EmnEUi447G7RJKl"/>
+<div class="absolute bottom-2 left-2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                PRINCIPALE
+            </div>
+<button class="absolute -top-1 -right-1 bg-white dark:bg-gray-900 text-red-500 rounded-full w-7 h-7 flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-sm font-bold">close</span>
+</button>
+<div class="absolute top-2 left-2 cursor-grab active:cursor-grabbing text-white/70">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+</div>
+<div class="relative photo-slot rounded-[20px] overflow-hidden bg-gray-200 dark:bg-gray-800 group border-2 border-transparent">
+<div class="w-full h-full bg-gray-300 dark:bg-gray-700 animate-pulse"></div>
+<button class="absolute -top-1 -right-1 bg-white dark:bg-gray-900 text-red-500 rounded-full w-7 h-7 flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-sm font-bold">close</span>
+</button>
+<div class="absolute top-2 left-2 cursor-grab text-white/70">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+</div>
+<div class="relative photo-slot rounded-[20px] overflow-hidden bg-gray-200 dark:bg-gray-800 group border-2 border-transparent">
+<div class="w-full h-full flex items-center justify-center border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-[20px]">
+<span class="material-symbols-outlined text-gray-400 text-3xl">add_circle</span>
+</div>
+</div>
+<div class="relative photo-slot rounded-[20px] overflow-hidden bg-gray-200 dark:bg-gray-800 group border-2 border-transparent">
+<div class="w-full h-full flex items-center justify-center border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-[20px]">
+<span class="material-symbols-outlined text-gray-400 text-3xl">add_circle</span>
+</div>
+</div>
+<div class="relative photo-slot rounded-[20px] overflow-hidden bg-gray-200 dark:bg-gray-800 group border-2 border-transparent">
+<div class="w-full h-full flex items-center justify-center border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-[20px]">
+<span class="material-symbols-outlined text-gray-400 text-3xl">add_circle</span>
+</div>
+</div>
+<div class="relative photo-slot rounded-[20px] overflow-hidden bg-gray-200 dark:bg-gray-800 group border-2 border-transparent">
+<div class="w-full h-full flex items-center justify-center border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-[20px]">
+<span class="material-symbols-outlined text-gray-400 text-3xl">add_circle</span>
+</div>
+</div>
+</div>
+<div class="mt-10">
+<h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">À propos de moi</h3>
+<textarea class="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 text-sm focus:ring-primary focus:border-primary min-h-[120px]" placeholder="Dites-en plus sur vous..."></textarea>
+</div>
+<div class="mt-8">
+<h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">Mes Intérêts</h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-4 py-2 bg-primary/5 border border-primary/20 text-primary rounded-full text-sm font-bold">Musique</span>
+<span class="px-4 py-2 bg-primary/5 border border-primary/20 text-primary rounded-full text-sm font-bold">Voyage</span>
+<span class="px-4 py-2 bg-primary/5 border border-primary/20 text-primary rounded-full text-sm font-bold">Cuisine</span>
+<button class="px-4 py-2 border border-dashed border-gray-300 dark:border-gray-700 text-gray-500 rounded-full text-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">add</span> Ajouter
+            </button>
+</div>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-background-dark/90 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 px-6 pt-3 pb-8">
+<div class="flex items-center justify-around max-w-lg mx-auto">
+<button class="flex flex-col items-center gap-1 text-gray-400">
+<span class="material-symbols-outlined">style</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Découvrir</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400">
+<span class="material-symbols-outlined">favorite</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Likes</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Messages</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Profil</span>
+</button>
+</div>
+</nav>
+
+</body></html>

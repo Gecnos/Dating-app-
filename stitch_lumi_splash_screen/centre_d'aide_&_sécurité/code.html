@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Centre d'Aide &amp; Sécurité</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0f2cbd",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101322",
+                        "midnight": "#050e3d",
+                        "gold": "#D4AF37",
+                        "gold-light": "#F3E5AB",
+                        "whatsapp": "#25D366"
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem", 
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem", 
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    backgroundImage: {
+                        'gold-gradient': 'linear-gradient(135deg, #D4AF37 0%, #F3E5AB 100%)',
+                        'blue-gradient': 'linear-gradient(180deg, #101322 0%, #050e3d 100%)',
+                    }
+                },
+            },
+        }
+    </script>
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: "Public Sans", sans-serif;
+        }
+        /* Custom scrollbar hide for horizontal scrolling */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen flex justify-center">
+<div class="w-full max-w-md bg-white dark:bg-[#101322] flex flex-col h-full min-h-screen relative overflow-hidden shadow-2xl">
+<!-- Header Section with decorative glow -->
+<div class="relative z-10 px-6 pt-6 pb-4 bg-white dark:bg-[#101322]">
+<!-- Subtle Gold Glow for premium feel -->
+<div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-primary/20 rounded-full blur-[80px] pointer-events-none"></div>
+<!-- Top Navigation -->
+<div class="flex items-center justify-between mb-6">
+<button class="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 dark:bg-[#1c1d27] text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-[#282b39] transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex gap-4">
+<button class="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 dark:bg-[#1c1d27] text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-[#282b39] transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2.5 w-2 h-2 bg-gold rounded-full"></span>
+</button>
+</div>
+</div>
+<!-- Title -->
+<div class="mb-6">
+<h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Centre d'Aide</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Support &amp; Sécurité pour votre tranquillité</p>
+</div>
+<!-- Search Bar -->
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-400 group-focus-within:text-gold transition-colors">search</span>
+</div>
+<input class="block w-full pl-11 pr-4 py-3.5 bg-slate-100 dark:bg-[#1c1d27] border-0 rounded-2xl text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-gold/50 focus:bg-white dark:focus:bg-[#252836] transition-all shadow-sm" placeholder="Rechercher une réponse..." type="text"/>
+</div>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto no-scrollbar pb-24">
+<!-- Categories Grid -->
+<div class="px-6 py-2">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white">Catégories</h2>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<!-- Security Card (Featured/Premium looking) -->
+<div class="col-span-2 relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1c1d27] to-[#0f2cbd]/20 border border-gold/20 p-5 flex items-center justify-between group active:scale-[0.98] transition-transform cursor-pointer">
+<div class="flex flex-col gap-1 z-10">
+<h3 class="text-white text-lg font-bold">Ma Sécurité</h3>
+<p class="text-slate-400 text-xs">Conseils et outils de protection</p>
+</div>
+<div class="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center border border-gold/30 text-gold group-hover:bg-gold group-hover:text-black transition-colors z-10">
+<span class="material-symbols-outlined">shield</span>
+</div>
+<!-- Abstract bg pattern -->
+<div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+</div>
+<!-- Account Card -->
+<div class="rounded-2xl bg-slate-100 dark:bg-[#1c1d27] p-4 flex flex-col gap-3 items-start border border-transparent hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-primary/10 dark:bg-white/5 flex items-center justify-center text-primary dark:text-white">
+<span class="material-symbols-outlined">person</span>
+</div>
+<h3 class="text-slate-900 dark:text-white font-semibold text-sm">Mon Compte</h3>
+</div>
+<!-- Payments Card -->
+<div class="rounded-2xl bg-slate-100 dark:bg-[#1c1d27] p-4 flex flex-col gap-3 items-start border border-transparent hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-primary/10 dark:bg-white/5 flex items-center justify-center text-primary dark:text-white">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+<h3 class="text-slate-900 dark:text-white font-semibold text-sm">Crédits &amp; Paiements</h3>
+</div>
+</div>
+</div>
+<!-- Popular Articles -->
+<div class="mt-6 px-6">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Articles Populaires</h2>
+<div class="flex flex-col space-y-3">
+<!-- Article 1 -->
+<button class="w-full text-left bg-white dark:bg-[#1c1d27] p-4 rounded-xl shadow-sm border border-slate-100 dark:border-[#282b39] flex items-center justify-between group">
+<div class="flex gap-3 items-center">
+<div class="text-gold shrink-0">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-primary dark:group-hover:text-white transition-colors">Comment vérifier mon profil ?</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
+</button>
+<!-- Article 2 -->
+<button class="w-full text-left bg-white dark:bg-[#1c1d27] p-4 rounded-xl shadow-sm border border-slate-100 dark:border-[#282b39] flex items-center justify-between group">
+<div class="flex gap-3 items-center">
+<div class="text-red-400 shrink-0">
+<span class="material-symbols-outlined text-[20px]">report_problem</span>
+</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-primary dark:group-hover:text-white transition-colors">Signaler un comportement suspect</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
+</button>
+<!-- Article 3 -->
+<button class="w-full text-left bg-white dark:bg-[#1c1d27] p-4 rounded-xl shadow-sm border border-slate-100 dark:border-[#282b39] flex items-center justify-between group">
+<div class="flex gap-3 items-center">
+<div class="text-primary shrink-0">
+<span class="material-symbols-outlined text-[20px]">diamond</span>
+</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-primary dark:group-hover:text-white transition-colors">Gérer mon abonnement Premium</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- FAQ Teaser -->
+<div class="mt-8 mx-6 p-5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 dark:from-[#151725] dark:to-[#1c1d27] relative overflow-hidden">
+<div class="absolute right-0 top-0 h-full w-1/3 bg-gold/10 -skew-x-12"></div>
+<h3 class="text-white font-bold relative z-10">Consulter la FAQ complète</h3>
+<p class="text-slate-300 text-xs mt-1 relative z-10 max-w-[70%]">Trouvez des réponses à toutes vos questions sur l'utilisation de l'application.</p>
+<button class="mt-3 text-xs font-bold text-gold uppercase tracking-wider flex items-center gap-1 relative z-10 hover:text-white transition-colors">
+                    Voir tout <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<div class="h-8"></div>
+</div>
+<!-- Sticky Footer -->
+<div class="absolute bottom-0 w-full bg-white/90 dark:bg-[#101322]/95 backdrop-blur-lg border-t border-slate-100 dark:border-[#1c1d27] p-5 pb-8 z-20 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+<h2 class="text-sm font-bold text-slate-500 dark:text-slate-400 mb-4 uppercase tracking-wider text-center">Besoin d'aide supplémentaire ?</h2>
+<div class="flex flex-col gap-3">
+<!-- WhatsApp Button -->
+<button class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-3.5 px-4 rounded-xl font-bold text-base shadow-lg shadow-green-900/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+<!-- Using a material icon that resembles a chat bubble as a placeholder for WA -->
+<span class="material-symbols-outlined">chat</span>
+                    Contacter le Support via WhatsApp
+                </button>
+<!-- Email Button -->
+<button class="w-full bg-slate-100 dark:bg-[#1c1d27] text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-[#282b39] py-3.5 px-4 rounded-xl font-semibold text-base border border-slate-200 dark:border-[#2f3344] flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined">mail</span>
+                    Envoyer un Email
+                </button>
+</div>
+</div>
+</div>
+</body></html>

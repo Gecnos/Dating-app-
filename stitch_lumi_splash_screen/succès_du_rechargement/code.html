@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Succès du Rechargement</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eebd2b",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#221d10",
+                    },
+                    fontFamily: {
+                        "display": ["Be Vietnam Pro", "Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom animation for the checkmark */
+        @keyframes scaleUp {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-scale-up {
+            animation: scaleUp 0.5s ease-out forwards;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display antialiased bg-background-light dark:bg-background-dark text-[#181611] dark:text-white transition-colors duration-300">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-hidden">
+<!-- Top App Bar: Close Action -->
+<div class="flex items-center justify-end p-4 pb-2 z-10">
+<button class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer text-[#181611] dark:text-white">
+<span class="material-symbols-outlined" style="font-size: 28px;">close</span>
+</button>
+</div>
+<!-- Main Content Area: Centered -->
+<div class="flex flex-1 flex-col items-center justify-center px-6 w-full max-w-md mx-auto relative z-0">
+<!-- Success Indicator -->
+<div class="mb-8 animate-scale-up">
+<div class="flex items-center justify-center w-32 h-32 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 shadow-sm ring-8 ring-green-50/50 dark:ring-green-900/10">
+<span class="material-symbols-outlined" style="font-size: 64px; font-variation-settings: 'wght' 700;">check</span>
+</div>
+</div>
+<!-- Title -->
+<div class="text-center space-y-2 mb-8 animate-scale-up" style="animation-delay: 0.1s;">
+<h1 class="text-[#181611] dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-tight">
+                    Paiement Réussi !
+                </h1>
+<p class="text-neutral-500 dark:text-neutral-400 text-sm font-medium">
+                    Transaction ID: #TRX-882910
+                </p>
+</div>
+<!-- Transaction Summary Card -->
+<div class="w-full bg-white dark:bg-[#2c2618] rounded-lg p-6 mb-8 shadow-sm border border-[#e6e3db] dark:border-white/10 animate-scale-up" style="animation-delay: 0.2s;">
+<div class="flex flex-col items-center gap-2">
+<span class="text-neutral-500 dark:text-neutral-400 text-sm font-medium uppercase tracking-wider">Crédits ajoutés</span>
+<div class="flex items-baseline gap-1">
+<span class="text-primary text-5xl font-black tracking-tight">+ 500</span>
+<span class="text-[#181611] dark:text-white/80 text-lg font-bold">crédits</span>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-dashed border-[#e6e3db] dark:border-white/10 text-center">
+<p class="text-[#181611] dark:text-neutral-200 text-base font-normal leading-relaxed">
+                        Votre solde a été mis à jour. Vous pouvez maintenant débloquer vos conversations.
+                    </p>
+</div>
+</div>
+</div>
+<!-- Bottom Action Area -->
+<div class="w-full p-4 pb-8 md:pb-10 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark z-10">
+<div class="max-w-md mx-auto">
+<button class="relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-full h-14 bg-primary text-[#181611] text-lg font-bold leading-normal tracking-[0.015em] shadow-lg shadow-primary/20 hover:brightness-105 active:scale-[0.98] transition-all">
+<span class="truncate">Commencer à discuter</span>
+<span class="material-symbols-outlined ml-2 text-xl">chat_bubble</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

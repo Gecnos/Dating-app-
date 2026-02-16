@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chat and Voice Messaging</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0f2cbd",
+                        "mustard": "#D4AF37", // Benin-inspired Mustard Gold
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101322",
+                    },
+                    fontFamily: {
+                        "display": ["Be Vietnam Pro"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .chat-pattern {
+            background-color: #f6f6f8;
+            background-image: radial-gradient(#0f2cbd 0.5px, transparent 0.5px), radial-gradient(#0f2cbd 0.5px, #f6f6f8 0.5px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            opacity: 0.03;
+        }
+        .dark .chat-pattern {
+            background-color: #101322;
+            background-image: radial-gradient(#ffffff 0.5px, transparent 0.5px), radial-gradient(#ffffff 0.5px, #101322 0.5px);
+            opacity: 0.05;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111218] dark:text-white min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
+<div class="flex items-center p-4 justify-between gap-3">
+<div class="flex items-center gap-3 flex-1">
+<button class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-[#111218] dark:text-white">arrow_back_ios_new</span>
+</button>
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-mustard" data-alt="Profile picture of a beautiful Beninese woman" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBCrIVXXjFhV5e4Lv9DUQjkW1QhZGKX1m6ASHm3yL-EkTKxrof2aiWYe61IP2zGJ1m2pxQzSg-uPuActWy5edLrJPRnRyPOighATxK7p_M_neHYEO4sTAh7VOSHw2r9ijfqM01uBV5pTpQ1WwybhKmUoDv_CnSrVhYxgorfh8srrTuPL1O0IyYM3fveiibQzfp6kzTuunkiS4k5qgLgMaQPsHtgyumuslIkKzBZZmX1_hf36D8jf2moxPiFVQ9LiqLemwHKc_ShONEZ");'>
+</div>
+<div class="absolute bottom-0 right-0 size-3 bg-green-500 border-2 border-white dark:border-background-dark rounded-full"></div>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<h2 class="text-[#111218] dark:text-white text-base font-bold leading-tight">Esé A.</h2>
+<span class="material-symbols-outlined text-primary text-[16px] font-bold" title="Verified Profile">verified</span>
+</div>
+<p class="text-[#616889] dark:text-gray-400 text-xs">Online • Cotonou</p>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="size-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+<span class="material-symbols-outlined text-primary">videocam</span>
+</button>
+<button class="size-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+<span class="material-symbols-outlined text-[#111218] dark:text-white">more_vert</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Message Content Area -->
+<main class="flex-1 relative overflow-y-auto px-4 py-6 flex flex-col gap-4">
+<!-- Background Pattern -->
+<div class="absolute inset-0 chat-pattern pointer-events-none"></div>
+<!-- MetaText Date -->
+<div class="flex justify-center my-2">
+<p class="text-[#616889] dark:text-gray-400 text-[11px] font-medium uppercase tracking-wider bg-white/50 dark:bg-gray-800/50 px-3 py-1 rounded-full backdrop-blur-sm">Today</p>
+</div>
+<!-- Recipient Message (Left) -->
+<div class="flex items-end gap-2 max-w-[85%]">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 shrink-0 mb-1" data-alt="Small profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBmPiQ5TRkeMnzTxZBRYm_7bw-mDCNJef_Qx55halts9vRXXSh_mqUbfGEnWgZHKUCk90BHlgCV_m6QBN44k1efAhTUu2ymwkHJm6IJ5LwbOvJKUcTZQS8OgBKac_iTZNF5Iw37rW3fvTuwhMGGJD0OocXk8aPuGIcXdwEtbPJ7gWj-4WQ-iQ51cI0cOe3onP62QLzo_-BiUwHVv-4rWqz36QUuFSFD_oeHC1gLyHe6BY3Zoy1LqRUSj5EUxB6GPDSXAwzwuToTNv4n");'>
+</div>
+<div class="flex flex-col gap-1">
+<div class="bg-[#f0f1f4] dark:bg-gray-800 text-[#111218] dark:text-white rounded-2xl rounded-bl-sm px-4 py-3 text-sm leading-relaxed shadow-sm">
+                    Bonjour! I saw you are interested in visiting the Pendjari National Park soon. Have you found a guide yet? 🐘
+                </div>
+<span class="text-[10px] text-[#616889] ml-1">14:20</span>
+</div>
+</div>
+<!-- User Message (Right - Mustard Gold) -->
+<div class="flex items-end gap-2 max-w-[85%] self-end flex-row-reverse">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 shrink-0 mb-1" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAEQLKjY_aaWZ2n4IL5A1ndVV38WdYDyO86PR0H5U_kLnUl2sYLbiUgp6eawGLjQTlwSpf_MndQLMM-ceMNFbXR74nB_0wRCC_FF0aObAC9ENp489KurgFebGJIw5dfsQji2J42-txvHZeXflOAsv6-x6pxbviShEjeeJlxYYrltyQf4Y7R4deRdLn3M_FTm2hdq4a6tpTzMSxWiahmIoqExrBOBScf401v0Qvry-V4gmW-WtaO7G6tG4Zc-TaWMwp1fI85MCbeJkcV");'>
+</div>
+<div class="flex flex-col gap-1 items-end">
+<div class="bg-mustard text-white rounded-2xl rounded-br-sm px-4 py-3 text-sm leading-relaxed shadow-sm">
+                    D'accord! Not yet. I was actually hoping to find someone who knows the hidden spots. Do you have any recommendations?
+                </div>
+<div class="flex items-center gap-1">
+<span class="text-[10px] text-[#616889]">14:22</span>
+<span class="material-symbols-outlined text-primary text-[14px]">done_all</span>
+</div>
+</div>
+</div>
+<!-- Recipient Voice Message -->
+<div class="flex items-end gap-2 max-w-[85%]">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 shrink-0 mb-1" data-alt="Small profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBgjOz1siwmY1GCa8O8VRkaeapBwXhS4UtaYTLmRLvSuJf6ZGEaim4tTNgW_mMmSWo3a4J-G1tPw6beO8gVUNpo79g-rCSaxfTsOwK_AeAh22fMXTK0txduZjQkyhE2AVQ_n9vCuXQEgugq-j7_K32Y84Y4rksFlySNSBB88TzbHZFiAcorhpRQnKNcRzfu0wQEuvHUH8BOV5rmnt4q6M4BqImmIbjkyAjYSMv3xSEL3cHZi8S2GQznOAOMG7bfY3yW7ayhwZ4behqw");'>
+</div>
+<div class="flex flex-col gap-1">
+<div class="bg-[#f0f1f4] dark:bg-gray-800 text-[#111218] dark:text-white rounded-2xl rounded-bl-sm px-4 py-3 text-sm flex items-center gap-3 min-w-[200px] shadow-sm">
+<button class="size-8 bg-primary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[20px] fill-current">play_arrow</span>
+</button>
+<div class="flex-1 flex items-center gap-0.5 h-6">
+<div class="w-1 h-3 bg-primary/40 rounded-full"></div>
+<div class="w-1 h-5 bg-primary rounded-full"></div>
+<div class="w-1 h-2 bg-primary/40 rounded-full"></div>
+<div class="w-1 h-4 bg-primary rounded-full"></div>
+<div class="w-1 h-6 bg-primary rounded-full"></div>
+<div class="w-1 h-3 bg-primary/40 rounded-full"></div>
+<div class="w-1 h-5 bg-primary rounded-full"></div>
+<div class="w-1 h-2 bg-primary/40 rounded-full"></div>
+</div>
+<span class="text-xs font-medium">0:18</span>
+</div>
+<span class="text-[10px] text-[#616889] ml-1">14:23</span>
+</div>
+</div>
+<!-- User Voice Note (Sending/Recent) -->
+<div class="flex items-end gap-2 max-w-[85%] self-end flex-row-reverse">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 shrink-0 mb-1" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCVXOg_FAFsmPU6TF92cbRIP6kCual3oIObLRxwf1wflU-gWFl0auk_K50trXAfScqt74dTvZuzOQ5_975BBA2MvRtoB5GBriC96kuoWb52YXg0ZT3winCnayqiKC4LktKByBAs2xz-Ls8YwrxukMmx_gL0joyTCwZfA0W7-oF7R6P9xRfhRbrn28SXRiIvCnY-5_oVhzpl7XhmqV3rKVV1tFD50VkiZSHwxk8W6uYIH2caMCK9sm0rqlGv7x_p-sX4BhDM1MLRIGQm");'>
+</div>
+<div class="flex flex-col gap-1 items-end">
+<div class="bg-mustard text-white rounded-2xl rounded-br-sm px-4 py-3 text-sm flex items-center gap-3 min-w-[180px] shadow-md">
+<span class="material-symbols-outlined text-white">mic</span>
+<div class="flex-1 flex items-center gap-1 h-6">
+<div class="w-1 h-4 bg-white/40 rounded-full"></div>
+<div class="w-1 h-6 bg-white rounded-full"></div>
+<div class="w-1 h-3 bg-white/40 rounded-full"></div>
+<div class="w-1 h-5 bg-white rounded-full"></div>
+<div class="w-1 h-2 bg-white/40 rounded-full"></div>
+</div>
+<span class="text-xs">0:05</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-[10px] text-[#616889]">Just now</span>
+<span class="material-symbols-outlined text-primary text-[14px]">done_all</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Input Bar -->
+<footer class="p-4 bg-white dark:bg-background-dark pb-8">
+<div class="flex items-center gap-3">
+<button class="size-10 flex items-center justify-center rounded-full bg-[#f0f1f4] dark:bg-gray-800 text-[#111218] dark:text-white shrink-0">
+<span class="material-symbols-outlined">add</span>
+</button>
+<div class="flex-1 flex items-center bg-[#f0f1f4] dark:bg-gray-800 rounded-full px-4 h-11">
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-sm placeholder:text-gray-500 dark:text-white" placeholder="Type a message..." type="text"/>
+<button class="text-gray-500 dark:text-gray-400 hover:text-primary p-1">
+<span class="material-symbols-outlined">camera_alt</span>
+</button>
+</div>
+<button class="size-12 flex items-center justify-center rounded-full bg-mustard text-white shadow-lg shadow-mustard/30 shrink-0 transform active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[28px]">mic</span>
+</button>
+</div>
+</footer>
+</body></html>

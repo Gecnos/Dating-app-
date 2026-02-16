@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Identity Verification Selfie</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0f2cbd",
+                        "accent-gold": "#d4af37", // Mustard gold for premium feel
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101322",
+                    },
+                    fontFamily: {
+                        "display": ["Be Vietnam Pro"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .camera-frame-oval {
+            clip-path: ellipse(40% 50% at 50% 50%);
+        }
+        .glass-overlay {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+        }
+        .dark .glass-overlay {
+            background: rgba(16, 19, 34, 0.7);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111218] dark:text-white transition-colors duration-300">
+<div class="relative flex h-screen w-full flex-col overflow-hidden max-w-[480px] mx-auto">
+<!-- Header -->
+<header class="flex items-center p-4 justify-between z-10">
+<div class="flex size-12 items-center justify-center cursor-pointer">
+<span class="material-symbols-outlined text-2xl">arrow_back_ios</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-tight flex-1 text-center">Vérification</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex size-12 items-center justify-center rounded-full bg-transparent p-0">
+<span class="material-symbols-outlined text-2xl">help_outline</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col items-center px-6 overflow-y-auto">
+<!-- Progress Indicator -->
+<div class="flex w-full flex-row items-center justify-center gap-2 py-4">
+<div class="h-1.5 w-8 rounded-full bg-primary"></div>
+<div class="h-1.5 w-8 rounded-full bg-primary"></div>
+<div class="h-1.5 w-8 rounded-full bg-gray-300 dark:bg-gray-700"></div>
+</div>
+<!-- Title & Body Text -->
+<div class="text-center mb-6">
+<h1 class="text-[#111218] dark:text-white text-2xl font-bold leading-tight mb-2">Prouvez que vous êtes réel</h1>
+<p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-relaxed">
+                    Prenez un selfie maintenant pour sécuriser votre compte et obtenir votre badge de vérification.
+                </p>
+</div>
+<!-- Camera View Container -->
+<div class="relative w-full aspect-[3/4] max-h-[45vh] bg-gray-200 dark:bg-gray-800 rounded-xl overflow-hidden shadow-2xl">
+<!-- Abstract Gradient for Camera Preview Mock -->
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/20 via-primary/5 to-accent-gold/20" data-alt="Simulated camera preview background"></div>
+<!-- Face Oval Frame Overlay -->
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-full h-full camera-frame-oval border-[3px] border-white/50 border-dashed animate-pulse"></div>
+<div class="absolute inset-0 bg-black/30 pointer-events-none" style="clip-path: polygon(0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%, 50% 10%, 90% 50%, 50% 90%, 10% 50%, 50% 10%);"></div>
+</div>
+<!-- Guidance Overlay -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 glass-overlay px-4 py-2 rounded-full border border-white/20 shadow-lg">
+<p class="text-primary font-bold text-xs uppercase tracking-widest flex items-center gap-2">
+<span class="size-2 bg-green-500 rounded-full animate-ping"></span>
+                        Cadrage en cours...
+                    </p>
+</div>
+</div>
+<!-- Verification Tips Chips -->
+<div class="flex flex-wrap justify-center gap-3 mt-8">
+<div class="flex items-center gap-2 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm">
+<span class="material-symbols-outlined text-primary text-lg">light_mode</span>
+<span class="text-xs font-medium">Bon éclairage</span>
+</div>
+<div class="flex items-center gap-2 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm">
+<span class="material-symbols-outlined text-primary text-lg">face</span>
+<span class="text-xs font-medium">Visage découvert</span>
+</div>
+</div>
+</main>
+<!-- Footer / Camera Control -->
+<footer class="p-8 flex flex-col items-center gap-4">
+<!-- Camera Control Component modified for the Shutter Button -->
+<div class="flex items-center justify-center gap-8 w-full">
+<!-- Gallery Button -->
+<button class="flex shrink-0 items-center justify-center rounded-full size-12 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+<span class="material-symbols-outlined text-2xl">photo_library</span>
+</button>
+<!-- Premium Shutter Button (Gold) -->
+<div class="relative group">
+<div class="absolute -inset-2 bg-accent-gold/20 rounded-full blur-md"></div>
+<button class="relative flex shrink-0 items-center justify-center rounded-full size-20 bg-accent-gold text-white shadow-[0_8px_30px_rgb(212,175,55,0.4)] active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-4xl font-bold">photo_camera</span>
+</button>
+</div>
+<!-- Flip Camera Button -->
+<button class="flex shrink-0 items-center justify-center rounded-full size-12 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+<span class="material-symbols-outlined text-2xl">flip_camera_ios</span>
+</button>
+</div>
+<p class="text-[10px] text-gray-500 dark:text-gray-500 text-center max-w-[280px] mt-4">
+                Vos données sont cryptées et utilisées uniquement pour la vérification d'identité.
+            </p>
+</footer>
+<!-- Bottom Safe Area Spacer -->
+<div class="h-6 w-full"></div>
+</div>
+</body></html>

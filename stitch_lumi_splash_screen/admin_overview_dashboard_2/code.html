@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lumi Admin - Reports Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f4c025",
+                        "midnight": "#1a1b2e",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#221e10",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col font-display overflow-x-hidden">
+<header class="sticky top-0 z-50 bg-midnight text-white px-4 py-3 flex items-center justify-between shadow-md">
+<div class="flex items-center gap-3">
+<div class="bg-primary text-midnight rounded-lg p-1.5 flex items-center justify-center">
+<span class="material-symbols-outlined font-bold">flag</span>
+</div>
+<h1 class="text-primary text-xl font-bold tracking-tight">Reports</h1>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-white/80 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">search</span>
+</button>
+<div class="h-8 w-8 rounded-full border-2 border-primary/50 overflow-hidden">
+<img alt="Admin Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtK-Ln2jU0kduWBwPgPpfNhNeKXxfPonNwzvghhyWGU-njgnHWKNLJRgy1JxcSw0Qqemei7ernYhGRb81yi-6g-Q5Tci30IKlpjzbJ3dI19wWGeolYcY8g-J9sczroMw5kdeMhN82z03bTLmR4F7EFKlxghDC5x13ZlT-LjKoTEvwAGoPXIPBDrqwEbvR3hk-710JY8ocuV_FXFGhXlbBHZUN2C39SbC6JCDXXt1wtuRIvPjREKG6S02WQd4Ims1rg-97KHpWiMevU"/>
+</div>
+</div>
+</header>
+<main class="flex-1 pb-24 px-4">
+<div class="py-6">
+<h2 class="text-midnight dark:text-white text-2xl font-bold leading-tight">Safety &amp; Moderation</h2>
+<p class="text-gray-500 dark:text-gray-400 text-sm">Reviewing 24 pending reports today.</p>
+</div>
+<div class="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
+<button class="flex items-center gap-2 px-4 py-2 bg-midnight text-white rounded-full text-xs font-semibold whitespace-nowrap">
+            All Status
+            <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-full text-xs font-semibold whitespace-nowrap">
+            Reason
+            <span class="material-symbols-outlined text-sm">filter_list</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-full text-xs font-semibold whitespace-nowrap">
+            Recent
+            <span class="material-symbols-outlined text-sm">calendar_month</span>
+</button>
+</div>
+<div class="space-y-4">
+<div class="bg-white dark:bg-zinc-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-zinc-800">
+<div class="flex justify-between items-start mb-3">
+<div class="flex gap-3">
+<div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+<img alt="avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDU1RBZPNZB_cp4QAobIdJ9fvNw7C1ZkrsTQMNW5L8hjqQ-pXIxQuLQYRwko-PBcqEc84dUqaw9VYhFALqLKq80tA0ZqZ-g6RoydymbsL5rG4AY24jl1yA6uBy2G8Aw9Nh4BQ4JXtY2bMYAo5_9AhF0KXyrh529x9IPeACWBKWqNpQLGqcHTWiV4j_FUpCtHjJLxfOwN_XTXCChAn4pQGq3lhmWm8qPB-GcS_abcqaY5mxui45V-HbH0eI-XqnhQa3o1NFRlArQCc2j"/>
+</div>
+<div>
+<h3 class="text-sm font-bold text-midnight dark:text-white">Koffi D.</h3>
+<p class="text-[10px] text-gray-500">Reported by: Marie L.</p>
+</div>
+</div>
+<span class="px-2 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded uppercase">New</span>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div>
+<p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Reason</p>
+<p class="text-xs font-medium text-midnight dark:text-gray-200">Harassment</p>
+</div>
+<div>
+<p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Date</p>
+<p class="text-xs font-medium text-midnight dark:text-gray-200">24 Oct, 14:20</p>
+</div>
+</div>
+<div class="flex gap-2 border-t border-gray-50 dark:border-zinc-800 pt-3">
+<button class="flex-1 bg-midnight text-white text-xs font-bold py-2 rounded-lg">Review</button>
+<button class="px-3 py-2 border border-gray-200 dark:border-zinc-700 rounded-lg text-midnight dark:text-white">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</div>
+</div>
+<div class="bg-white dark:bg-zinc-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-zinc-800">
+<div class="flex justify-between items-start mb-3">
+<div class="flex gap-3">
+<div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+<img alt="avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATFUfnWlIna5ZWiGrFB-m3NC4LZVH3Uu-EcfQ4-UzXNiy7qE1HOWF2xMJTc3Hj2jD9MZsfE-khF2dDfjhuNroiF98_kUhGKOi4xzEet_Gxa-2h1ojH9ZNlFkb8q1tBogcniXZiIAvVlTRfRXcZHqzALxZ94pgVAzKBgHzF18kbR4BUbH_Dj00f6VjBGLJp8AZVaBLNW5yc_sE9tWyaxtaJxfipf985rKvro_CwZqir1iYK866mwcdq93a3n31mXEU-A2yGXqxc0NwM"/>
+</div>
+<div>
+<h3 class="text-sm font-bold text-midnight dark:text-white">Abidatou S.</h3>
+<p class="text-[10px] text-gray-500">Reported by: Moussa G.</p>
+</div>
+</div>
+<span class="px-2 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded uppercase">Reviewing</span>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div>
+<p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Reason</p>
+<p class="text-xs font-medium text-midnight dark:text-gray-200">Fake Profile</p>
+</div>
+<div>
+<p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Date</p>
+<p class="text-xs font-medium text-midnight dark:text-gray-200">24 Oct, 12:15</p>
+</div>
+</div>
+<div class="flex gap-2 border-t border-gray-50 dark:border-zinc-800 pt-3">
+<button class="flex-1 bg-midnight text-white text-xs font-bold py-2 rounded-lg">Continue</button>
+<button class="px-3 py-2 border border-gray-200 dark:border-zinc-700 rounded-lg text-midnight dark:text-white">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</div>
+</div>
+<div class="bg-white dark:bg-zinc-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-zinc-800 opacity-80">
+<div class="flex justify-between items-start mb-3">
+<div class="flex gap-3">
+<div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+<img alt="avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmylT5palGGEGknISY0atgPPYeWcVhxkWGbEBqNf5eZ9LtlH1uSHRTnviZZUcFP3tEPmQ-s8MbquWEJ_8Vsc2rw-s5g0lcGclCexUDS9OjLcS4iNrjUyr65GFf3WW7I1yR2u74ar31idV9VN81GqbZidIec1W9DWYPak4fzttBkbwGqCOD0s4tXw64jzJjczZeRZ3efrWlerhhXtdXDHZ1LNWLiRja91WBAltqMx95_C2nFUBQ0Rhyicue6pDLKS5fqZkRQFL5MKe-"/>
+</div>
+<div>
+<h3 class="text-sm font-bold text-midnight dark:text-white">Yemi A.</h3>
+<p class="text-[10px] text-gray-500">Reported by: System Bot</p>
+</div>
+</div>
+<span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded uppercase">Resolved</span>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div>
+<p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Reason</p>
+<p class="text-xs font-medium text-midnight dark:text-gray-200">Spam</p>
+</div>
+<div>
+<p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Date</p>
+<p class="text-xs font-medium text-midnight dark:text-gray-200">23 Oct, 18:45</p>
+</div>
+</div>
+<div class="flex gap-2 border-t border-gray-50 dark:border-zinc-800 pt-3">
+<button class="flex-1 border border-gray-200 dark:border-zinc-700 text-midnight dark:text-white text-xs font-bold py-2 rounded-lg">View Log</button>
+</div>
+</div>
+<div class="bg-white dark:bg-zinc-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-zinc-800">
+<div class="flex justify-between items-start mb-3">
+<div class="flex gap-3">
+<div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+<img alt="avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyEle7kwUJDv4RYugyBcLdcMjlapxcwIboBjNt3v1PXJ2xsOVLCPC23iJlRcItSKZVwpgmRIPGY49QKnTe1QMicpYIJS1whG7ciJyI_eQmfBnlsf-s3xuN_qVh445AzslLzKfdFp9utr6PAijLU3TreZvB1Z34SrBBW2ebEZhSyUKkfG_0s49mSHmT1Nl7rQQ51_IfoJ5ZomF1gMalF0v3Lda6s-nL3QjaYv9yQCBgUwm77kATCGMMr4CCcj6MEq13R2fs-zePEPMe"/>
+</div>
+<div>
+<h3 class="text-sm font-bold text-midnight dark:text-white">Sèmèvo H.</h3>
+<p class="text-[10px] text-gray-500">Reported by: Nadia K.</p>
+</div>
+</div>
+<span class="px-2 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded uppercase">New</span>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div>
+<p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Reason</p>
+<p class="text-xs font-medium text-midnight dark:text-gray-200">Inappropriate Media</p>
+</div>
+<div>
+<p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Date</p>
+<p class="text-xs font-medium text-midnight dark:text-gray-200">24 Oct, 09:30</p>
+</div>
+</div>
+<div class="flex gap-2 border-t border-gray-50 dark:border-zinc-800 pt-3">
+<button class="flex-1 bg-midnight text-white text-xs font-bold py-2 rounded-lg">Review</button>
+<button class="px-3 py-2 border border-gray-200 dark:border-zinc-700 rounded-lg text-midnight dark:text-white">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-midnight border-t border-white/10 px-6 py-3 flex items-center justify-between z-50">
+<button class="flex flex-col items-center gap-1 text-white/50 hover:text-white transition-colors">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-medium">Overview</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-white/50 hover:text-white transition-colors">
+<span class="material-symbols-outlined">verified</span>
+<span class="text-[10px] font-medium">Verify</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined">flag</span>
+<span class="text-[10px] font-bold">Reports</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-white/50 hover:text-white transition-colors">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="text-[10px] font-medium">Finance</span>
+</button>
+</nav>
+
+</body></html>

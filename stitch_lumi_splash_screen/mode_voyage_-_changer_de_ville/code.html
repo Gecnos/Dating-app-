@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mode Voyage - Lumi</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f2b90d",
+                        "primary-hover": "#d9a50b",
+                        "background-light": "#f8f8f5", 
+                        "background-dark": "#0a1128", // Deep Midnight Blue
+                        "surface-dark": "#15223e", // Slightly lighter blue for cards
+                        "surface-light": "#ffffff",
+                        "text-light": "#1e293b",
+                        "text-dark": "#f8fafc",
+                        "text-muted": "#94a3b8",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "body": ["Plus Jakarta Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen text-text-light dark:text-text-dark flex flex-col items-center">
+<div class="relative w-full max-w-md bg-background-light dark:bg-background-dark min-h-screen flex flex-col shadow-2xl overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex items-center justify-between p-4 sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md">
+<!-- Close Button / Back -->
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-gray-500 dark:text-gray-300">close</span>
+</button>
+<h1 class="text-lg font-bold tracking-tight text-center flex-1">Mode Voyage</h1>
+<div class="w-10 h-10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1, 'wght' 600;">flight_takeoff</span>
+</div>
+</header>
+<main class="flex-1 flex flex-col px-5 pb-24 space-y-6 overflow-y-auto hide-scrollbar">
+<!-- Section: Current Location -->
+<section>
+<h3 class="text-sm font-semibold text-gray-500 dark:text-text-muted mb-3 uppercase tracking-wider">Votre position actuelle</h3>
+<div class="flex items-center justify-between bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-100 dark:border-white/5">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">my_location</span>
+</div>
+<div>
+<p class="font-bold text-lg leading-tight">Cotonou</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Bénin</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-green-500 text-2xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</section>
+<!-- Section: Change Destination -->
+<section>
+<h3 class="text-sm font-semibold text-gray-500 dark:text-text-muted mb-3 uppercase tracking-wider">Changer de destination</h3>
+<!-- Search Input -->
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-gray-400 group-focus-within:text-primary transition-colors">search</span>
+</div>
+<input class="w-full h-14 pl-12 pr-4 bg-surface-light dark:bg-surface-dark border-transparent focus:border-primary focus:ring-1 focus:ring-primary rounded-xl text-base placeholder-gray-400 dark:placeholder-gray-500 transition-all shadow-sm" placeholder="Rechercher une ville (ex: Porto-Novo)" type="text"/>
+</div>
+</section>
+<!-- Section: Popular Destinations -->
+<section>
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-sm font-semibold text-gray-500 dark:text-text-muted uppercase tracking-wider">Destinations Populaires</h3>
+<a class="text-xs font-medium text-primary hover:text-primary-hover" href="#">Voir tout</a>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Card 1: Parakou -->
+<div class="relative group cursor-pointer overflow-hidden rounded-xl h-36">
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all duration-300 z-10"></div>
+<img alt="Monument in Parakou city center under sunlight" class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" data-alt="Statue of Bio Guera in Parakou" data-location="Parakou" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJesQ7cSbWFsATGkQn4LMLG__uz0CJq_bsNZPc0XOFuZ00rJNuRp7-pyxqPt0SPeq_nbebCi5bkSYvCN-kEdz1TtJKlXCKnqqKRJ1_OkjEL89KZgLejRQoDY7qyonqMsi0zsxFswL1coUYt4WJ-9NTh4qvY6xdLjuJBISRf7Ew98lHDGs8sAL5wT3OpQqfKwNeMgDfiNdOcV0KvqGRbFE7EV_oGXVymOYX9oHW-kN1W67rYk50JcxIzc1P7vwq6mCDbW4NbHdC2MIp"/>
+<div class="absolute top-2 right-2 z-20 bg-black/60 backdrop-blur-sm rounded-full p-1 w-6 h-6 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[14px]">lock</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 p-3 z-20 bg-gradient-to-t from-black/80 to-transparent">
+<span class="block text-white font-bold text-sm">Parakou</span>
+<span class="block text-white/80 text-xs">Nord</span>
+</div>
+</div>
+<!-- Card 2: Ouidah -->
+<div class="relative group cursor-pointer overflow-hidden rounded-xl h-36">
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all duration-300 z-10"></div>
+<img alt="Ouidah Gate of No Return monument silhouette against sunset" class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" data-alt="Door of No Return in Ouidah" data-location="Ouidah" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeK1DIM-B7YFG2nc7mFe6ZJYWfm1-k5OeybBWQ7V2AvxaSXNT49Ksjo5ZFcdSCpVLlAUThHjrnnexTPKt69HR2WhbZTbY9zFf73ZMy4Pw_TIfctNiAJ5NOHqeVRvz1ducZyg7iNS56eWdohn6_4371vCSFGmkr9f3sojCy3RZN3NNBz6wr5TbDMeY_lkCFyXh-KQddzrSThAiiMaQrgbricoQYUzusi9ZmnRUjTsC3Az09jGu3wOhs61WTUx7123PM9JvcYcAUPm0X"/>
+<div class="absolute top-2 right-2 z-20 bg-black/60 backdrop-blur-sm rounded-full p-1 w-6 h-6 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[14px]">lock</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 p-3 z-20 bg-gradient-to-t from-black/80 to-transparent">
+<span class="block text-white font-bold text-sm">Ouidah</span>
+<span class="block text-white/80 text-xs">Atlantique</span>
+</div>
+</div>
+<!-- Card 3: Natitingou -->
+<div class="relative group cursor-pointer overflow-hidden rounded-xl h-36">
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all duration-300 z-10"></div>
+<img alt="Tata Somba traditional clay fortress houses in Natitingou" class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" data-alt="Tata Somba landscape in Natitingou" data-location="Natitingou" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXo-tM9D4AqKC2K8MbmERUkhmlSUUPJNO0RfKIElq1t4qSqWekYZ_bbSvTwGbc5ZQ641lE-8rtheipABfrE3oSsn_1V-Hl7UIC6xSUzCeIqRfp0B2LcApraMz1OmlzEa3cyj8Y1dHwZPeIXKjV8eGT7jAMPoeRd3ja8mdQSAw7HkQVqyvTsmF1TvOYajsoIZvrbNOJXX_e7Y1DByCXTnjrrgpo0pHY_vxda0StMcgIM84UZNItvT_oiqnsnEahhMC_Y-Sdo1R2W7ec"/>
+<div class="absolute top-2 right-2 z-20 bg-black/60 backdrop-blur-sm rounded-full p-1 w-6 h-6 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[14px]">lock</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 p-3 z-20 bg-gradient-to-t from-black/80 to-transparent">
+<span class="block text-white font-bold text-sm">Natitingou</span>
+<span class="block text-white/80 text-xs">Atacora</span>
+</div>
+</div>
+<!-- Card 4: Abomey -->
+<div class="relative group cursor-pointer overflow-hidden rounded-xl h-36">
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all duration-300 z-10"></div>
+<img alt="Historic red clay palace walls of Abomey" class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" data-alt="Royal Palace of Abomey" data-location="Abomey" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5sod50Pr3LCXyoH7ZQDxvWlB2Jrb17xNx5ts5tXqQVdGUxa4sMvqy8xPJS3bZrzieYUm1V7j5hwmYpZSh29LQc-UceBlU5U6zt6s9tqiqphq0m11xucfCxWCRtL_ACwiZqFOh7X9Ytay4wJ9I1kNoLHaF56tv5eAgPRLUX5fKXnPCyTsmxjOJIFqzbE2YW4yJTd63cgQse_QQz1H3auUTxUuBROX0wBc5tIYA0WjUcvGP6f17e5H-LlZ5Qh6frQZLMHavgCALw3sF"/>
+<div class="absolute top-2 right-2 z-20 bg-black/60 backdrop-blur-sm rounded-full p-1 w-6 h-6 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[14px]">lock</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 p-3 z-20 bg-gradient-to-t from-black/80 to-transparent">
+<span class="block text-white font-bold text-sm">Abomey</span>
+<span class="block text-white/80 text-xs">Zou</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Upsell Banner -->
+<section class="mt-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-background-dark to-primary/5 p-[1px]">
+<div class="relative bg-surface-dark/90 rounded-2xl p-5 flex flex-col items-center text-center">
+<!-- Decorative background element -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 blur-3xl rounded-full"></div>
+<div class="w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-[#ffdf7e] flex items-center justify-center mb-3 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-black font-bold" style="font-variation-settings: 'FILL' 1;">diamond</span>
+</div>
+<h4 class="text-white font-bold text-lg mb-1">Passez à Lumi Premium</h4>
+<p class="text-gray-300 text-sm leading-relaxed mb-4">
+                        Le Mode Voyage est une exclusivité Lumi Premium. Rencontrez des célibataires partout au Bénin sans bouger de chez vous.
+                    </p>
+</div>
+</section>
+</main>
+<!-- Sticky Footer CTA -->
+<div class="absolute bottom-0 w-full p-5 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light dark:via-background-dark to-transparent z-50">
+<button class="w-full bg-primary hover:bg-primary-hover text-background-dark font-bold text-lg py-4 rounded-xl shadow-lg shadow-primary/20 transition-transform active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 600;">rocket_launch</span>
+                Activer le voyage
+            </button>
+</div>
+</div>
+</body></html>

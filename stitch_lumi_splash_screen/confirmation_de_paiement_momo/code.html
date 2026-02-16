@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Confirmation de Paiement MoMo</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#ecc813",
+              "background-light": "#f8f8f6",
+              "background-dark": "#221f10",
+              "surface-light": "#ffffff",
+              "surface-dark": "#2d2a1d",
+              "text-light": "#181711",
+              "text-dark": "#e6e4db",
+              "subtext-light": "#898361",
+              "subtext-dark": "#aba68d",
+            },
+            fontFamily: {
+              "display": ["Be Vietnam Pro", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        /* Custom styles for iOS-like feel if needed */
+        .ios-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased min-h-screen flex flex-col items-center">
+<!-- Mobile Container -->
+<div class="relative w-full max-w-md h-full min-h-screen flex flex-col overflow-hidden bg-background-light dark:bg-background-dark shadow-2xl">
+<!-- Header -->
+<header class="flex items-center justify-between p-4 pb-2 bg-surface-light dark:bg-surface-dark sticky top-0 z-10 border-b border-gray-100 dark:border-gray-800">
+<button class="flex size-10 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-text-light dark:text-text-dark">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<h2 class="text-text-light dark:text-text-dark text-lg font-bold leading-tight tracking-[-0.015em]">Paiement MTN MoMo</h2>
+<div class="size-10"></div> <!-- Spacer for centering -->
+</header>
+<!-- Main Content -->
+<main class="flex-1 px-4 py-6 flex flex-col gap-6">
+<!-- Transaction Summary Card -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-5 ios-shadow border border-gray-100 dark:border-gray-800">
+<div class="flex items-start justify-between gap-4">
+<div class="flex flex-col gap-1">
+<span class="text-subtext-light dark:text-subtext-dark text-xs font-medium uppercase tracking-wider">Total à payer</span>
+<p class="text-text-light dark:text-text-dark text-2xl font-bold leading-tight">4 500 FCFA</p>
+<p class="text-subtext-light dark:text-subtext-dark text-sm font-medium mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">shopping_bag</span>
+                            Pour: 500 Crédits
+                        </p>
+</div>
+<!-- Brand Logo / Product Image -->
+<div class="w-16 h-16 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+<!-- Abstract representation of credits/coins -->
+<span class="material-symbols-outlined text-primary text-3xl">token</span>
+</div>
+</div>
+<!-- Separator -->
+<div class="h-px w-full bg-gray-100 dark:bg-gray-800 my-4"></div>
+<div class="flex items-center justify-between text-sm">
+<span class="text-subtext-light dark:text-subtext-dark">Frais de transaction</span>
+<span class="text-text-light dark:text-text-dark font-medium">0 FCFA</span>
+</div>
+</div>
+<!-- Phone Input Section -->
+<div class="flex flex-col gap-2">
+<label class="text-text-light dark:text-text-dark text-base font-medium pl-1" for="phone">Numéro MoMo</label>
+<div class="relative flex items-center">
+<!-- Country Code Prefix -->
+<div class="absolute left-0 top-0 bottom-0 flex items-center pl-4 gap-2 z-10">
+<!-- Benin Flag Placeholder (Using simple div with description for AI image replacement if needed, but styling with CSS for now) -->
+<div aria-hidden="true" class="w-6 h-4 overflow-hidden rounded-sm shadow-sm relative bg-green-600" title="Benin Flag">
+<div class="absolute left-0 top-0 w-2.5 h-full bg-green-600"></div>
+<div class="absolute right-0 top-0 w-3.5 h-1/2 bg-yellow-400"></div>
+<div class="absolute right-0 bottom-0 w-3.5 h-1/2 bg-red-600"></div>
+</div>
+<span class="text-text-light dark:text-text-dark font-medium border-r border-gray-200 dark:border-gray-700 pr-2">+229</span>
+</div>
+<input class="form-input block w-full pl-[6.5rem] pr-4 py-4 rounded-xl text-lg font-medium bg-surface-light dark:bg-surface-dark border-gray-200 dark:border-gray-700 focus:border-primary focus:ring-primary text-text-light dark:text-text-dark placeholder-subtext-light/50 dark:placeholder-subtext-dark/50 transition-all shadow-sm" id="phone" inputmode="numeric" name="phone" pattern="[0-9]*" placeholder="66 00 00 00" type="tel"/>
+<span class="material-symbols-outlined absolute right-4 text-subtext-light dark:text-subtext-dark pointer-events-none">smartphone</span>
+</div>
+<p class="text-xs text-subtext-light dark:text-subtext-dark pl-1">Entrez le numéro MoMo qui sera débité.</p>
+</div>
+</main>
+<!-- Footer Actions -->
+<footer class="p-4 pb-8 bg-surface-light dark:bg-surface-dark border-t border-gray-100 dark:border-gray-800">
+<!-- Payment Button -->
+<button class="w-full flex items-center justify-center gap-2 rounded-xl h-14 bg-primary hover:bg-yellow-400 active:scale-[0.98] transition-all text-text-light text-lg font-bold shadow-lg shadow-primary/20">
+<span>Payer maintenant</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+<!-- Trust Indicators -->
+<div class="mt-6 flex flex-col items-center gap-2 opacity-80">
+<div class="flex items-center justify-center gap-1 text-subtext-light dark:text-subtext-dark">
+<span class="material-symbols-outlined text-green-600 text-[18px]">lock</span>
+<span class="text-xs font-medium">Paiement 100% Sécurisé</span>
+</div>
+<div class="flex items-center gap-4 grayscale opacity-60">
+<!-- Simple visual representations of logos using text/icons since no external images allowed for logos -->
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+<span class="text-[10px] font-bold tracking-wider">SSL SECURE</span>
+</div>
+</div>
+</div>
+</footer>
+</div>
+</body></html>

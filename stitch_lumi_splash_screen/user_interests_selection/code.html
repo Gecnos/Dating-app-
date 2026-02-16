@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Séléction d'intérêts - Bénin Dating</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0f2cbd",
+                        "gold": "#D4AF37",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101322",
+                    },
+                    fontFamily: {
+                        "display": ["Be Vietnam Pro", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col transition-colors duration-300">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 ios-blur px-4 py-3 flex items-center justify-between">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-sm text-gray-700 dark:text-gray-200">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<button class="text-primary dark:text-blue-400 font-bold text-base px-2">Sauter</button>
+</header>
+<main class="flex-grow px-4 pb-32">
+<!-- Progress Bar Section -->
+<div class="flex flex-col gap-3 py-6">
+<div class="flex gap-6 justify-between items-end">
+<p class="text-gray-900 dark:text-white text-lg font-bold leading-none">Étape d'inscription</p>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-none">3 sur 5</p>
+</div>
+<div class="h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
+<div class="h-full rounded-full bg-primary" style="width: 60%;"></div>
+</div>
+</div>
+<!-- Header Text -->
+<div class="pt-4 pb-6">
+<h1 class="text-gray-900 dark:text-white text-[32px] font-bold leading-tight tracking-tight">Vos passions ?</h1>
+<p class="text-gray-600 dark:text-gray-400 text-base mt-2">Sélectionnez vos centres d'intérêt pour rencontrer des personnes qui vous ressemblent.</p>
+</div>
+<!-- Chips Grid Section -->
+<div class="flex flex-wrap gap-3">
+<!-- Selected Chips -->
+<div class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary px-6 shadow-md border border-primary">
+<span class="material-symbols-outlined text-white text-[20px]">check</span>
+<p class="text-white text-sm font-semibold">Cuisine</p>
+</div>
+<div class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary px-6 shadow-md border border-primary">
+<span class="material-symbols-outlined text-white text-[20px]">check</span>
+<p class="text-white text-sm font-semibold">Musique Béninoise</p>
+</div>
+<div class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary px-6 shadow-md border border-primary">
+<span class="material-symbols-outlined text-white text-[20px]">check</span>
+<p class="text-white text-sm font-semibold">Tech</p>
+</div>
+<!-- Unselected Chips -->
+<div class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 px-6 border border-gray-200 dark:border-slate-700 hover:border-primary transition-colors cursor-pointer">
+<p class="text-gray-900 dark:text-gray-100 text-sm font-medium">Football</p>
+</div>
+<div class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 px-6 border border-gray-200 dark:border-slate-700 hover:border-primary transition-colors cursor-pointer">
+<p class="text-gray-900 dark:text-gray-100 text-sm font-medium">Voyage</p>
+</div>
+<div class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 px-6 border border-gray-200 dark:border-slate-700 hover:border-primary transition-colors cursor-pointer">
+<p class="text-gray-900 dark:text-gray-100 text-sm font-medium">Danse Traditionnelle</p>
+</div>
+<div class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 px-6 border border-gray-200 dark:border-slate-700 hover:border-primary transition-colors cursor-pointer">
+<p class="text-gray-900 dark:text-gray-100 text-sm font-medium">Entrepreneuriat</p>
+</div>
+<div class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 px-6 border border-gray-200 dark:border-slate-700 hover:border-primary transition-colors cursor-pointer">
+<p class="text-gray-900 dark:text-gray-100 text-sm font-medium">Art Contemporain</p>
+</div>
+<div class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 px-6 border border-gray-200 dark:border-slate-700 hover:border-primary transition-colors cursor-pointer">
+<p class="text-gray-900 dark:text-gray-100 text-sm font-medium">Photographie</p>
+</div>
+<div class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 px-6 border border-gray-200 dark:border-slate-700 hover:border-primary transition-colors cursor-pointer">
+<p class="text-gray-900 dark:text-gray-100 text-sm font-medium">Cinéma</p>
+</div>
+<div class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 px-6 border border-gray-200 dark:border-slate-700 hover:border-primary transition-colors cursor-pointer">
+<p class="text-gray-900 dark:text-gray-100 text-sm font-medium">Plage &amp; Détente</p>
+</div>
+<div class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 px-6 border border-gray-200 dark:border-slate-700 hover:border-primary transition-colors cursor-pointer">
+<p class="text-gray-900 dark:text-gray-100 text-sm font-medium">Lecture</p>
+</div>
+<div class="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 px-6 border border-gray-200 dark:border-slate-700 hover:border-primary transition-colors cursor-pointer">
+<p class="text-gray-900 dark:text-gray-100 text-sm font-medium">Mixologie</p>
+</div>
+</div>
+</main>
+<!-- Fixed Bottom Action Area -->
+<footer class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark">
+<div class="max-w-md mx-auto">
+<button class="w-full bg-gold hover:bg-[#c5a021] text-white font-bold text-lg py-4 rounded-full shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+<span>Suivant</span>
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+<p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-4">Selectionnez au moins 3 intérêts pour continuer</p>
+</div>
+</footer>
+<!-- Verification Badge (Subtle background branding) -->
+<div class="fixed top-[20%] right-[-20px] opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-[150px] text-primary rotate-12">verified_user</span>
+</div>
+</body></html>

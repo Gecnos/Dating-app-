@@ -1,0 +1,123 @@
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable
+{
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasFactory, Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'google_id',
+        'avatar',
+        'bio',
+        'intention_id',
+        'gender',
+        'date_of_birth',
+        'credits',
+        'blur_enabled',
+        'is_verified',
+        'interests',
+        'latitude',
+        'longitude',
+        'job',
+        'education',
+        'height',
+        'languages',
+        'city',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'interests' => 'array',
+            'languages' => 'array',
+        ];
+    }
+
+    /**
+     * Relation avec l'Intention.
+     */
+    public function intention()
+    {
+        return $this->belongsTo(Intention::class);
+    }
+
+    /**
+     * Relation avec les Likes envoyés.
+     */
+    public function sentLikes()
+    {
+        return $this->hasMany(MatchModel::class, 'user_id');
+    }
+
+    /**
+     * Relation avec les Likes reçus.
+     */
+    public function receivedLikes()
+    {
+        return $this->hasMany(MatchModel::class, 'target_id');
+    }
+
+    /**
+     * Tous les Matchs mutuels.
+     */
+    public function matches()
+    {
+        return $this->hasMany(MatchModel::class, 'user_id')->where('is_mutual', true);
+    }
+
+    /**
+     * Messages envoyés.
+     */
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'from_id');
+    }
+
+    /**
+     * Messages reçus.
+     */
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'to_id');
+    }
+
+    /**
+     * Relation avec les photos de l'utilisateur.
+     */
+    public function photos()
+    {
+        return $this->hasMany(UserPhoto::class)->orderBy('order');
+    }
+}

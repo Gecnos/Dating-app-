@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Basic Information Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#0f2cbd",
+              "accent-gold": "#D4AF37",
+              "background-light": "#f6f6f8",
+              "background-dark": "#101322",
+            },
+            fontFamily: {
+              "display": ["Be Vietnam Pro", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: "Be Vietnam Pro", sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #dbdde6;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-[430px] mx-auto bg-white dark:bg-background-dark overflow-x-hidden shadow-2xl">
+<!-- TopAppBar -->
+<div class="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
+<div class="text-[#111218] dark:text-white flex size-12 shrink-0 items-center cursor-pointer">
+<span class="material-symbols-outlined">arrow_back_ios</span>
+</div>
+<h2 class="text-[#111218] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Inscription</h2>
+</div>
+<!-- ProgressBar -->
+<div class="flex flex-col gap-3 p-4">
+<div class="flex gap-6 justify-between">
+<p class="text-[#111218] dark:text-gray-300 text-base font-medium leading-normal">Étape 1 sur 5</p>
+<p class="text-[#111218] dark:text-gray-400 text-sm font-normal leading-normal">20%</p>
+</div>
+<div class="rounded-full bg-[#dbdde6] dark:bg-gray-700 h-2 w-full overflow-hidden">
+<div class="h-full rounded-full bg-primary" style="width: 20%;"></div>
+</div>
+</div>
+<!-- Headline & Body -->
+<div class="px-4 pt-4">
+<h2 class="text-[#111218] dark:text-white tracking-tight text-[28px] font-bold leading-tight pb-2">Commençons par l'essentiel</h2>
+<p class="text-[#616889] dark:text-gray-400 text-base font-normal leading-normal">Parlez-nous de vous pour trouver votre partenaire idéal au Bénin.</p>
+</div>
+<!-- Form Section -->
+<div class="flex-1 flex flex-col gap-6 p-4 mt-4">
+<!-- First Name Field -->
+<div class="flex flex-col gap-2">
+<label class="text-[#111218] dark:text-white text-base font-medium leading-normal px-1">Prénom</label>
+<div class="relative">
+<input class="form-input flex w-full rounded-full text-[#111218] dark:text-white dark:bg-slate-800 focus:outline-0 focus:ring-2 focus:ring-primary border border-[#dbdde6] dark:border-gray-700 h-14 placeholder:text-[#616889] px-6 text-base font-normal leading-normal" placeholder="Ex: Koffi" type="text"/>
+<span class="material-symbols-outlined absolute right-5 top-4 text-gray-400">person</span>
+</div>
+</div>
+<!-- Date of Birth Field -->
+<div class="flex flex-col gap-2">
+<label class="text-[#111218] dark:text-white text-base font-medium leading-normal px-1">Date de naissance</label>
+<div class="relative">
+<input class="form-input flex w-full rounded-full text-[#111218] dark:text-white dark:bg-slate-800 focus:outline-0 focus:ring-2 focus:ring-primary border border-[#dbdde6] dark:border-gray-700 h-14 placeholder:text-[#616889] px-6 text-base font-normal leading-normal" type="date"/>
+</div>
+</div>
+<!-- Gender Selection -->
+<div class="flex flex-col gap-3">
+<label class="text-[#111218] dark:text-white text-base font-medium leading-normal px-1">Genre</label>
+<div class="flex gap-4">
+<label class="flex-1 cursor-pointer group">
+<input checked="" class="hidden peer" name="gender" type="radio"/>
+<div class="flex items-center justify-center h-14 rounded-full border border-[#dbdde6] dark:border-gray-700 peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:text-primary transition-all duration-200">
+<span class="material-symbols-outlined mr-2">male</span>
+<span class="font-medium">Homme</span>
+</div>
+</label>
+<label class="flex-1 cursor-pointer group">
+<input class="hidden peer" name="gender" type="radio"/>
+<div class="flex items-center justify-center h-14 rounded-full border border-[#dbdde6] dark:border-gray-700 peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:text-primary transition-all duration-200">
+<span class="material-symbols-outlined mr-2">female</span>
+<span class="font-medium">Femme</span>
+</div>
+</label>
+</div>
+</div>
+<!-- City Selection (Searchable Dropdown Style) -->
+<div class="flex flex-col gap-2">
+<label class="text-[#111218] dark:text-white text-base font-medium leading-normal px-1">Ville</label>
+<div class="relative">
+<select class="form-select appearance-none flex w-full rounded-full text-[#111218] dark:text-white dark:bg-slate-800 focus:outline-0 focus:ring-2 focus:ring-primary border border-[#dbdde6] dark:border-gray-700 h-14 px-6 text-base font-normal leading-normal bg-white">
+<option disabled="" selected="" value="">Choisir votre ville</option>
+<option value="cotonou">Cotonou</option>
+<option value="parakou">Parakou</option>
+<option value="porto-novo">Porto-Novo</option>
+<option value="abomey-calavi">Abomey-Calavi</option>
+<option value="boikon">Bohicon</option>
+</select>
+<span class="material-symbols-outlined absolute right-5 top-4 text-gray-400 pointer-events-none">location_on</span>
+</div>
+</div>
+</div>
+<!-- Sticky Bottom Button Area -->
+<div class="p-6 mt-auto bg-white dark:bg-background-dark border-t border-gray-100 dark:border-gray-800">
+<div class="flex items-center justify-center gap-2 mb-4">
+<span class="material-symbols-outlined text-xs text-green-500">verified_user</span>
+<p class="text-[12px] text-gray-500 text-center">Vos données sont sécurisées et cryptées.</p>
+</div>
+<button class="w-full h-16 bg-accent-gold hover:bg-[#c4a02e] text-white font-bold text-lg rounded-full shadow-lg shadow-accent-gold/30 flex items-center justify-center gap-2 transition-transform active:scale-[0.98]">
+                Suivant
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+<!-- Background Decorative Element (Beninese-inspired subtle pattern) -->
+<div class="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05] z-0 overflow-hidden">
+<div class="absolute -right-20 -top-20 w-80 h-80 rounded-full border-[40px] border-primary"></div>
+<div class="absolute -left-20 top-1/2 w-60 h-60 rounded-full border-[20px] border-accent-gold"></div>
+</div>
+</div>
+</body></html>

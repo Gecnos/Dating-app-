@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0f2cbd",
+                        "accent-gold": "#D4AF37",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101322",
+                    },
+                    fontFamily: {
+                        "display": ["Be Vietnam Pro", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .ios-status-bar { height: 44px; }
+        .intention-card-selected {
+            border: 2px solid #D4AF37;
+            background-color: rgba(212, 175, 55, 0.05);
+        }
+        .pattern-bg {
+            background-image: radial-gradient(#0f2cbd10 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111218] dark:text-white min-h-screen flex flex-col">
+<!-- Top Navigation Area -->
+<div class="flex items-center justify-between p-4 pt-6">
+<button class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<div class="flex-1 px-4">
+<!-- ProgressBar Component -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<p class="text-xs font-medium uppercase tracking-wider opacity-60">Étape 2 sur 5</p>
+</div>
+<div class="h-1.5 w-full bg-[#dbdde6] dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 40%;"></div>
+</div>
+</div>
+</div>
+<button class="text-sm font-semibold text-primary dark:text-blue-400">Aide</button>
+</div>
+<div class="flex-1 overflow-y-auto px-6 pb-24">
+<!-- HeadlineText Component -->
+<div class="pt-8 pb-4">
+<h2 class="text-[#111218] dark:text-white tracking-tight text-3xl font-bold leading-tight">
+                Que recherchez-vous vraiment?
+            </h2>
+<p class="mt-2 text-[#616889] dark:text-gray-400 text-base">
+                Choisissez votre intention pour des rencontres qui vous ressemblent au Bénin.
+            </p>
+</div>
+<!-- Cards Section -->
+<div class="flex flex-col gap-4 mt-6">
+<!-- Card 1: Serious (Selected State Example) -->
+<div class="group relative flex flex-col items-start gap-4 p-5 rounded-[16px] bg-white dark:bg-gray-900 shadow-sm border-2 border-accent-gold bg-accent-gold/5 transition-all">
+<div class="absolute top-4 right-4 text-accent-gold">
+<span class="material-symbols-outlined fill-1">check_circle</span>
+</div>
+<div class="size-12 rounded-full bg-accent-gold/20 flex items-center justify-center text-accent-gold">
+<span class="material-symbols-outlined text-3xl">favorite</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-lg font-bold">Relation Sérieuse</h3>
+<p class="text-sm text-[#616889] dark:text-gray-400 leading-relaxed">
+                        Pour ceux qui cherchent l'engagement, la construction d'un foyer et le long terme.
+                    </p>
+</div>
+</div>
+<!-- Card 2: Discovery -->
+<div class="group relative flex flex-col items-start gap-4 p-5 rounded-[16px] bg-white dark:bg-gray-900 shadow-sm border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all">
+<div class="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">explore</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-lg font-bold">Découverte &amp; Sorties</h3>
+<p class="text-sm text-[#616889] dark:text-gray-400 leading-relaxed">
+                        Rencontres amicales, sorties culturelles à Cotonou et networking enrichissant.
+                    </p>
+</div>
+</div>
+<!-- Card 3: Casual -->
+<div class="group relative flex flex-col items-start gap-4 p-5 rounded-[16px] bg-white dark:bg-gray-900 shadow-sm border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all">
+<div class="size-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+<span class="material-symbols-outlined text-3xl">bolt</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-lg font-bold">Fun &amp; Sans prise de tête</h3>
+<p class="text-sm text-[#616889] dark:text-gray-400 leading-relaxed">
+                        Vivre l'instant présent, des moments légers et des connexions spontanées.
+                    </p>
+</div>
+</div>
+</div>
+<!-- Verification Badge / Trust Element -->
+<div class="mt-8 flex items-center gap-3 p-4 bg-primary/5 dark:bg-primary/10 rounded-xl border border-primary/10">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+<p class="text-xs text-[#616889] dark:text-gray-400">
+                Votre intention est visible sur votre profil pour garantir la transparence et la sécurité de la communauté.
+            </p>
+</div>
+</div>
+<!-- Bottom Action Button -->
+<div class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background-light via-background-light dark:from-background-dark dark:via-background-dark to-transparent">
+<button class="w-full bg-primary text-white py-4 rounded-full font-bold text-lg shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform">
+            Continuer
+        </button>
+<!-- iOS Home Indicator Space -->
+<div class="h-4"></div>
+</div>
+<!-- Background Decoration -->
+<div aria-hidden="true" class="fixed inset-0 pointer-events-none opacity-[0.03] z-[-1] pattern-bg"></div>
+</body></html>
