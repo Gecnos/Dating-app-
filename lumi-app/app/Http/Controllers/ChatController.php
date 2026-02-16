@@ -39,7 +39,7 @@ class ChatController extends Controller
 
         $users = User::whereIn('id', $matchIds)->with('intention')->get();
 
-        return Inertia::render('MatchesList', [
+        return Inertia::render('ChatList', [
             'matches' => $users
         ]);
     }
@@ -88,7 +88,21 @@ class ChatController extends Controller
             'content' => $request->content ?? '',
             'type' => $request->type ?? 'text',
             'media_path' => $mediaPath,
+            'is_read' => false
         ]);
+
+        // Send notification to recipient
+        $recipient = User::find($request->to_id);
+        if ($recipient) {
+            $sender = Auth::user();
+            $recipient->notify(new \App\Notifications\AppNotification(
+                'message',
+                'Nouveau Message',
+                "{$sender->name} vous a envoyé un message.",
+                'mail',
+                '#0f2cbd'
+            ));
+        }
 
         // TODO: Uncomment when Reverb is configured
         // broadcast(new MessageSent($message))->toOthers();

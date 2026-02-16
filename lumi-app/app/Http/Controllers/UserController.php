@@ -56,21 +56,26 @@ class UserController extends Controller
     {
         $me = Auth::user();
         
-        // Algorithme de base : Pas encore liké/ignoré, pas soi-même
-        $excludeIds = MatchModel::where('user_id', $me->id)->pluck('target_id')->toArray();
-        $excludeIds[] = $me->id;
+        // IDs à exclure : déjà swipé, soi-même, bloqués (mutuel), signalés (par moi), ou en Ghost Mode
+        $swipedIds = MatchModel::where('user_id', $me->id)->pluck('target_id')->toArray();
+        $blockedByMe = \App\Models\Block::where('blocker_id', $me->id)->pluck('blocked_id')->toArray();
+        $blockedMe = \App\Models\Block::where('blocked_id', $me->id)->pluck('blocker_id')->toArray();
+        $reportedByMe = \App\Models\Report::where('reporter_id', $me->id)->pluck('reported_id')->toArray();
 
-        $profiles = User::whereNotIn('id', $excludeIds)
+        $excludeIds = array_unique(array_merge($swipedIds, $blockedByMe, $blockedMe, $reportedByMe, [$me->id]));
+
+        $profiles = Inertia::defer(fn() => User::whereNotIn('id', $excludeIds)
+            ->where('is_ghost_mode', false) // Exclure les profils en mode fantôme
             ->with(['intention', 'photos'])
             ->limit(10)
             ->get()
             ->map(function($user) {
-                // Toujours flouter dans le discovery si blur_enabled
+                // Toujours flouter dans le discovery si blur_enabled (ou si on veut garder la logique Cloudinary)
                 if ($user->blur_enabled && $user->avatar) {
                     $user->avatar = $this->cloudinary->getBlurredUrl($user->avatar);
                 }
                 return $user;
-            });
+            }));
 
         return Inertia::render('Discovery', [
             'initialProfiles' => $profiles
@@ -83,7 +88,16 @@ class UserController extends Controller
     public function explorer(Request $request)
     {
         $me = Auth::user();
-        $query = User::with(['intention', 'photos'])->where('id', '!=', $me->id);
+        
+        // Filtres de base : sécurité et confidentialité
+        $blockedByMe = \App\Models\Block::where('blocker_id', $me->id)->pluck('blocked_id')->toArray();
+        $blockedMe = \App\Models\Block::where('blocked_id', $me->id)->pluck('blocker_id')->toArray();
+        $reportedByMe = \App\Models\Report::where('reporter_id', $me->id)->pluck('reported_id')->toArray();
+        $excludeIds = array_unique(array_merge($blockedByMe, $blockedMe, $reportedByMe, [$me->id]));
+
+        $query = User::with(['intention', 'photos'])
+            ->whereNotIn('id', $excludeIds)
+            ->where('is_ghost_mode', false);
 
         // Filtre par genre
         if ($request->filled('gender')) {
@@ -117,7 +131,7 @@ class UserController extends Controller
         // Filtre de proximité (Distance en KM)
         if ($request->filled('distance') && $me->latitude && $me->longitude) {
             $distanceKm = $request->distance;
-            $query->whereRaw("ST_DistanceSphere(ST_MakePoint(longitude, latitude), ST_MakePoint(?, ?)) <= ?", [
+            $query->whereRaw("ST_DistanceSphere(ST_MakePoint(longitude::double precision, latitude::double precision), ST_MakePoint(?::double precision, ?::double precision)) <= ?", [
                 $me->longitude, $me->latitude, $distanceKm * 1000
             ]);
         }
@@ -125,12 +139,12 @@ class UserController extends Controller
         // Calcul de la distance si les coordonnées sont dispos
         if ($me->latitude && $me->longitude) {
             $query->select('*')
-                  ->selectRaw("round((ST_DistanceSphere(ST_MakePoint(longitude, latitude), ST_MakePoint(?, ?)) / 1000)::numeric, 1) as distance_km", [
+                  ->selectRaw("round((ST_DistanceSphere(ST_MakePoint(longitude::double precision, latitude::double precision), ST_MakePoint(?::double precision, ?::double precision)) / 1000)::numeric, 1) as distance_km", [
                       $me->longitude, $me->latitude
                   ]);
         }
 
-        $profiles = $query->limit(40)->get()->map(function($user) {
+        $profiles = Inertia::defer(fn() => $query->limit(40)->get()->map(function($user) {
             // Calcul de l'âge réel
             $user->age = $user->date_of_birth ? \Carbon\Carbon::parse($user->date_of_birth)->age : null;
             
@@ -139,7 +153,7 @@ class UserController extends Controller
                 $user->avatar = $this->cloudinary->getBlurredUrl($user->avatar);
             }
             return $user;
-        });
+        }));
 
         return Inertia::render('Explorer', [
             'profiles' => $profiles,
@@ -174,11 +188,23 @@ class UserController extends Controller
             'city' => 'nullable|string|max:255',
             'interests' => 'nullable|array',
             'languages' => 'nullable|array',
+            'avatar_data' => 'nullable|string',
         ]);
+
+        if ($request->filled('avatar_data')) {
+            $url = $this->cloudinary->uploadBase64($request->avatar_data);
+            $user->avatar = $url;
+            
+            // On l'ajoute aussi à la galerie si elle n'y est pas
+            $user->photos()->create([
+                'url' => $url,
+                'order' => $user->photos()->count()
+            ]);
+        }
 
         $user->update($validated);
 
-        return redirect()->route('profile', 'me')->with('success', 'Profil mis à jour !');
+        return redirect()->route('my.profile')->with('success', 'Profil mis à jour !');
     }
 
     /**
@@ -310,5 +336,36 @@ class UserController extends Controller
         ]);
 
         return response()->json(['message' => 'Position mise à jour.']);
+    }
+
+    /**
+     * Active/Désactive le mode fantôme.
+     */
+    public function toggleGhostMode(Request $request)
+    {
+        $user = Auth::user();
+        $user->is_ghost_mode = !$user->is_ghost_mode;
+        $user->save();
+
+        return response()->json([
+            'is_ghost_mode' => $user->is_ghost_mode,
+            'message' => $user->is_ghost_mode ? 'Mode fantôme activé.' : 'Mode fantôme désactivé.'
+        ]);
+    }
+
+    /**
+     * Supprime le compte de l'utilisateur.
+     */
+    public function destroy()
+    {
+        $user = Auth::user();
+        
+        // Logout first
+        Auth::guard('web')->logout();
+
+        // Delete user (cascade will handle related data if set up in DB, otherwise we might need to clean up manually)
+        $user->delete();
+
+        return redirect('/');
     }
 }

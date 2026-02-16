@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
-import NavigationBar from '@/Components/NavigationBar';
+import { Head, Link, router, Deferred } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function Explorer({ profiles, filters, intentions }) {
+export default function Explorer({ profiles: initialProfiles, filters, intentions }) {
+    const [profiles, setProfiles] = useState(initialProfiles || []);
+
+    useEffect(() => {
+        if (initialProfiles && initialProfiles.length > 0) {
+            setProfiles(initialProfiles);
+        }
+    }, [initialProfiles]);
     const [search, setSearch] = useState(filters.search || '');
     const [showFilters, setShowFilters] = useState(false);
 
@@ -64,13 +70,13 @@ export default function Explorer({ profiles, filters, intentions }) {
             <Head title="Découverte" />
 
             {/* Header / Search */}
-            <header className="flex flex-col bg-[#101322]/80 backdrop-blur-xl p-4 pb-6 sticky top-0 z-40 border-b border-white/5 gap-4">
+            <header className="flex flex-col bg-[#101322] p-4 pb-6 sticky top-0 z-40 border-b border-white/10 gap-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-black tracking-tight uppercase italic text-[#D4AF37]">Explorer</h1>
                         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Trouvez votre perle rare</p>
                     </div>
-                    <Link href={route('profile', 'me')} className="size-10 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 overflow-hidden shadow-lg shadow-black/20">
+                    <Link href={route('profile', 'me')} className="size-10 rounded-2xl bg-[#1a1f35] flex items-center justify-center border border-white/10 overflow-hidden shadow-lg shadow-black/20">
                         <span className="material-symbols-outlined text-gray-400">person</span>
                     </Link>
                 </div>
@@ -85,12 +91,12 @@ export default function Explorer({ profiles, filters, intentions }) {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Nom, intérêt, ville..."
-                            className="block w-full py-4 pl-12 pr-4 text-sm bg-white/5 border border-white/5 rounded-2xl focus:ring-1 focus:ring-[#D4AF37] placeholder-gray-500 transition-all outline-none"
+                            className="block w-full py-4 pl-12 pr-4 text-sm bg-[#1a1f35] border border-white/10 rounded-2xl focus:ring-1 focus:ring-[#D4AF37] placeholder-gray-500 transition-all outline-none"
                         />
                     </form>
                     <button
                         onClick={() => setShowFilters(true)}
-                        className={`size-14 rounded-2xl border flex items-center justify-center transition-all ${showFilters || Object.keys(filters).length > 1 ? 'bg-[#D4AF37] border-[#D4AF37] text-[#101322]' : 'bg-white/5 border-white/5 text-white'}`}
+                        className={`size-14 rounded-2xl border flex items-center justify-center transition-all ${showFilters || Object.keys(filters).length > 1 ? 'bg-[#D4AF37] border-[#D4AF37] text-[#101322]' : 'bg-[#1a1f35] border-[#white/10] text-white'}`}
                     >
                         <span className="material-symbols-outlined">tune</span>
                     </button>
@@ -106,7 +112,7 @@ export default function Explorer({ profiles, filters, intentions }) {
                             <button
                                 key={cat.label}
                                 onClick={() => router.get(route('explorer'), { search: cat.label })}
-                                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white/5 border border-white/5 whitespace-nowrap active:scale-95 transition-all hover:border-[#D4AF37]/30"
+                                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#1a1f35] border border-white/10 whitespace-nowrap active:scale-95 transition-all hover:border-[#D4AF37]/30"
                             >
                                 <span className="material-symbols-outlined text-sm text-[#D4AF37]">{cat.icon}</span>
                                 <span className="text-[11px] font-black uppercase tracking-widest">{cat.label}</span>
@@ -126,78 +132,98 @@ export default function Explorer({ profiles, filters, intentions }) {
                         )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <AnimatePresence>
-                            {profiles.map((profile, index) => (
-                                <motion.div
-                                    key={profile.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.05 }}
-                                >
-                                    <Link
-                                        href={route('profile', profile.id)}
-                                        className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden bg-white/5 shadow-2xl transition-transform active:scale-95 flex flex-col"
+                    <Deferred data="profiles" fallback={
+                        <div className="grid grid-cols-2 gap-4 animate-pulse">
+                            {[1, 2, 3, 4].map(i => (
+                                <div key={i} className="aspect-[3/4] rounded-[2rem] bg-white/5 border border-white/10" />
+                            ))}
+                        </div>
+                    }>
+                        <div className="grid grid-cols-2 gap-4">
+                            <AnimatePresence>
+                                {profiles.map((profile, index) => (
+                                    <motion.div
+                                        key={profile.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: index * 0.05 }}
                                     >
-                                        <img
-                                            src={profile.avatar || 'https://via.placeholder.com/400x600'}
-                                            alt={profile.name}
-                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent" />
+                                        <Link
+                                            href={route('profile', profile.id)}
+                                            className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden bg-[#1a1f35] shadow-2xl transition-transform active:scale-95 flex flex-col border border-white/5"
+                                        >
+                                            <img
+                                                src={profile.avatar || 'https://via.placeholder.com/400x600'}
+                                                alt={profile.name}
+                                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent" />
 
-                                        <div className="absolute bottom-4 left-4 right-4">
-                                            <div className="flex items-center justify-between mb-1">
-                                                <h4 className="text-sm font-black truncate">{profile.name}{profile.age ? `, ${profile.age}` : ''}</h4>
-                                                {profile.is_verified && (
-                                                    <span className="material-symbols-outlined text-[#D4AF37] text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                                )}
-                                            </div>
-                                            <div className="flex flex-col gap-1 opacity-80">
-                                                <div className="flex items-center gap-1">
-                                                    <span className="material-symbols-outlined text-[12px] text-[#D4AF37]">location_on</span>
-                                                    <span className="text-[9px] font-bold uppercase tracking-wider">{profile.city || 'Cotonou'}</span>
-                                                </div>
-                                                {profile.distance_km !== undefined && (
+                                            <div className="absolute bottom-4 left-4 right-4">
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <h4 className="text-sm font-black truncate">{profile.name}{profile.age ? `, ${profile.age}` : ''}</h4>
                                                     <div className="flex items-center gap-1">
-                                                        <span className="material-symbols-outlined text-[12px] text-gray-400">near_me</span>
-                                                        <span className="text-[9px] font-bold text-gray-400">À {profile.distance_km} km</span>
+                                                        {profile.is_verified && (
+                                                            <span className="material-symbols-outlined text-[#D4AF37] text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                                        )}
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                router.visit(`/chat/${profile.id}`);
+                                                            }}
+                                                            className="size-8 rounded-full bg-[#D4AF37] text-[#101322] flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[18px]">chat</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-col gap-1 opacity-80">
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="material-symbols-outlined text-[12px] text-[#D4AF37]">location_on</span>
+                                                        <span className="text-[9px] font-bold uppercase tracking-wider">{profile.city || 'Cotonou'}</span>
+                                                    </div>
+                                                    {profile.distance_km !== undefined && (
+                                                        <div className="flex items-center gap-1">
+                                                            <span className="material-symbols-outlined text-[12px] text-gray-400">near_me</span>
+                                                            <span className="text-[9px] font-bold text-gray-400">À {profile.distance_km} km</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="absolute top-4 left-4 flex flex-col gap-2">
+                                                {profile.intention && (
+                                                    <div className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-tighter shadow-lg border border-white/10`}
+                                                        style={{ backgroundColor: `${profile.intention.color_badge || '#D4AF37'}EE`, color: '#fff' }}>
+                                                        {profile.intention.label}
                                                     </div>
                                                 )}
                                             </div>
-                                        </div>
-
-                                        <div className="absolute top-4 left-4 flex flex-col gap-2">
-                                            {profile.intention && (
-                                                <div className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-tighter shadow-lg backdrop-blur-md border border-white/10`}
-                                                    style={{ backgroundColor: `${profile.intention.color_badge || '#D4AF37'}CC`, color: '#fff' }}>
-                                                    {profile.intention.label}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </Link>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    </div>
-
-                    {profiles.length === 0 && (
-                        <div className="flex flex-col items-center justify-center py-24 text-center">
-                            <div className="size-20 rounded-full bg-white/5 flex items-center justify-center mb-6">
-                                <span className="material-symbols-outlined text-4xl text-gray-700">person_search</span>
-                            </div>
-                            <h4 className="text-lg font-black uppercase tracking-tighter italic mb-2">Aucun résultat</h4>
-                            <p className="text-xs text-gray-500 max-w-[200px] leading-relaxed">
-                                Essayez d'élargir vos filtres de recherche ou changez votre localisation.
-                            </p>
-                            <button
-                                onClick={() => router.get(route('explorer'))}
-                                className="mt-8 text-[10px] font-black uppercase tracking-[0.2em] text-[#D4AF37] underline decoration-2 underline-offset-4"
-                            >
-                                Réinitialiser les filtres
-                            </button>
+                                        </Link>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
                         </div>
-                    )}
+
+                        {profiles.length === 0 && (
+                            <div className="flex flex-col items-center justify-center py-24 text-center">
+                                <div className="size-20 rounded-full bg-[#1a1f35] flex items-center justify-center mb-6 border border-white/5">
+                                    <span className="material-symbols-outlined text-4xl text-gray-700">person_search</span>
+                                </div>
+                                <h4 className="text-lg font-black uppercase tracking-tighter italic mb-2">Aucun résultat</h4>
+                                <p className="text-xs text-gray-500 max-w-[200px] leading-relaxed">
+                                    Essayez d'élargir vos filtres de recherche ou changez votre localisation.
+                                </p>
+                                <button
+                                    onClick={() => router.get(route('explorer'))}
+                                    className="mt-8 text-[10px] font-black uppercase tracking-[0.2em] text-[#D4AF37] underline decoration-2 underline-offset-4"
+                                >
+                                    Réinitialiser les filtres
+                                </button>
+                            </div>
+                        )}
+                    </Deferred>
                 </section>
             </main>
 
@@ -208,7 +234,7 @@ export default function Explorer({ profiles, filters, intentions }) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-end"
+                        className="fixed inset-0 z-[100] bg-black/90 flex items-end"
                     >
                         <motion.div
                             initial={{ y: "100%" }}
@@ -232,7 +258,7 @@ export default function Explorer({ profiles, filters, intentions }) {
                                         <button
                                             key={g}
                                             onClick={() => setGender(g)}
-                                            className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${gender === g ? 'bg-[#D4AF37] text-[#101322] border-[#D4AF37]' : 'bg-white/5 border-white/5 text-gray-400'}`}
+                                            className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${gender === g ? 'bg-[#D4AF37] text-[#101322] border-[#D4AF37]' : 'bg-[#1a1f35] border-white/5 text-gray-400'}`}
                                         >
                                             {g || 'Peu importe'}
                                         </button>
@@ -250,12 +276,12 @@ export default function Explorer({ profiles, filters, intentions }) {
                                     <input
                                         type="range" min="18" max="60" value={ageMin}
                                         onChange={e => setAgeMin(parseInt(e.target.value))}
-                                        className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
+                                        className="w-full h-1.5 bg-[#1a1f35] rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
                                     />
                                     <input
                                         type="range" min="18" max="60" value={ageMax}
                                         onChange={e => setAgeMax(Math.max(ageMin + 1, parseInt(e.target.value)))}
-                                        className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
+                                        className="w-full h-1.5 bg-[#1a1f35] rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
                                     />
                                 </div>
                             </div>
@@ -269,7 +295,7 @@ export default function Explorer({ profiles, filters, intentions }) {
                                 <input
                                     type="range" min="5" max="200" step="5" value={distance}
                                     onChange={e => setDistance(parseInt(e.target.value))}
-                                    className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
+                                    className="w-full h-1.5 bg-[#1a1f35] rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
                                 />
                             </div>
 
@@ -279,7 +305,7 @@ export default function Explorer({ profiles, filters, intentions }) {
                                 <div className="flex flex-wrap gap-2">
                                     <button
                                         onClick={() => setIntentionId('')}
-                                        className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${intentionId === '' ? 'bg-[#D4AF37] text-[#101322] border-[#D4AF37]' : 'bg-white/5 border-white/5 text-gray-400'}`}
+                                        className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${intentionId === '' ? 'bg-[#D4AF37] text-[#101322] border-[#D4AF37]' : 'bg-[#1a1f35] border-white/5 text-gray-400'}`}
                                     >
                                         Toutes
                                     </button>
@@ -287,7 +313,7 @@ export default function Explorer({ profiles, filters, intentions }) {
                                         <button
                                             key={int.id}
                                             onClick={() => setIntentionId(int.id)}
-                                            className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${intentionId === int.id ? 'bg-[#D4AF37] text-[#101322] border-[#D4AF37]' : 'bg-white/5 border-white/5 text-gray-400'}`}
+                                            className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${intentionId === int.id ? 'bg-[#D4AF37] text-[#101322] border-[#D4AF37]' : 'bg-[#1a1f35] border-white/5 text-gray-400'}`}
                                         >
                                             {int.label}
                                         </button>
@@ -306,7 +332,6 @@ export default function Explorer({ profiles, filters, intentions }) {
                 )}
             </AnimatePresence>
 
-            <NavigationBar />
         </div>
     );
 }

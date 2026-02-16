@@ -1,0 +1,154 @@
+Sur l'onglet decouverte pouvoir taper sur un profil pour avoir plus en détail 
+Supprimer le bouton préférence sur l''onglet decouverte 
+Supprimer le pourcentage sur les profils détaillés des users 
+Le calcul du pourcentage doit se faire en interne 
+Implémenter la page notifications  voir maquette
+Reduire le temps de chargement entre les pages passés à de l'async
+Quand un user active sa localisation ça lui envoie une erreur de ce type 
+{
+    # Illuminate\Database\QueryException - Internal Server Error
+
+SQLSTATE[42883]: Undefined function: 7 ERREUR:  la fonction st_makepoint(numeric, numeric) n'existe pas
+LINE 1: select *, round((ST_DistanceSphere(ST_MakePoint(longitude, l...
+                                           ^
+HINT:  Aucune fonction ne correspond au nom donné et aux types d'arguments.
+Vous devez ajouter des conversions explicites de type. (Connection: pgsql, Host: 127.0.0.1, Port: 5432, Database: lumi_db, SQL: select *, round((ST_DistanceSphere(ST_MakePoint(longitude, latitude), ST_MakePoint(2.48844290, 6.36351140)) / 1000)::numeric, 1) as distance_km from "users" where "id" != 4 limit 40)
+
+PHP 8.4.7
+Laravel 12.51.0
+1b68-2c0f-53c0-626-7600-84fb-2853-537f-ba41.ngrok-free.app
+
+## Stack Trace
+
+0 - vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+1 - vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+2 - vendor\laravel\framework\src\Illuminate\Database\Connection.php:411
+3 - vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:3438
+4 - vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:3423
+5 - vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4013
+6 - vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:3422
+7 - vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:902
+8 - vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:884
+9 - app\Http\Controllers\UserController.php:133
+10 - vendor\laravel\framework\src\Illuminate\Routing\ControllerDispatcher.php:46
+11 - vendor\laravel\framework\src\Illuminate\Routing\Route.php:265
+12 - vendor\laravel\framework\src\Illuminate\Routing\Route.php:211
+13 - vendor\laravel\framework\src\Illuminate\Routing\Router.php:822
+14 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:180
+15 - vendor\laravel\framework\src\Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets.php:32
+16 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+17 - vendor\inertiajs\inertia-laravel\src\Middleware.php:122
+18 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+19 - vendor\laravel\framework\src\Illuminate\Routing\Middleware\SubstituteBindings.php:50
+20 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+21 - vendor\laravel\framework\src\Illuminate\Auth\Middleware\Authenticate.php:63
+22 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+23 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken.php:87
+24 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+25 - vendor\laravel\framework\src\Illuminate\View\Middleware\ShareErrorsFromSession.php:48
+26 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+27 - vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php:120
+28 - vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php:63
+29 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+30 - vendor\laravel\framework\src\Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse.php:36
+31 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+32 - vendor\laravel\framework\src\Illuminate\Cookie\Middleware\EncryptCookies.php:74
+33 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+34 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:137
+35 - vendor\laravel\framework\src\Illuminate\Routing\Router.php:821
+36 - vendor\laravel\framework\src\Illuminate\Routing\Router.php:800
+37 - vendor\laravel\framework\src\Illuminate\Routing\Router.php:764
+38 - vendor\laravel\framework\src\Illuminate\Routing\Router.php:753
+39 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php:200
+40 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:180
+41 - vendor\nativephp\mobile\src\Http\Middleware\RenderEdgeComponents.php:14
+42 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+43 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php:21
+44 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull.php:31
+45 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+46 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php:21
+47 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TrimStrings.php:51
+48 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+49 - vendor\laravel\framework\src\Illuminate\Http\Middleware\ValidatePostSize.php:27
+50 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+51 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance.php:109
+52 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+53 - vendor\laravel\framework\src\Illuminate\Http\Middleware\HandleCors.php:61
+54 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+55 - vendor\laravel\framework\src\Illuminate\Http\Middleware\TrustProxies.php:58
+56 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+57 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks.php:22
+58 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+59 - vendor\laravel\framework\src\Illuminate\Http\Middleware\ValidatePathEncoding.php:26
+60 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+61 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:137
+62 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php:175
+63 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php:144
+64 - vendor\laravel\framework\src\Illuminate\Foundation\Application.php:1220
+65 - public\index.php:20
+66 - vendor\laravel\framework\src\Illuminate\Foundation\resources\server.php:23
+
+## Request
+
+GET /explorer
+
+## Headers
+
+* **host**: 1b68-2c0f-53c0-626-7600-84fb-2853-537f-ba41.ngrok-free.app
+* **user-agent**: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36
+* **accept**: text/html, application/xhtml+xml
+* **accept-encoding**: gzip, deflate, br, zstd
+* **accept-language**: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7
+* **cookie**: abuse_interstitial=1b68-2c0f-53c0-626-7600-84fb-2853-537f-ba41.ngrok-free.app; XSRF-TOKEN=eyJpdiI6IkRQWkVlZkdCb01PMGs2bGs0YnFTMFE9PSIsInZhbHVlIjoiS3BlN25ZL01qUy82ckE4cGc0aHlDRzVNVURIaDdwYjM1WHFvTXkwbGhrM1c2b09reFd5UE1uTEZ2eTR2N1MzNFh6QklUWHlZL1RhSzg1citIK1V4ZUwrSE1XSXVQSlRMdDM5cXZFK2QzcC9wOG1sT1pyUVBQbXNBSkJHOFoySTYiLCJtYWMiOiI1N2M3MmY2OTJiOTJlMTNkYzhjZjlmNGYwMjNlNDRmYmIzZGU1MTc5YzY3MDZhYjQxMWQwM2EzZWRiOWVhMTIwIiwidGFnIjoiIn0%3D; lumi-session=eyJpdiI6Ik1paFJ2aHFta0FsTlRrdzY2akx4Qmc9PSIsInZhbHVlIjoiWUhIRTlpMDFjMjNwR0xka1A5ZmhkQmphd1JKSEQ4MnhlSkJsVHFQL0NDYjFmaEZwcEJ4TnYveCtFZk1lcko5WTdwc1JpWWxCMWlnYUl6YkFON21tdDRkbWVSeDZBa0xTWTNiVzNJcUZQVkNaS0JEcms3ZmdEa2lVWGk5V0FQUG8iLCJtYWMiOiJlOTZmMTNkZTdhYmI2ODEwYmJkMzQzYjMxNjVkNWRkYWVjNWY5NTk2MmYzNGQyOGU0YTBkNDEyOWVlNDIyMjRhIiwidGFnIjoiIn0%3D
+* **priority**: u=1, i
+* **referer**: https://1b68-2c0f-53c0-626-7600-84fb-2853-537f-ba41.ngrok-free.app/discovery
+* **sec-ch-ua**: "Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"
+* **sec-ch-ua-mobile**: ?0
+* **sec-ch-ua-platform**: "Linux"
+* **sec-fetch-dest**: empty
+* **sec-fetch-mode**: cors
+* **sec-fetch-site**: same-origin
+* **x-forwarded-for**: 154.66.137.26
+* **x-forwarded-host**: 1b68-2c0f-53c0-626-7600-84fb-2853-537f-ba41.ngrok-free.app
+* **x-forwarded-proto**: https
+* **x-inertia**: true
+* **x-inertia-version**: f593f77d46bfd481aa8aeee5f6e9d500
+* **x-requested-with**: XMLHttpRequest
+* **x-xsrf-token**: eyJpdiI6IkRQWkVlZkdCb01PMGs2bGs0YnFTMFE9PSIsInZhbHVlIjoiS3BlN25ZL01qUy82ckE4cGc0aHlDRzVNVURIaDdwYjM1WHFvTXkwbGhrM1c2b09reFd5UE1uTEZ2eTR2N1MzNFh6QklUWHlZL1RhSzg1citIK1V4ZUwrSE1XSXVQSlRMdDM5cXZFK2QzcC9wOG1sT1pyUVBQbXNBSkJHOFoySTYiLCJtYWMiOiI1N2M3MmY2OTJiOTJlMTNkYzhjZjlmNGYwMjNlNDRmYmIzZGU1MTc5YzY3MDZhYjQxMWQwM2EzZWRiOWVhMTIwIiwidGFnIjoiIn0=
+
+## Route Context
+
+controller: App\Http\Controllers\UserController@explorer
+route name: explorer
+middleware: web, auth
+
+## Route Parameters
+
+No route parameter data available.
+
+## Database Queries
+
+* pgsql - select * from "sessions" where "id" = 'r3btSH6rZdlcXIUBGXOAcuWoOWd4OOAs3VLzBULA' limit 1 (71.58 ms)
+* pgsql - select * from "users" where "id" = 4 limit 1 (3.3 ms)
+}
+
+
+La fonctinnalité de note vocale dans le chat ne passe pas du moins on peut commencer la note vocale mais appuyez dessus pour arreter ne passe pas , faudrait aussi une ui pour qu'on sache comment la note vocale dure etc .. like whatsapp
+Quand on voit un profil en détail les trois points qui sont en haut coivent nous permettre de signaler le profil ou le bloquer de meme dans la messagerie dans un chat
+Dans la messagerie ui ou ux dynamique pour qu'on voit les derniers messages avec un truc pour savoir le nombre de message non lus par discussion et meme une ui si c'est une note vocale 
+Dans l'édition de profil au niveau des centre d'intérets en plus d'ajouter un nouveau , un get pour récuperer les centres d'intérets les afficher à l'user , lui demander de choisir 05 dedans 
+Au niveau de profil il y a un bouton préférence de rencontres supprime le 
+Apuuyez sur la photo de profil doit nous permettre de la voir en pop up façon 
+Que la page edit de profil ressemble vraiment à celle là adapter à notre contexte stitch_lumi_splash_screen\modif_profil\screen.png
+Implémente la page aide et centre de sécurité voir maquette et rends ça dynamqiue interactions bdd s'il le faut  
+Le bouton ghost mode doit faire que la visibilté du profil soit à zero donc invisible pour les autres mais lui il peur utiliser normalement 
+Enlever partout les parties où on dit que les photos seront floutés
+Dans messagerie au niveau du app bar enlever le bouton messagerie puisque le texte est déjà là 
+Rendre l'ui de la page messagerie dynamique 
+Ajouter un bouton pour signaler un profil ou le bloquer dans la messagerie et dans le profil 
+Ajouter un bouton light mode et black mode au choix de l'user 
+Suivre les pages de la maquette stitch_lumi_splash_screen\profile_pagee\screen.png pour le redisgn de la page profil 
+et ça stitch_lumi_splash_screen\setting_page\screen.png pour la page paramètre 
+Enlever bien sur les trucs comme préférence de recherche de match et autres 
+On ne voit pas les likes reçus 
+Supprimer les fichiers inutiles enfin de fin 

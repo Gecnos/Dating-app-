@@ -1,45 +1,213 @@
-import { useState } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react'; // Added usePage
+import { useState, useMemo } from 'react';
+import { Head, Link, usePage, router } from '@inertiajs/react'; // Added usePage, router
 import { motion, AnimatePresence } from 'framer-motion';
-import NavigationBar from '@/Components/NavigationBar';
+import axios from 'axios';
 
 export default function ProfileDetails({ profile, isMutual }) {
     const { auth } = usePage().props;
     const isOwnProfile = auth.user && auth.user.id === profile.id;
-    const [isBlurEnabled, setIsBlurEnabled] = useState(!isOwnProfile && profile.blur_enabled && !isMutual);
+    const [showPhotoPopup, setShowPhotoPopup] = useState(false);
+    const [showOptions, setShowOptions] = useState(false);
+    const [reportModal, setReportModal] = useState(false);
+    const [blockConfirm, setBlockConfirm] = useState(false);
     const [activePhoto, setActivePhoto] = useState(0);
+    const [reportReason, setReportReason] = useState('');
+    const [reportDescription, setReportDescription] = useState('');
 
-    const age = profile.date_of_birth ? new Date().getFullYear() - new Date(profile.date_of_birth).getFullYear() : '24';
+    const photos = profile.photos && profile.photos.length > 0
+        ? profile.photos
+        : [{ url: profile.avatar || 'https://via.placeholder.com/600x800' }];
 
-    // Mock gallery if photos are missing
-    const photos = profile.photos?.length > 0 ? profile.photos : [
-        { url: profile.avatar || 'https://via.placeholder.com/800x1200' },
-        { url: 'https://via.placeholder.com/800x1200' }
-    ];
+    const age = useMemo(() => {
+        if (!profile.date_of_birth) return 24;
+        const birthDate = new Date(profile.date_of_birth);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+        return age;
+    }, [profile.date_of_birth]);
 
     const attributes = [
-        { label: 'Métier', value: profile.job || 'Non spécifié', icon: 'work' },
-        { label: 'Études', value: profile.education || 'Non spécifié', icon: 'school' },
-        { label: 'Taille', value: profile.height ? `${profile.height} cm` : 'Non spécifié', icon: 'straighten' },
-        { label: 'Ville', value: profile.city || 'Cotonou', icon: 'location_on' },
+        { label: 'Métier', value: profile.job || 'Non renseigné', icon: 'work' },
+        { label: 'Taille', value: profile.height ? `${profile.height} cm` : 'Non renseigné', icon: 'height' },
+        { label: 'Ville', value: profile.city || 'Cotonou', icon: 'location_city' },
+        { label: 'Études', value: profile.education || 'Plus d\'infos', icon: 'school' },
     ];
+
+    const reportReasons = [
+        "Contenu inapproprié",
+        "Harcèlement",
+        "Faux profil",
+        "Comportement suspect",
+        "Autre"
+    ];
+
+    const handleReport = async () => {
+        if (!reportReason) return;
+        try {
+            await axios.post('/api/reports', {
+                reported_id: profile.id,
+                reason: reportReason,
+                description: reportDescription
+            });
+            setShowOptions(false);
+            setReportModal(false);
+            alert("Signalement envoyé. Le profil a été masqué.");
+            router.visit(route('discovery'));
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleBlock = async () => {
+        try {
+            await axios.post('/api/blocks', { blocked_id: profile.id });
+            setShowOptions(false);
+            setBlockConfirm(false);
+            alert("Utilisateur bloqué.");
+            router.visit(route('discovery'));
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-[#101322] text-white font-sans pb-32 overflow-x-hidden">
             <Head title={`${profile.name} - Profil`} />
 
+            {/* Photo Enlargement Popup */}
+            <AnimatePresence>
+                {showPhotoPopup && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowPhotoPopup(false)}
+                        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4"
+                    >
+                        <motion.img
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            src={photos[activePhoto].url}
+                            className="max-w-full max-h-[80vh] rounded-3xl object-contain shadow-2xl"
+                        />
+                        <button className="absolute top-10 right-10 size-12 rounded-full bg-white/10 flex items-center justify-center">
+                            <span className="material-symbols-outlined">close</span>
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Options Menu (Report/Block) */}
+            <AnimatePresence>
+                {showOptions && (
+                    <div className="fixed inset-0 z-[100] flex items-end justify-center">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowOptions(false)}
+                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ y: "100%" }}
+                            animate={{ y: 0 }}
+                            exit={{ y: "100%" }}
+                            className="relative w-full max-w-md bg-[#161b2e] rounded-t-[3rem] p-8 border-t border-white/10 shadow-2xl"
+                        >
+                            <div className="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" />
+                            <h3 className="text-xl font-black italic tracking-tighter mb-6 text-center">Options du profil</h3>
+                            <div className="space-y-3">
+                                <button
+                                    onClick={() => setReportModal(true)}
+                                    className="w-full py-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center gap-3 text-red-500 font-bold active:scale-95 transition-all"
+                                >
+                                    <span className="material-symbols-outlined text-xl">report</span>
+                                    Signaler le profil
+                                </button>
+                                <button
+                                    onClick={() => setBlockConfirm(true)}
+                                    className="w-full py-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center gap-3 text-gray-400 font-bold active:scale-95 transition-all"
+                                >
+                                    <span className="material-symbols-outlined text-xl">block</span>
+                                    Bloquer cet utilisateur
+                                </button>
+                                <button onClick={() => setShowOptions(false)} className="w-full py-4 rounded-2xl bg-white/10 flex items-center justify-center text-sm font-black uppercase tracking-widest mt-4">
+                                    Annuler
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* Report Reason Modal */}
+                {reportModal && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                        <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="relative bg-[#161b2e] w-full max-w-sm rounded-[2.5rem] p-8 border border-white/10 shadow-2xl">
+                            <h3 className="text-xl font-black italic tracking-tight mb-6">Signaler {profile.name}</h3>
+                            <div className="space-y-2 mb-6">
+                                {reportReasons.map(reason => (
+                                    <button
+                                        key={reason}
+                                        onClick={() => setReportReason(reason)}
+                                        className={`w-full p-4 rounded-2xl text-xs font-bold text-left transition-all ${reportReason === reason ? 'bg-[#D4AF37] text-[#101322]' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+                                    >
+                                        {reason}
+                                    </button>
+                                ))}
+                            </div>
+                            <textarea
+                                value={reportDescription}
+                                onChange={(e) => setReportDescription(e.target.value)}
+                                placeholder="Détails supplémentaires (optionnel)..."
+                                className="w-full bg-white/5 border-none rounded-2xl p-4 text-xs italic text-gray-300 mb-6 min-h-[100px] focus:ring-[#D4AF37]"
+                            ></textarea>
+                            <div className="flex gap-3">
+                                <button onClick={() => setReportModal(false)} className="flex-1 py-4 rounded-2xl bg-white/10 font-bold text-xs">Annuler</button>
+                                <button onClick={handleReport} disabled={!reportReason} className="flex-1 py-4 rounded-2xl bg-red-500 font-black text-xs uppercase tracking-widest disabled:opacity-50">Confirmer</button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* Block Confirm Modal */}
+                {blockConfirm && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                        <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="relative bg-[#161b2e] w-full max-w-sm rounded-[2.5rem] p-8 border border-white/10 shadow-2xl text-center">
+                            <div className="size-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
+                                <span className="material-symbols-outlined text-4xl">block_flipped</span>
+                            </div>
+                            <h3 className="text-xl font-black italic tracking-tight mb-2">Bloquer {profile.name} ?</h3>
+                            <p className="text-xs text-gray-500 mb-8 leading-relaxed">
+                                Vous ne verrez plus ce profil et cet utilisateur ne pourra plus interagir avec vous.
+                            </p>
+                            <div className="flex gap-3">
+                                <button onClick={() => setBlockConfirm(false)} className="flex-1 py-4 rounded-2xl bg-white/10 font-bold text-xs text-white">Annuler</button>
+                                <button onClick={handleBlock} className="flex-1 py-4 rounded-2xl bg-white text-red-600 font-black text-xs uppercase tracking-widest">Bloquer</button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             {/* Sticky Header */}
-            <header className="fixed top-0 inset-x-0 h-16 bg-[#101322]/80 backdrop-blur-xl z-50 flex items-center justify-between px-6 border-b border-white/5">
-                <button onClick={() => window.history.back()} className="size-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 active:scale-90 transition-transform">
+            <header className="fixed top-0 inset-x-0 h-16 bg-[#101322] z-50 flex items-center justify-between px-6 border-b border-white/10">
+                <button onClick={() => window.history.back()} className="size-10 flex items-center justify-center rounded-xl bg-[#1a1f35] border border-white/10 active:scale-90 transition-transform">
                     <span className="material-symbols-outlined text-gray-400">arrow_back</span>
                 </button>
-                <div className="flex items-center gap-2 bg-[#D4AF37]/10 px-3 py-1.5 rounded-full border border-[#D4AF37]/20">
+                <div className="flex items-center gap-2 bg-[#D4AF37]/20 px-3 py-1.5 rounded-full border border-[#D4AF37]/30">
                     <span className="material-symbols-outlined text-[#D4AF37] text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                     <span className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-wider">Certifié</span>
                 </div>
-                <button className="size-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 active:scale-90 transition-transform">
-                    <span className="material-symbols-outlined text-gray-400">more_vert</span>
-                </button>
+                {!isOwnProfile && (
+                    <button onClick={() => setShowOptions(true)} className="size-10 flex items-center justify-center rounded-xl bg-[#1a1f35] border border-white/10 active:scale-90 transition-transform">
+                        <span className="material-symbols-outlined text-gray-400">more_vert</span>
+                    </button>
+                )}
+                {isOwnProfile && <div className="size-10" />}
             </header>
 
             {/* Hero Gallery Section */}
@@ -52,7 +220,8 @@ export default function ProfileDetails({ profile, isMutual }) {
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.5 }}
                         src={photos[activePhoto].url}
-                        className={`w-full h-full object-cover transition-all duration-700 ${isBlurEnabled ? 'blur-3xl scale-110' : ''}`}
+                        onClick={() => setShowPhotoPopup(true)} // Enlargement on click
+                        className="w-full h-full object-cover transition-all duration-700 cursor-zoom-in"
                         alt={profile.name}
                     />
                 </AnimatePresence>
@@ -80,9 +249,9 @@ export default function ProfileDetails({ profile, isMutual }) {
 
                 {/* Verification/Badge Overlay */}
                 <div className="absolute bottom-10 left-6 z-30">
-                    <div className="flex items-center gap-3 bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-[2rem] shadow-2xl">
-                        <div className="size-12 rounded-full bg-[#0f2cbd] flex items-center justify-center shadow-lg shadow-[#0f2cbd]/20">
-                            <span className="material-symbols-outlined text-white text-2xl">{profile.intention?.icon || 'favorite'}</span>
+                    <div className="flex items-center gap-3 bg-[#1a1f35] border border-white/10 p-4 rounded-[2rem] shadow-2xl">
+                        <div className="size-12 rounded-full bg-[#D4AF37] flex items-center justify-center shadow-lg shadow-[#D4AF37]/20">
+                            <span className="material-symbols-outlined text-[#101322] text-2xl">{profile.intention?.icon || 'favorite'}</span>
                         </div>
                         <div>
                             <p className="text-[10px] font-black uppercase text-gray-400 tracking-tighter leading-none">Intention</p>
@@ -90,22 +259,6 @@ export default function ProfileDetails({ profile, isMutual }) {
                         </div>
                     </div>
                 </div>
-
-                {/* Blur Premium Message */}
-                {isBlurEnabled && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm z-40 p-10 text-center">
-                        <div className="size-20 bg-[#D4AF37] rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-[#D4AF37]/30">
-                            <span className="material-symbols-outlined text-[#101322] text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
-                        </div>
-                        <h3 className="text-2xl font-black italic tracking-tighter mb-2">Visage Caché</h3>
-                        <p className="text-xs font-medium text-gray-300 max-w-[200px] leading-relaxed mx-auto">
-                            {profile.name} utilise le **Mode Fantôme**. Matchez pour débloquer ses photos.
-                        </p>
-                        <button onClick={() => setIsBlurEnabled(false)} className="mt-8 px-8 py-3 rounded-full bg-white text-[#101322] text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">
-                            Tenter le match
-                        </button>
-                    </div>
-                )}
             </section>
 
             {/* Profile Content */}
@@ -113,22 +266,20 @@ export default function ProfileDetails({ profile, isMutual }) {
                 {/* Header Info */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-4xl font-black italic tracking-tighter">{profile.name}, {age}</h1>
+                        <h1 className="text-4xl font-black italic tracking-tighter">{profile.name}, {age} ans</h1>
                         <div className="flex items-center gap-1.5 text-gray-400 mt-1">
                             <span className="material-symbols-outlined text-sm text-[#D4AF37]">location_on</span>
-                            <span className="text-xs font-bold uppercase tracking-widest">{profile.city || 'Cotonou'} • 5km</span>
+                            <span className="text-xs font-bold uppercase tracking-widest">{profile.city || 'Cotonou'} • {profile.distance_km ? `${profile.distance_km}km` : 'À proximité'}</span>
                         </div>
                     </div>
-                    <div className="size-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-lg">
-                        <span className="text-3xl font-black text-[#D4AF37]">98%</span>
-                    </div>
+                    {/* Compatibility percentage removed as per user request */}
                 </div>
 
                 {/* Stats/Attributes Grid */}
                 <div className="grid grid-cols-2 gap-3">
                     {attributes.map((attr, idx) => (
-                        <div key={idx} className="p-4 rounded-3xl bg-white/5 border border-white/5 flex items-center gap-3">
-                            <span className="material-symbols-outlined text-[#D4AF37] opacity-50">{attr.icon}</span>
+                        <div key={idx} className="p-4 rounded-3xl bg-[#1a1f35] border border-white/10 flex items-center gap-3">
+                            <span className="material-symbols-outlined text-[#D4AF37] opacity-60 text-xl">{attr.icon}</span>
                             <div className="min-w-0">
                                 <p className="text-[9px] font-black text-gray-500 uppercase tracking-tighter leading-none">{attr.label}</p>
                                 <p className="text-xs font-bold truncate text-gray-200">{attr.value}</p>
@@ -153,9 +304,9 @@ export default function ProfileDetails({ profile, isMutual }) {
                 <section className="space-y-4">
                     <h3 className="text-xs font-black uppercase tracking-widest text-[#D4AF37]">Mes centres d'intérêt</h3>
                     <div className="flex flex-wrap gap-2">
-                        {(profile.interests || ['Sport', 'Voyage', 'Cuisine']).map((interest, i) => (
-                            <span key={i} className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-2xl text-[11px] font-bold text-gray-200 hover:border-[#D4AF37]/40 transition-colors">
-                                {interest}
+                        {(profile.interests || []).map((interest, i) => (
+                            <span key={i} className="px-5 py-2.5 bg-[#1a1f35] border border-white/10 rounded-2xl text-[11px] font-bold text-gray-200 hover:border-[#D4AF37]/40 transition-colors">
+                                {typeof interest === 'string' ? interest : interest.label}
                             </span>
                         ))}
                     </div>
@@ -166,7 +317,6 @@ export default function ProfileDetails({ profile, isMutual }) {
             </main>
 
             {/* Sticky Action Footer */}
-            {/* Sticky Action Footer */}
             <footer className="fixed bottom-8 inset-x-6 z-50">
                 {isOwnProfile ? (
                     <div className="bg-[#101322]/80 backdrop-blur-2xl border border-white/10 p-3 rounded-[2.5rem] flex items-center gap-3 shadow-2xl">
@@ -174,18 +324,21 @@ export default function ProfileDetails({ profile, isMutual }) {
                             <span className="material-symbols-outlined text-2xl">edit</span>
                             <span className="text-[11px] font-black uppercase tracking-widest">Modifier</span>
                         </Link>
-                        <button className="size-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-white active:scale-90 transition-all hover:bg-white/10">
+                        <Link href={'/settings'} className="size-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-white active:scale-90 transition-all hover:bg-white/10">
                             <span className="material-symbols-outlined text-3xl">settings</span>
-                        </button>
+                        </Link>
                     </div>
                 ) : (
                     <div className="bg-[#101322]/80 backdrop-blur-2xl border border-white/10 p-3 rounded-[2.5rem] flex items-center gap-3 shadow-2xl">
                         <button className="size-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-red-500 active:scale-90 transition-all hover:bg-red-500/10 hover:border-red-500/20">
                             <span className="material-symbols-outlined text-3xl">close</span>
                         </button>
-                        <button className="flex-1 h-16 rounded-3xl bg-white text-[#101322] flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all">
-                            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
-                            <span className="text-[11px] font-black uppercase tracking-widest">Lumi Match</span>
+                        <button onClick={() => router.visit(`/chat/${profile.id}`)} className="flex-1 h-16 rounded-3xl bg-[#D4AF37] text-[#101322] flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all text-white">
+                            <span className="material-symbols-outlined text-2xl">chat</span>
+                            <span className="text-[11px] font-black uppercase tracking-widest">Message</span>
+                        </button>
+                        <button className="size-16 rounded-3xl bg-white text-[#101322] flex items-center justify-center shadow-xl active:scale-95 transition-all">
+                            <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
                         </button>
                     </div>
                 )}

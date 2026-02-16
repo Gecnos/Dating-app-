@@ -4,13 +4,14 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -38,6 +39,7 @@ class User extends Authenticatable
         'height',
         'languages',
         'city',
+        'is_ghost_mode',
     ];
 
     /**
@@ -62,6 +64,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'interests' => 'array',
             'languages' => 'array',
+            'is_ghost_mode' => 'boolean',
         ];
     }
 
@@ -119,5 +122,37 @@ class User extends Authenticatable
     public function photos()
     {
         return $this->hasMany(UserPhoto::class)->orderBy('order');
+    }
+
+    /**
+     * Signalements effectués par l'utilisateur.
+     */
+    public function reportsMade()
+    {
+        return $this->hasMany(Report::class, 'reporter_id');
+    }
+
+    /**
+     * Signalements reçus par l'utilisateur.
+     */
+    public function reportsReceived()
+    {
+        return $this->hasMany(Report::class, 'reported_id');
+    }
+
+    /**
+     * Utilisateurs bloqués par l'utilisateur.
+     */
+    public function blockedUsers()
+    {
+        return $this->hasMany(Block::class, 'blocker_id');
+    }
+
+    /**
+     * Utilisateurs par lesquels l'utilisateur est bloqué.
+     */
+    public function blockedBy()
+    {
+        return $this->hasMany(Block::class, 'blocked_id');
     }
 }

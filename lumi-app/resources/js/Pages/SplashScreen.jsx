@@ -61,51 +61,47 @@ export default function SplashScreen() {
             <div className="h-12 w-full"></div>
 
             {/* Top Decorative Element */}
-            <div className="mt-8 flex flex-col items-center opacity-40">
-                <span className="material-symbols-outlined text-[#E1AD01] text-sm">verified_user</span>
-                <p className="text-[10px] uppercase tracking-[0.3em] text-[#E1AD01] mt-1 font-semibold">Secure & Verified</p>
+            <div className="mt-12 flex flex-col items-center opacity-40">
+                <span className="material-symbols-outlined text-[#D4AF37] text-sm">verified_user</span>
+                <p className="text-[9px] uppercase tracking-[0.4em] text-[#D4AF37] mt-2 font-black italic">SÉCURISÉ & VÉRIFIÉ</p>
             </div>
 
             {/* Central Branding Section */}
             <div className="flex flex-col items-center justify-center flex-grow -mt-20 z-10">
                 {/* Logo Container */}
-                <div className="relative w-32 h-32 flex items-center justify-center">
-                    {/* Outer glow */}
-                    <div className="absolute inset-0 bg-[#E1AD01]/20 rounded-full blur-2xl"></div>
+                <div className="relative w-36 h-36 flex items-center justify-center">
                     {/* Main Logo Icon */}
-                    <div className="relative z-10 w-24 h-24 bg-[#E1AD01] rounded-full flex items-center justify-center shadow-2xl shadow-[#E1AD01]/40 transition-transform hover:scale-105 duration-700">
-                        <span className="material-symbols-outlined text-[#0a0c1a] text-5xl font-bold">flare</span>
+                    <div className="relative z-10 w-28 h-28 bg-[#D4AF37] rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-[#D4AF37]/30 transition-transform duration-700">
+                        <span className="material-symbols-outlined text-[#101322] text-6xl font-black">flare</span>
                     </div>
-                    {/* Secondary Gold Accent Ring */}
-                    <div className="absolute inset-0 border-2 border-[#E1AD01]/30 rounded-full scale-125 animate-[pulse_4s_infinite]"></div>
                 </div>
 
                 {/* App Name */}
-                <div className="mt-8 text-center">
-                    <h1 className="text-6xl font-bold tracking-tighter text-white">Lumi</h1>
-                    <div className="h-1.5 w-12 bg-[#E1AD01] mx-auto mt-2 rounded-full shadow-[0_0_10px_rgba(225,173,1,0.5)]"></div>
-                    <p className="text-[#E1AD01]/80 mt-4 text-sm font-medium tracking-[0.2em] uppercase">Benin Premium Dating</p>
+                <div className="mt-10 text-center">
+                    <h1 className="text-7xl font-black tracking-tighter text-white italic uppercase">Lumi</h1>
+                    <div className="h-2 w-16 bg-[#D4AF37] mx-auto mt-4 rounded-full shadow-lg shadow-[#D4AF37]/50"></div>
+                    <p className="text-[#D4AF37]/80 mt-6 text-[10px] font-black tracking-[0.3em] uppercase italic">L'excellence au Bénin</p>
                 </div>
             </div>
 
             {/* Bottom Section */}
-            <div className="w-full max-w-xs space-y-8 z-10">
+            <div className="w-full max-w-xs space-y-10 z-10">
                 {/* Goal-oriented matching hint */}
-                <div className="flex items-center justify-center gap-2 opacity-60">
-                    <span className="material-symbols-outlined text-white text-xs">favorite</span>
-                    <p className="text-white text-[11px] tracking-wide">Connecting hearts in Cotonou & beyond</p>
+                <div className="flex items-center justify-center gap-3 opacity-50">
+                    <span className="material-symbols-outlined text-[#D4AF37] text-sm">favorite</span>
+                    <p className="text-white text-[10px] font-black uppercase tracking-widest italic">Connecter les cœurs au Bénin</p>
                 </div>
 
                 {/* Loading Indicator */}
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-4">
                     <div className="flex justify-center">
-                        <p className="text-white/40 text-[10px] uppercase tracking-widest font-medium">
-                            {progress < 100 ? 'Setting the stage...' : 'Ready to shine'}
+                        <p className="text-gray-500 text-[9px] font-black uppercase tracking-[0.2em] italic">
+                            {progress < 100 ? 'Préparation de votre univers...' : 'Prêt à briller'}
                         </p>
                     </div>
                     <div className="rounded-full bg-white/5 h-1.5 overflow-hidden border border-white/5">
                         <div
-                            className="h-full rounded-full bg-[#E1AD01] transition-all duration-300 ease-linear shadow-[0_0_15px_rgba(225,173,1,0.5)]"
+                            className="h-full rounded-full bg-[#D4AF37] transition-all duration-300 ease-linear shadow-lg shadow-[#D4AF37]/50"
                             style={{ width: `${progress}%` }}
                         ></div>
                     </div>

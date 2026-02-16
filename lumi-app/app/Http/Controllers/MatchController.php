@@ -49,6 +49,23 @@ class MatchController extends Controller
                 
                 broadcast(new \App\Events\MatchNotification($match, $targetUser))->toOthers();
                 broadcast(new \App\Events\MatchNotification($reciprocal, $currentUser))->toOthers();
+
+                // Store persistent notifications
+                $targetUser->notify(new \App\Notifications\AppNotification(
+                    'match',
+                    'Nouveau Match !',
+                    "Vous avez matché avec {$currentUser->name}.",
+                    'favorite',
+                    '#D4AF37'
+                ));
+
+                $currentUser->notify(new \App\Notifications\AppNotification(
+                    'match',
+                    'Nouveau Match !',
+                    "Vous avez matché avec {$targetUser->name}.",
+                    'favorite',
+                    '#D4AF37'
+                ));
             }
         }
 
@@ -66,9 +83,10 @@ class MatchController extends Controller
         $me = Auth::user();
 
         // Likes reçus (ceux qui m'ont liké mais pas encore de match mutuel)
-        $receivedLikes = MatchModel::where('target_id', $me->id)
+        $receivedLikes = Inertia::defer(fn() => MatchModel::where('target_id', $me->id)
             ->where('status', 'liked')
             ->where('is_mutual', false)
+            ->whereHas('user') // Sécurité: seulement si le user existe
             ->with(['user.intention'])
             ->get()
             ->map(function($match) {
@@ -77,11 +95,12 @@ class MatchController extends Controller
                     'user' => $match->user,
                     'created_at' => $match->created_at,
                 ];
-            });
+            }));
 
         // Likes envoyés
-        $sentLikes = MatchModel::where('user_id', $me->id)
+        $sentLikes = Inertia::defer(fn() => MatchModel::where('user_id', $me->id)
             ->where('status', 'liked')
+            ->whereHas('target') // Sécurité
             ->with(['target.intention'])
             ->get()
             ->map(function($match) {
@@ -90,7 +109,7 @@ class MatchController extends Controller
                     'user' => $match->target,
                     'created_at' => $match->created_at,
                 ];
-            });
+            }));
 
         return Inertia::render('Likes', [
             'receivedLikes' => $receivedLikes,

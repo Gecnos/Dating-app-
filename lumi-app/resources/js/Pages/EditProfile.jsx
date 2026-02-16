@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
-import NavigationBar from '@/Components/NavigationBar';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
@@ -19,7 +18,22 @@ export default function EditProfile({ user }) {
         city: user.city || '',
         interests: user.interests || [],
         languages: user.languages || [],
+        avatar_data: null,
     });
+
+    const [previewUrl, setPreviewUrl] = useState(user.avatar);
+
+    const handlePhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setData('avatar_data', reader.result);
+                setPreviewUrl(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     useEffect(() => {
         axios.get('/api/interests').then(res => {
@@ -49,181 +63,114 @@ export default function EditProfile({ user }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#101322] text-white font-sans pb-32 overflow-x-hidden">
-            <Head title="Modifier mon profil" />
+        <div className="min-h-screen bg-[#F9F9FB] dark:bg-[#101322] text-[#111218] dark:text-white font-sans pb-32 overflow-x-hidden">
+            <Head title={`Modifier le profil - ${data.name}`} />
 
-            <header className="sticky top-0 z-50 bg-[#101322]/90 backdrop-blur-xl px-6 py-4 border-b border-white/5 flex items-center justify-between">
-                <Link href={route('profile', 'me')} className="size-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10">
-                    <span className="material-symbols-outlined text-gray-400">arrow_back</span>
+            <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#101322]/80 backdrop-blur-xl px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
+                <Link href={route('profile', 'me')} className="w-10 h-10 flex items-center justify-start">
+                    <span className="material-symbols-outlined text-gray-800 dark:text-white">arrow_back_ios</span>
                 </Link>
-                <h1 className="text-xl font-black italic tracking-tighter">Édition Profil</h1>
+                <h1 className="text-lg font-bold">Modifier le profil</h1>
                 <button
                     onClick={submit}
                     disabled={processing}
-                    className="px-6 py-2 rounded-full bg-[#D4AF37] text-[#101322] text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
+                    className="bg-[#D4AF37] text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-sm shadow-[#D4AF37]/20 active:scale-95 transition-transform disabled:opacity-50"
                 >
-                    {processing ? 'Envoi...' : 'Enregistrer'}
+                    {processing ? '...' : 'Enregistrer'}
                 </button>
             </header>
 
-            <main className="max-w-md mx-auto p-6 space-y-10">
-                {/* Photo Section */}
-                <section className="space-y-4">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Photos de profil (Max 6)</h3>
-                    <div className="grid grid-cols-3 gap-3">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                            <div key={i} className="aspect-[3/4] rounded-2xl bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center relative overflow-hidden group">
-                                {user.photos?.[i] ? (
-                                    <img src={user.photos[i].url} className="w-full h-full object-cover" />
-                                ) : (
-                                    <span className="material-symbols-outlined text-white/20 group-hover:text-[#D4AF37] transition-colors">add_a_photo</span>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </section>
+            <main className="max-w-lg mx-auto pb-12">
+                {/* Photo Section - Hero Style */}
+                <div className="relative w-full h-80 bg-gray-200 dark:bg-gray-800">
+                    <div
+                        className="w-full h-full bg-cover bg-center"
+                        style={{ backgroundImage: `url(${previewUrl || 'https://via.placeholder.com/600'})` }}
+                    />
+                    <div className="absolute inset-0 bg-black/10" />
+                    <label className="absolute bottom-6 right-6 w-12 h-12 bg-white dark:bg-[#1a1f35] rounded-full flex items-center justify-center shadow-xl border-4 border-white/20 text-[#D4AF37] cursor-pointer active:scale-95 transition-transform">
+                        <span className="material-symbols-outlined">add_a_photo</span>
+                        <input type="file" className="hidden" accept="image/*" onChange={handlePhotoChange} />
+                    </label>
+                </div>
 
-                <form onSubmit={submit} className="space-y-8">
-                    {/* Basic Info */}
+                <div className="px-6 -mt-4 relative z-10">
                     <div className="space-y-6">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Nom d'affichage</label>
-                            <input
-                                type="text"
-                                value={data.name}
-                                onChange={e => setData('name', e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-[#D4AF37] focus:border-[#D4AF37] transition-all outline-none"
-                                placeholder="Votre nom"
-                            />
-                            {errors.name && <p className="text-red-500 text-[10px] font-bold uppercase">{errors.name}</p>}
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Bio / Ma Philosophie</label>
+                        {/* Bio Section */}
+                        <div className="bg-white dark:bg-[#161b2e] p-5 rounded-2xl shadow-sm border border-gray-50 dark:border-gray-800">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">À propos de moi</label>
                             <textarea
                                 value={data.bio}
                                 onChange={e => setData('bio', e.target.value)}
-                                rows="4"
-                                className={`w-full bg-white/5 border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-[#D4AF37] focus:border-[#D4AF37] transition-all resize-none outline-none ${errors.bio ? 'border-red-500' : 'border-white/10'}`}
-                                placeholder="Dites-en un peu plus sur vous..."
+                                className="w-full border-none p-0 focus:ring-0 text-gray-800 dark:text-gray-100 bg-transparent resize-none min-h-[100px] text-sm leading-relaxed italic"
+                                placeholder="Dites-en plus sur vous..."
                             />
-                            {errors.bio && <p className="text-red-500 text-[10px] font-bold uppercase">{errors.bio}</p>}
-                        </div>
-                    </div>
-
-                    {/* Secondary attributes */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Métier</label>
-                            <input
-                                type="text"
-                                value={data.job}
-                                onChange={e => setData('job', e.target.value)}
-                                className={`w-full bg-white/5 border rounded-2xl px-5 py-4 text-sm font-bold outline-none ${errors.job ? 'border-red-500' : 'border-white/10'}`}
-                                placeholder="Ex: Designer"
-                            />
-                            {errors.job && <p className="text-red-500 text-[10px] font-bold uppercase">{errors.job}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Taille (cm)</label>
-                            <input
-                                type="number"
-                                value={data.height}
-                                onChange={e => setData('height', e.target.value)}
-                                className={`w-full bg-white/5 border rounded-2xl px-5 py-4 text-sm font-bold outline-none ${errors.height ? 'border-red-500' : 'border-white/10'}`}
-                                placeholder="Ex: 175"
-                            />
-                            {errors.height && <p className="text-red-500 text-[10px] font-bold uppercase">{errors.height}</p>}
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Études / Établissement</label>
-                        <input
-                            type="text"
-                            value={data.education}
-                            onChange={e => setData('education', e.target.value)}
-                            className={`w-full bg-white/5 border rounded-2xl px-5 py-4 text-sm font-bold outline-none ${errors.education ? 'border-red-500' : 'border-white/10'}`}
-                            placeholder="Ex: Master en Droit"
-                        />
-                        {errors.education && <p className="text-red-500 text-[10px] font-bold uppercase">{errors.education}</p>}
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Ville actuelle</label>
-                        <input
-                            type="text"
-                            value={data.city}
-                            onChange={e => setData('city', e.target.value)}
-                            className={`w-full bg-white/5 border rounded-2xl px-5 py-4 text-sm font-bold outline-none ${errors.city ? 'border-red-500' : 'border-white/10'}`}
-                            placeholder="Ex: Cotonou, Haie Vive"
-                        />
-                        {errors.city && <p className="text-red-500 text-[10px] font-bold uppercase">{errors.city}</p>}
-                    </div>
-
-                    {/* Interests Section */}
-                    <div className="space-y-6 pt-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Centres d'intérêt</h3>
-                            <span className="text-[9px] font-bold text-[#D4AF37]">{data.interests.length}/5</span>
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
-                            <AnimatePresence>
+                        {/* Profession & Education */}
+                        <div className="bg-white dark:bg-[#161b2e] p-5 rounded-2xl shadow-sm border border-gray-50 dark:border-gray-800 space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Profession / Job</label>
+                                <input
+                                    className="w-full border-none p-0 focus:ring-0 text-gray-800 dark:text-gray-100 bg-transparent text-sm font-bold"
+                                    type="text"
+                                    value={data.job}
+                                    onChange={e => setData('job', e.target.value)}
+                                />
+                            </div>
+                            <div className="h-px bg-gray-100 dark:bg-gray-800"></div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Éducation</label>
+                                <input
+                                    className="w-full border-none p-0 focus:ring-0 text-gray-800 dark:text-gray-100 bg-transparent text-sm font-bold"
+                                    type="text"
+                                    value={data.education}
+                                    onChange={e => setData('education', e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Interests Grid */}
+                        <div className="bg-white dark:bg-[#161b2e] p-5 rounded-2xl shadow-sm border border-gray-50 dark:border-gray-800">
+                            <div className="flex justify-between items-center mb-4">
+                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400">Centres d'intérêt ({data.interests.length}/5)</label>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
                                 {availableInterests.map((interest) => (
-                                    <motion.button
+                                    <button
                                         key={interest.id}
                                         type="button"
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        className={`px-4 py-2.5 rounded-2xl text-[10px] font-bold uppercase tracking-wider border transition-all ${data.interests.includes(interest.label) ? 'bg-[#D4AF37] text-[#101322] border-[#D4AF37] shadow-lg shadow-[#D4AF37]/20 scale-[1.05]' : 'bg-white/5 text-gray-500 border-white/5 hover:border-white/20'}`}
                                         onClick={() => {
                                             const newInterests = data.interests.includes(interest.label)
                                                 ? data.interests.filter(i => i !== interest.label)
                                                 : data.interests.length < 5 ? [...data.interests, interest.label] : data.interests;
                                             setData('interests', newInterests);
                                         }}
+                                        className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${data.interests.includes(interest.label)
+                                            ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/30'
+                                            : 'bg-gray-50 dark:bg-gray-800 text-gray-400 border-transparent'
+                                            }`}
                                     >
                                         {interest.label}
-                                    </motion.button>
+                                    </button>
                                 ))}
-                            </AnimatePresence>
+                            </div>
                         </div>
 
-                        {/* Suggest Interest */}
-                        <div className="bg-white/5 p-5 rounded-3xl border border-white/5 space-y-4">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Un intérêt manque ? Suggérez-le !</p>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={suggestion}
-                                    onChange={e => setSuggestion(e.target.value)}
-                                    placeholder="Ex: Pétanque, Yoga..."
-                                    className="flex-1 bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-xs focus:ring-1 focus:ring-[#D4AF37] outline-none"
-                                />
-                                <button
-                                    onClick={handleSuggest}
-                                    disabled={suggesting || !suggestion}
-                                    className="bg-[#D4AF37] text-[#101322] px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50"
-                                >
-                                    {suggesting ? '...' : 'OK'}
-                                </button>
+                        {/* Verified Badge Status */}
+                        <div className="p-4 bg-[#D4AF37]/5 border border-[#D4AF37]/10 rounded-2xl flex items-center gap-4">
+                            <div className="w-10 h-10 bg-[#D4AF37]/10 rounded-full flex items-center justify-center">
+                                <span className="material-symbols-outlined text-[#D4AF37]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                             </div>
-                            {suggestionSuccess && (
-                                <motion.p
-                                    initial={{ opacity: 0, y: 5 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="text-green-400 text-[9px] font-black uppercase"
-                                >
-                                    {suggestionSuccess}
-                                </motion.p>
-                            )}
+                            <div>
+                                <h4 className="font-bold text-[#D4AF37] text-sm">Profil Vérifié</h4>
+                                <p className="text-xs text-[#D4AF37]/70">Votre badge premium est visible par tous.</p>
+                            </div>
                         </div>
                     </div>
-                </form>
+                </div>
             </main>
 
-            <NavigationBar />
         </div>
     );
 }

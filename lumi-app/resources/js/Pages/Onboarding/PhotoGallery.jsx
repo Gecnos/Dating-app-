@@ -42,27 +42,30 @@ export default function PhotoGallery() {
                 }}>
             </div>
 
-            <div className="w-full pt-4 pb-8 flex items-center justify-between z-10">
-                <button onClick={() => window.history.back()} className="text-white/60 hover:text-[#E1AD01] transition-colors">
-                    <span className="material-symbols-outlined">arrow_back_ios</span>
+            {/* Header / Progress bar */}
+            <div className="w-full pt-6 pb-10 flex items-center justify-between z-10">
+                <button onClick={() => window.history.back()} className="size-10 flex items-center justify-center rounded-xl bg-[#161b2e] border border-white/10 active:scale-90 transition-all">
+                    <span className="material-symbols-outlined text-gray-400 text-sm">arrow_back_ios</span>
                 </button>
-                <div className="flex-1 mx-8 h-1 bg-white/10 rounded-full overflow-hidden">
-                    <div className="w-4/5 h-full bg-[#E1AD01] rounded-full shadow-[0_0_10px_rgba(225,173,1,0.5)]"></div>
+                <div className="flex-1 mx-8 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                    <div className="w-4/5 h-full bg-[#D4AF37] rounded-full shadow-lg shadow-[#D4AF37]/30"></div>
                 </div>
-                <span className="text-xs font-bold text-[#E1AD01] tracking-widest leading-none">04/05</span>
+                <span className="text-[10px] font-black text-[#D4AF37] tracking-[0.2em] leading-none uppercase italic">04/05</span>
             </div>
 
-            <div className="flex-1 flex flex-col space-y-6 z-10">
-                <div className="space-y-2">
-                    <h1 className="text-3xl font-black tracking-tight text-white leading-tight">Ajoute tes plus belles photos</h1>
-                    <p className="text-white/60 text-sm font-medium leading-relaxed">Les profils avec au moins 3 photos reçoivent 5x plus de matchs. Lumi vérifie chaque photo pour ta sécurité.</p>
+            <div className="flex-1 flex flex-col space-y-8 z-10">
+                <div className="space-y-4">
+                    <h1 className="text-4xl font-black tracking-tighter text-white leading-none italic uppercase">
+                        Ajoute tes plus <br /> belles photos
+                    </h1>
+                    <p className="text-gray-500 text-sm font-medium leading-relaxed italic">Les profils avec au moins 3 photos reçoivent <br /> 5x plus d'attention exclusive.</p>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 pt-4">
+                <div className="grid grid-cols-3 gap-4 pt-4">
                     {data.photos.map((img, idx) => (
                         <label
                             key={idx}
-                            className={`aspect-[3/4] rounded-2xl border-2 border-dashed flex items-center justify-center relative overflow-hidden transition-all ${img ? 'border-transparent shadow-xl' : 'border-white/10 bg-white/5 hover:border-[#E1AD01]/50'
+                            className={`aspect-[3/4] rounded-3xl border-2 border-dashed flex items-center justify-center relative overflow-hidden transition-all ${img ? 'border-transparent shadow-2xl' : 'border-white/5 bg-[#161b2e] hover:border-[#D4AF37]/30'
                                 } ${errors[`photos.${idx}`] ? 'border-red-500' : ''}`}
                         >
                             {img ? (
@@ -75,14 +78,14 @@ export default function PhotoGallery() {
                                             n[idx] = null;
                                             setData('photos', n);
                                         }}
-                                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-lg z-20"
+                                        className="absolute top-3 right-3 bg-[#101322]/80 backdrop-blur-md text-white rounded-full size-7 flex items-center justify-center shadow-lg z-20 hover:bg-red-500 transition-colors"
                                     >
-                                        <span className="material-symbols-outlined text-xs">close</span>
+                                        <span className="material-symbols-outlined text-sm font-black">close</span>
                                     </button>
                                 </>
                             ) : (
-                                <div className="text-white/20 flex flex-col items-center">
-                                    <span className="material-symbols-outlined text-3xl">add_a_photo</span>
+                                <div className="text-gray-700 flex flex-col items-center">
+                                    <span className="material-symbols-outlined text-4xl">add_a_photo</span>
                                 </div>
                             )}
                             <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageChange(idx, e)} />
@@ -91,30 +94,30 @@ export default function PhotoGallery() {
                 </div>
 
                 {errors.photos && (
-                    <p className="text-red-500 text-xs font-bold text-center">{errors.photos}</p>
+                    <p className="text-red-500 text-[10px] font-black uppercase text-center italic tracking-widest">{errors.photos}</p>
                 )}
 
-                <div className="bg-[#E1AD01]/10 p-4 rounded-2xl flex items-start space-x-3 mt-4 border border-[#E1AD01]/20">
-                    <div className="text-[#E1AD01] mt-1">
+                <div className="bg-[#D4AF37]/5 p-5 rounded-[2rem] flex items-start space-x-4 mt-auto border border-[#D4AF37]/10">
+                    <div className="text-[#D4AF37] mt-1">
                         <span className="material-symbols-outlined text-xl">blur_on</span>
                     </div>
-                    <p className="text-[10px] text-white/60 leading-tight">
-                        <strong>Mode Flou :</strong> Vos photos seront floues pour les autres membres jusqu'à ce qu'un match mutuel soit confirmé, préservant ainsi votre vie privée au Bénin.
+                    <p className="text-[9px] text-gray-400 leading-relaxed font-black uppercase tracking-wider italic">
+                        <strong>Protection Exclusive :</strong> Vos photos seront floues pour les autres membres <br /> jusqu'à ce qu'un match mutuel soit confirmé.
                     </p>
                 </div>
 
-                <div className="mt-auto pb-8">
+                <div className="pb-10">
                     <button
                         onClick={handleSubmit}
                         disabled={processing || data.photos.filter(img => img !== null).length === 0}
-                        className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-2xl transition-all active:scale-95 ${processing || data.photos.filter(img => img !== null).length === 0
+                        className={`w-full py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl transition-all active:scale-95 ${processing || data.photos.filter(img => img !== null).length === 0
                             ? 'bg-white/5 text-white/20 cursor-not-allowed border border-white/5'
-                            : 'bg-white text-[#101322] hover:bg-[#E1AD01]'
+                            : 'bg-[#D4AF37] text-[#101322] border border-[#D4AF37] hover:brightness-110 shadow-[#D4AF37]/20 uppercase italic font-black'
                             }`}
                     >
                         {processing ? (
-                            <div className="flex items-center justify-center space-x-2">
-                                <div className="w-4 h-4 border-2 border-[#101322] border-t-transparent rounded-full animate-spin"></div>
+                            <div className="flex items-center justify-center space-x-3">
+                                <div className="size-4 border-2 border-[#101322]/30 border-t-[#101322] rounded-full animate-spin"></div>
                                 <span>Envoi en cours...</span>
                             </div>
                         ) : 'Terminer mon profil'}

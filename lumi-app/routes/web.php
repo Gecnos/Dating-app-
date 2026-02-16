@@ -8,6 +8,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MatchController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\BlockController;
+use App\Http\Controllers\NotificationController;
 
 use Inertia\Inertia;
 
@@ -47,7 +50,7 @@ Route::get('/onboarding/photos', function () {
 
 Route::get('/discovery', [UserController::class, 'discovery'])->name('discovery');
 
-Route::get('/profile/{id}', [UserController::class, 'show'])->name('profile');
+Route::get('/profile/{id}', [UserController::class, 'show'])->name('profile')->where('id', '[0-9]+|me');
 
 Route::post('/api/swipe', [MatchController::class, 'swipe'])->name('swipe');
 
@@ -64,8 +67,34 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifications', function () {
         return Inertia::render('Notifications');
     })->name('notifications');
+
+    Route::get('/settings', function () {
+        return Inertia::render('Settings');
+    })->name('settings');
+
+    Route::get('/settings/blocked', function () {
+        return Inertia::render('BlockedUsers');
+    })->name('settings.blocked');
+
+    Route::get('/settings/reports', function () {
+        return Inertia::render('ReportedUsers');
+    })->name('settings.reports');
+
     Route::get('/profile/edit', [UserController::class, 'edit'])->name('profile.edit');
     Route::post('/profile/update', [UserController::class, 'update'])->name('profile.update');
+    Route::delete('/profile/destroy', [UserController::class, 'destroy'])->name('user.destroy');
+
+    Route::get('/help', function () {
+        return Inertia::render('Help');
+    })->name('help');
+
+    Route::get('/legal/terms', function () {
+        return Inertia::render('Legal/Terms');
+    })->name('legal.terms');
+
+    Route::get('/legal/privacy', function () {
+        return Inertia::render('Legal/Privacy');
+    })->name('legal.privacy');
     
     Route::get('/match-success/{user2}', function ($user2) {
         return Inertia::render('MatchSuccess', [
@@ -76,16 +105,28 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/my-profile', function () {
         return Inertia::render('Profile', [
-            'user' => Auth::user()
+            'user' => Auth::user()->load('photos')
         ]);
     })->name('my.profile');
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
     Route::post('/api/user/location', [UserController::class, 'updateLocation'])->name('user.location');
+    Route::post('/api/user/ghost-mode', [UserController::class, 'toggleGhostMode'])->name('user.ghost-mode');
+
+    // Signalements et Blocages
+    Route::get('/api/reports', [ReportController::class, 'index']);
+    Route::post('/api/reports', [ReportController::class, 'store']);
+    Route::get('/api/blocks', [BlockController::class, 'index']);
+    Route::post('/api/blocks', [BlockController::class, 'store']);
+    Route::delete('/api/blocks/{user}', [BlockController::class, 'destroy']);
 
     Route::get('/api/messages/{user_id}', [ChatController::class, 'index']);
     Route::post('/api/messages', [ChatController::class, 'store']);
+
+    Route::get('/api/notifications', [NotificationController::class, 'index']);
+    Route::post('/api/notifications/read', [NotificationController::class, 'markAsRead']);
+    Route::delete('/api/notifications/{id}', [NotificationController::class, 'destroy']);
 });
 
 Route::prefix('admin')->middleware(['auth'])->group(function () {

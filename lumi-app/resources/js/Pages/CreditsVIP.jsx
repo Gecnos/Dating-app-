@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head } from '@inertiajs/react';
-import NavigationBar from '@/Components/NavigationBar';
 
 export default function CreditsVIP() {
     const plans = [
@@ -10,40 +9,50 @@ export default function CreditsVIP() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#F8F9FB] flex flex-col font-sans mb-24">
-            <Head title="Lumi VIP & Crédits" />
+        <div className="min-h-screen bg-[#101322] flex flex-col font-sans mb-24 text-white">
+            <Head title="Lumi Premium & Crédits" />
 
             {/* Header */}
-            <div className="bg-[#1e40af] p-8 pb-16 text-white text-center space-y-4 rounded-b-[3rem] shadow-2xl">
-                <h1 className="text-3xl font-black">Lumi VIP</h1>
-                <p className="text-blue-100 text-sm opacity-80">Boostez vos rencontres et soutenez la communauté.</p>
-                <div className="inline-flex bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/20 items-center space-x-3">
-                    <span className="text-2xl">💎</span>
+            <div className="bg-[#161b2e] p-8 pb-16 text-center space-y-6 rounded-b-[4rem] shadow-2xl border-b border-white/10 relative overflow-hidden">
+                <div className="relative z-10">
+                    <h1 className="text-4xl font-black italic tracking-tighter uppercase italic">Lumi Premium</h1>
+                    <p className="text-gray-400 text-[11px] font-black uppercase tracking-widest mt-2">Boostez vos rencontres avec style.</p>
+                </div>
+
+                <div className="relative z-10 inline-flex bg-[#1a1f35] px-8 py-5 rounded-[2rem] border border-[#D4AF37]/30 items-center space-x-5 shadow-2xl">
+                    <div className="size-12 bg-[#D4AF37] rounded-full flex items-center justify-center shadow-lg shadow-[#D4AF37]/20">
+                        <span className="material-symbols-outlined text-[#101322] text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>diamond</span>
+                    </div>
                     <div className="text-left">
-                        <span className="block text-[10px] uppercase font-black text-blue-200">Solde actuel</span>
-                        <span className="text-xl font-black">0 Crédits</span>
+                        <span className="block text-[9px] uppercase font-black text-[#D4AF37] tracking-widest mb-1">Votre Solde</span>
+                        <span className="text-2xl font-black italic">0 Crédits</span>
                     </div>
                 </div>
+
+                {/* Decorative crown */}
+                <span className="material-symbols-outlined absolute -top-8 -right-8 text-[12rem] text-white/5 rotate-12 pointer-events-none">crown</span>
             </div>
 
-            <div className="flex-1 -mt-8 px-6 space-y-6">
+            <div className="flex-1 -mt-10 px-6 space-y-10 relative z-20">
                 {/* VIP Features */}
-                <div className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 space-y-4">
-                    <h2 className="text-lg font-black text-gray-800 flex items-center space-x-2">
-                        <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"></path></svg>
-                        <span>Avantages VIP</span>
+                <div className="bg-[#1a1f35] rounded-[2.5rem] p-8 shadow-2xl border border-white/10 space-y-6">
+                    <h2 className="text-xs font-black text-[#D4AF37] uppercase tracking-[0.2em] flex items-center space-x-3">
+                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>stars</span>
+                        <span>Privilèges Exclusifs</span>
                     </h2>
-                    <ul className="grid grid-cols-2 gap-3">
+                    <ul className="grid grid-cols-2 gap-4">
                         {[
                             'Swipes Illimités',
                             'Boost de Visibilité',
                             'Mode Invisible',
-                            'Zéro Publicité',
-                            'Replay illimité',
-                            'Priorité messages'
+                            'Sans Publicité',
+                            'Replay Illimité',
+                            'Priorité Messages'
                         ].map((feat, i) => (
-                            <li key={i} className="flex items-center space-x-2 text-xs text-gray-600 font-medium">
-                                <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
+                            <li key={i} className="flex items-center space-x-3 text-[11px] text-gray-300 font-black uppercase tracking-tighter italic">
+                                <div className="size-5 rounded-full bg-[#D4AF37]/20 flex items-center justify-center shrink-0">
+                                    <span className="material-symbols-outlined text-[12px] text-[#D4AF37]">done</span>
+                                </div>
                                 <span>{feat}</span>
                             </li>
                         ))}
@@ -51,45 +60,52 @@ export default function CreditsVIP() {
                 </div>
 
                 {/* Credit Packages */}
-                <div className="space-y-4">
-                    <h2 className="text-lg font-black text-gray-800 ml-2">Acheter des crédits</h2>
-                    <div className="space-y-3">
+                <div className="space-y-6">
+                    <h2 className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] ml-2 italic">Forfaits de Crédits</h2>
+                    <div className="space-y-4">
                         {plans.map((plan, i) => (
                             <div
                                 key={i}
-                                className={`p-6 rounded-3xl border-2 transition-all cursor-pointer relative ${plan.featured
-                                    ? 'bg-blue-600 border-blue-600 text-white shadow-2xl shadow-blue-200 scale-[1.02]'
-                                    : 'bg-white border-gray-100 text-gray-900 border-opacity-100'
+                                className={`p-8 rounded-[2.5rem] border-2 transition-all cursor-pointer relative group ${plan.featured
+                                    ? 'bg-[#D4AF37] border-[#D4AF37] text-[#101322] shadow-2xl shadow-[#D4AF37]/20 scale-[1.02]'
+                                    : 'bg-[#161b2e] border-white/5 text-white hover:border-white/10'
                                     }`}
                             >
                                 {plan.featured && (
-                                    <span className="absolute -top-3 right-8 bg-[#D4AF37] text-black text-[10px] font-black px-3 py-1 rounded-full uppercase">Le plus populaire</span>
+                                    <div className="absolute -top-3.5 right-10 bg-[#101322] text-[#D4AF37] text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-[#D4AF37]/30">
+                                        Recommandé
+                                    </div>
                                 )}
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <h3 className="text-xl font-black">{plan.credits}</h3>
-                                        <p className={`text-xs ${plan.featured ? 'text-blue-100' : 'text-gray-400 font-medium'}`}>{plan.badge}</p>
+                                        <h3 className="text-2xl font-black italic tracking-tight">{plan.credits}</h3>
+                                        <p className={`text-[10px] uppercase font-black tracking-widest mt-1 ${plan.featured ? 'opacity-60' : 'text-[#D4AF37]'}`}>{plan.badge}</p>
                                     </div>
                                     <div className="text-right">
-                                        <span className={`text-2xl font-black ${plan.featured ? 'text-white' : 'text-blue-600'}`}>{plan.price}</span>
-                                        <span className={`block text-[10px] ${plan.featured ? 'text-blue-200' : 'text-gray-400'}`}>Paiement KKiaPay</span>
+                                        <span className="text-2xl font-black italic block mb-1">{plan.price}</span>
+                                        <div className={`flex items-center justify-end gap-1.5 ${plan.featured ? 'opacity-80' : 'text-gray-500'}`}>
+                                            <span className="material-symbols-outlined text-sm">payments</span>
+                                            <span className="text-[9px] font-black uppercase tracking-tighter">KKiaPay</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
+
+                {/* KKiaPay Bottom Button */}
+                <div className="pb-12">
+                    <button className="w-full bg-[#D4AF37] text-[#101322] h-18 py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[#D4AF37]/20 flex items-center justify-center space-x-4 active:scale-95 transition-all">
+                        <span>Payer sécurisé</span>
+                        <span className="material-symbols-outlined">shield_check</span>
+                    </button>
+                    <p className="text-center mt-4 text-[9px] text-gray-600 font-black uppercase tracking-widest px-8">
+                        Paiement sécurisé via KKiaPay. Vos données sont protégées.
+                    </p>
+                </div>
             </div>
 
-            {/* KKiaPay Bottom Button Placeholder */}
-            <div className="px-6 mt-8">
-                <button className="w-full bg-[#1e40af] text-white h-16 rounded-2xl font-black text-lg shadow-xl shadow-blue-100 flex items-center justify-center space-x-3 active:scale-95 transition-transform">
-                    <span>Payer avec KKiaPay</span>
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                </button>
-            </div>
-
-            <NavigationBar />
         </div>
     );
 }

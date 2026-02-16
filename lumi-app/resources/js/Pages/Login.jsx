@@ -40,61 +40,48 @@ export default function Login() {
             )}
 
             {/* Top Navigation Bar */}
-            <div className="flex items-center bg-transparent p-4 justify-between z-10">
+            <div className="flex items-center bg-transparent p-6 justify-between z-10">
                 <button
                     onClick={() => showEmailForm ? setShowEmailForm(false) : window.history.back()}
-                    className="flex items-center justify-center h-10 w-10 rounded-full bg-white/10 shadow-sm backdrop-blur-sm hover:bg-white/20 transition-all"
+                    className="flex items-center justify-center size-12 rounded-2xl bg-[#161b2e] border border-white/10 shadow-xl active:scale-90 transition-all"
                 >
-                    <span className="material-symbols-outlined text-white">
+                    <span className="material-symbols-outlined text-gray-400">
                         {showEmailForm ? 'arrow_back' : 'close'}
                     </span>
                 </button>
-                <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">
+                <h2 className="text-white text-lg font-black italic tracking-tighter uppercase flex-1 text-center pr-12">
                     {showEmailForm ? 'Par Email' : 'Connexion'}
                 </h2>
             </div>
 
             {/* Hero Section */}
             {!showEmailForm && (
-                <div className="flex w-full flex-col px-6 pt-8 z-10">
-                    <div className="w-full aspect-[4/3] rounded-[2rem] overflow-hidden mb-8 relative border border-white/5 shadow-2xl">
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#0f2cbd]/20 to-[#0f2cbd]/40 flex items-center justify-center">
-                            <div className="w-48 h-48 bg-white/10 rounded-full blur-3xl absolute -top-10 -left-10 animate-pulse"></div>
-                            <div className="w-32 h-32 bg-[#0f2cbd]/30 rounded-full blur-2xl absolute -bottom-5 -right-5"></div>
-
+                <div className="flex w-full flex-col px-6 pt-6 z-10">
+                    <div className="w-full aspect-[4/3] rounded-[3rem] overflow-hidden mb-10 relative border border-white/10 shadow-2xl bg-[#161b2e]">
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#0f2cbd]/20 to-[#101322] flex items-center justify-center">
                             {/* Visual representation of "Premium Benin" */}
-                            <div className="flex flex-col items-center gap-4 z-10">
+                            <div className="flex flex-col items-center gap-6 z-10">
                                 <div className="relative">
-                                    <span className="material-symbols-outlined text-[#E1AD01] text-7xl opacity-90 drop-shadow-[0_0_20px_rgba(225,173,1,0.5)]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                    <div className="size-32 bg-[#D4AF37]/10 rounded-full absolute inset-[-1rem] blur-2xl animate-pulse"></div>
+                                    <span className="material-symbols-outlined text-[#D4AF37] text-8xl relative z-10 opacity-90" style={{ fontVariationSettings: "'FILL' 1" }}>
                                         verified_user
                                     </span>
-                                    <div className="absolute -inset-2 border-2 border-[#E1AD01]/20 rounded-full scale-110"></div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <span className="h-2 w-8 rounded-full bg-[#0f2cbd]"></span>
-                                    <span className="h-2 w-2 rounded-full bg-[#0f2cbd]/40"></span>
-                                    <span className="h-2 w-2 rounded-full bg-[#0f2cbd]/40"></span>
+                                <div className="flex gap-3">
+                                    <span className="h-2 w-10 rounded-full bg-[#D4AF37]"></span>
+                                    <span className="h-2 w-2 rounded-full bg-[#D4AF37]/30"></span>
+                                    <span className="h-2 w-2 rounded-full bg-[#D4AF37]/30"></span>
                                 </div>
                             </div>
                         </div>
-                        {/* Geometric Pattern Overlay */}
-                        <div className="absolute inset-0 bg-center bg-no-repeat bg-cover mix-blend-overlay opacity-10 pointer-events-none"
-                            style={{
-                                backgroundImage: `
-                                    linear-gradient(30deg, #0f2cbd 12%, transparent 12.5%, transparent 87%, #0f2cbd 87.5%, #0f2cbd),
-                                    linear-gradient(150deg, #0f2cbd 12%, transparent 12.5%, transparent 87%, #0f2cbd 87.5%, #0f2cbd)
-                                `,
-                                backgroundSize: '40px 70px'
-                            }}>
-                        </div>
                     </div>
 
-                    <div className="text-center space-y-3">
-                        <h1 className="text-white tracking-tight text-3xl md:text-4xl font-black leading-tight">
-                            Rencontrez autrement au Bénin
+                    <div className="text-center space-y-4">
+                        <h1 className="text-white tracking-tighter text-4xl font-black leading-none italic uppercase">
+                            Rencontrez <br /> autrement
                         </h1>
-                        <p className="text-white/60 text-sm md:text-base font-medium leading-relaxed max-w-xs mx-auto">
-                            La plateforme premium de rencontres sécurisées et orientées vers l'avenir.
+                        <p className="text-gray-500 text-sm font-medium leading-relaxed max-w-xs mx-auto italic">
+                            La première plateforme premium <br /> de rencontres au Bénin.
                         </p>
                     </div>
                 </div>
@@ -102,27 +89,27 @@ export default function Login() {
 
             {/* Email Form Section */}
             {showEmailForm && (
-                <div className="flex-1 px-6 pt-8 z-10 flex flex-col">
-                    <form onSubmit={submit} className="space-y-6">
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-[#E1AD01] uppercase tracking-widest ml-1">Email</label>
+                <div className="flex-1 px-6 pt-10 z-10 flex flex-col">
+                    <form onSubmit={submit} className="space-y-8">
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-[#D4AF37] uppercase tracking-[0.2em] ml-1">Email</label>
                             <input
                                 type="email"
                                 value={data.email}
                                 onChange={e => setData('email', e.target.value)}
-                                className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-5 text-white placeholder:text-white/20 focus:outline-none focus:border-[#E1AD01]/50 transition-all font-medium"
+                                className="w-full h-16 bg-[#161b2e] border border-white/10 rounded-3xl px-6 text-white placeholder:text-gray-700 focus:outline-none focus:border-[#D4AF37]/50 transition-all font-medium italic shadow-inner"
                                 placeholder="votre@email.com"
                                 required
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-[#E1AD01] uppercase tracking-widest ml-1">Mot de passe</label>
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-[#D4AF37] uppercase tracking-[0.2em] ml-1">Mot de passe</label>
                             <input
                                 type="password"
                                 value={data.password}
                                 onChange={e => setData('password', e.target.value)}
-                                className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-5 text-white placeholder:text-white/20 focus:outline-none focus:border-[#E1AD01]/50 transition-all font-medium"
+                                className="w-full h-16 bg-[#161b2e] border border-white/10 rounded-3xl px-6 text-white placeholder:text-gray-700 focus:outline-none focus:border-[#D4AF37]/50 transition-all font-medium italic shadow-inner"
                                 placeholder="••••••••"
                                 required
                             />
@@ -131,24 +118,24 @@ export default function Login() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="flex items-center justify-center gap-3 rounded-full h-15 px-5 bg-[#0f2cbd] text-white text-base font-bold w-full shadow-xl shadow-[#0f2cbd]/20 active:scale-[0.98] transition-all border border-white/5 mt-8"
+                            className="flex items-center justify-center gap-4 rounded-3xl h-18 px-6 bg-[#D4AF37] text-[#101322] text-xs font-black uppercase tracking-[0.2em] w-full shadow-2xl shadow-[#D4AF37]/10 active:scale-[0.98] transition-all border border-white/10 mt-12"
                         >
                             {processing ? (
-                                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <div className="w-6 h-6 border-4 border-[#101322]/30 border-t-[#101322] rounded-full animate-spin"></div>
                             ) : (
                                 <>
-                                    <span className="material-symbols-outlined text-xl">login</span>
                                     <span>Se connecter</span>
+                                    <span className="material-symbols-outlined font-black">login</span>
                                 </>
                             )}
                         </button>
                     </form>
 
-                    <div className="mt-8 text-center">
-                        <p className="text-white/40 text-sm">
-                            Pas encore de compte ?{' '}
-                            <Link href="/register" className="text-[#E1AD01] font-bold hover:underline">
-                                Créer un compte
+                    <div className="mt-10 text-center">
+                        <p className="text-gray-500 text-[11px] font-black uppercase tracking-widest leading-loose">
+                            Pas encore de compte ? <br />
+                            <Link href="/register" className="text-[#D4AF37] hover:underline decoration-2 underline-offset-4">
+                                Rejoindre Lumi Premium
                             </Link>
                         </p>
                     </div>
@@ -157,10 +144,10 @@ export default function Login() {
 
             {/* Button Group Section (Main Menu) */}
             {!showEmailForm && (
-                <div className="mt-auto pb-10 px-6 space-y-4 z-10">
+                <div className="mt-auto pb-12 px-6 space-y-5 z-10">
                     <a
                         href="/auth/google"
-                        className="flex cursor-pointer items-center justify-center gap-3 overflow-hidden rounded-full h-15 px-5 bg-white text-[#111218] text-base font-bold tracking-[0.015em] w-full shadow-lg hover:bg-gray-50 active:scale-[0.98] transition-all"
+                        className="flex cursor-pointer items-center justify-center gap-4 overflow-hidden rounded-[2rem] h-18 px-8 bg-white text-[#101322] text-xs font-black uppercase tracking-[0.2em] w-full shadow-2xl active:scale-[0.98] transition-all"
                     >
                         <img alt="Google" className="w-5 h-5" src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" />
                         <span className="truncate">Continuer avec Google</span>
@@ -168,23 +155,23 @@ export default function Login() {
 
                     <button
                         onClick={() => setShowEmailForm(true)}
-                        className="flex cursor-pointer items-center justify-center gap-3 overflow-hidden rounded-full h-15 px-5 bg-[#0f2cbd] text-white text-base font-bold tracking-[0.015em] w-full shadow-xl shadow-[#0f2cbd]/20 active:scale-[0.98] transition-all border border-white/5"
+                        className="flex cursor-pointer items-center justify-center gap-4 overflow-hidden rounded-[2rem] h-18 px-8 bg-[#161b2e] text-white text-xs font-black uppercase tracking-[0.2em] w-full shadow-xl border border-white/10 active:scale-[0.98] transition-all"
                     >
-                        <span className="material-symbols-outlined text-xl">mail</span>
+                        <span className="material-symbols-outlined text-gray-400">mail</span>
                         <span className="truncate">Continuer avec Email</span>
                     </button>
 
-                    <div className="flex items-center justify-center gap-2 mt-4 text-[#E1AD01] font-bold text-xs uppercase tracking-widest opacity-80">
-                        <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                        <span>Vérifié & Sécurisé</span>
+                    <div className="flex items-center justify-center gap-2 mt-6 text-[#D4AF37] font-black text-[10px] uppercase tracking-[0.2em] opacity-80 italic">
+                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                        <span>Vérifié & Sécurisé au Bénin</span>
                     </div>
 
-                    <div className="px-4 mt-6">
-                        <p className="text-white/40 text-[10px] font-medium leading-relaxed text-center uppercase tracking-wider">
+                    <div className="px-8 mt-8">
+                        <p className="text-gray-600 text-[9px] font-black leading-relaxed text-center uppercase tracking-widest">
                             En continuant, vous acceptez nos
-                            <span className="underline ml-1">Conditions d'utilisation</span>
+                            <span className="underline ml-1 decoration-gray-700">Conditions d'utilisation</span>
                             et notre
-                            <span className="underline ml-1">Politique de confidentialité</span>.
+                            <span className="underline ml-1 decoration-gray-700">Politique de confidentialité</span>.
                         </p>
                     </div>
                 </div>
