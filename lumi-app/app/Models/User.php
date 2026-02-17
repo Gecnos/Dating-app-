@@ -194,11 +194,9 @@ class User extends Authenticatable
             return "https://ui-avatars.com/api/?name=" . urlencode($this->name) . "&color=D4AF37&background=101322";
         }
         
-        if (strpos($this->avatar, 'http') === 0) {
+        if (strpos($this->avatar, 'http') === 0 || strpos($this->avatar, '/') === 0) {
             return $this->avatar;
         }
-
-        return asset('storage/' . $this->avatar);
     }
 
     /**

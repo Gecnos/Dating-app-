@@ -6,7 +6,8 @@ import LocationTracker from './LocationTracker';
 
 import NavigationBar from './NavigationBar';
 export default function AppLayout({ children }) {
-    const { auth, url } = usePage().props;
+    const { auth } = usePage().props;
+    const { url } = usePage();
 
     // Initialize global events listener
     useGlobalNotifications();
@@ -33,16 +34,16 @@ export default function AppLayout({ children }) {
 
     // Définir les routes où la NavigationBar doit apparaître
     const pathname = new URL(url, window.location.origin).pathname;
-    const showNavBar = [
-        '/discovery',
-        '/explorer',
-        '/likes',
-        '/chat',
-        '/my-profile',
-        '/expert',
-        '/settings',
-        '/notifications'
-    ].includes(pathname);
+    const excludedPaths = [
+        '/', '/login', '/register', '/onboarding', '/match-success',
+        '/settings', '/profile/', '/help', '/legal', '/photos/manage'
+    ];
+    // Hide navbar in individual chats (e.g., /chat/5) but show in /chat list
+    const isIndividualChat = pathname.startsWith('/chat/') && pathname !== '/chat';
+    const showNavBar = auth?.user && !isIndividualChat && !excludedPaths.some(path => {
+        if (path === '/') return pathname === '/';
+        return pathname.startsWith(path);
+    });
 
     return (
         <>

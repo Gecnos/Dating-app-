@@ -11,7 +11,6 @@ class CloudinaryService
      */
     public function uploadImage($imagePath, $applyBlur = false)
     {
-        // Si Cloudinary n'est pas configuré (valeur par défaut dans le .env), on passe en local
         if (!$this->isCloudinaryConfigured()) {
             return $this->uploadLocal($imagePath);
         }
@@ -60,23 +59,34 @@ class CloudinaryService
      */
     protected function uploadLocal($data)
     {
-        $dir = public_path('uploads/profiles');
+        $dir = public_path('uploads/media');
         if (!file_exists($dir)) {
             mkdir($dir, 0755, true);
         }
 
-        // Si c'est du base64
-        if (strpos($data, 'data:image') === 0) {
-            $format = explode('/', explode(':', substr($data, 0, strpos($data, ';')))[1])[1];
-            $filename = uniqid() . '.' . $format;
-            $data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data));
-            file_put_contents($dir . '/' . $filename, $data);
-            return asset('uploads/profiles/' . $filename);
-        }
+        // Si c'est du base64 (Data URI)
+        if (strpos($data, 'data:') === 0) {
+            // Extraction du format et de l'extension
+            preg_match('/data:([^;]+);base64,(.*)/', $data, $matches);
+            
+            if (count($matches) === 3) {
+                $mimeType = $matches[1];
+                $base64Content = $matches[2];
+                
+                $extension = explode('/', $mimeType)[1] ?? 'bin';
+                // Cas spéciaux pour les extensions
+                if ($extension === 'jpeg') $extension = 'jpg';
+                if ($extension === 'plain') $extension = 'txt';
+                if (strpos($extension, 'webm') !== false) $extension = 'webm';
+                if (strpos($extension, 'wav') !== false) $extension = 'wav';
 
-        // Si c'est un chemin de fichier ou un objet UploadedFile
-        // (Simplifié pour le besoin actuel du base64 dans l'onboarding)
-        return $data; 
+                $filename = uniqid() . '.' . $extension;
+                $decodedData = base64_decode($base64Content);
+                
+                file_put_contents($dir . '/' . $filename, $decodedData);
+                return '/uploads/media/' . $filename;
+            }
+        }
     }
 
     /**

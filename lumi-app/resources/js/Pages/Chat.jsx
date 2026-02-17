@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import RecordRTC from 'recordrtc';
+import VoicePlayer from '@/Components/VoicePlayer';
 
 export default function Chat({ chatWith, messages: initialMessages }) {
     const { auth } = usePage().props;
@@ -62,8 +64,7 @@ export default function Chat({ chatWith, messages: initialMessages }) {
     ];
 
     const timerRef = useRef(null);
-    const mediaRecorderRef = useRef(null);
-    const chunksRef = useRef([]);
+    const cancelRecordingRef = useRef(false);
 
     // Scroll handling for infinite scroll
     const handleScroll = async (e) => {
@@ -104,9 +105,23 @@ export default function Chat({ chatWith, messages: initialMessages }) {
     // Auto-scroll to bottom only when sending/receiving new messages, not when loading old
     useEffect(() => {
         if (shouldScrollToBottom && scrollRef.current) {
-            scrollRef.current.scrollIntoView({ behavior: 'auto' });
+            // For initial load or new messages, scroll instantly
+            scrollRef.current.scrollIntoView({ behavior: 'auto', block: 'end' });
+
+            // Re-check after a short delay for images or lazy-renders
+            const timer = setTimeout(() => {
+                if (scrollRef.current) {
+                    scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }
+            }, 100);
+            return () => clearTimeout(timer);
         }
-    }, [messages, shouldScrollToBottom]);
+    }, [messages.length, shouldScrollToBottom]);
+
+    // Force scroll to bottom on mount
+    useEffect(() => {
+        setShouldScrollToBottom(true);
+    }, []);
 
     // Re-enable auto-scroll when user sends a message
     const enableAutoScroll = () => setShouldScrollToBottom(true);
@@ -167,6 +182,8 @@ export default function Chat({ chatWith, messages: initialMessages }) {
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
+    const recorderRef = useRef(null);
+
     const startRecording = async () => {
         if (isRecording) {
             stopRecording();
@@ -174,37 +191,42 @@ export default function Chat({ chatWith, messages: initialMessages }) {
         }
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorderRef.current = new MediaRecorder(stream);
-            chunksRef.current = [];
 
-            mediaRecorderRef.current.ondataavailable = (e) => {
-                if (e.data.size > 0) chunksRef.current.push(e.data);
-            };
+            recorderRef.current = new RecordRTC(stream, {
+                type: 'audio',
+                mimeType: 'audio/webm',
+                recorderType: RecordRTC.StereoAudioRecorder,
+                numberOfAudioChannels: 1,
+                desiredSampRate: 16000,
+            });
 
-            mediaRecorderRef.current.onstop = () => {
-                const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-                setAudioBlob(blob);
-                if (chunksRef.current.length > 0 && !cancelRecordingRef.current) {
-                    sendVoiceMessage(blob);
-                }
-                cancelRecordingRef.current = false;
-            };
-
-            mediaRecorderRef.current.start();
+            recorderRef.current.startRecording();
             setIsRecording(true);
+            setRecordingTime(0);
         } catch (err) {
             console.error("Erreur micro:", err);
             alert("Accès micro refusé ou non supporté.");
         }
     };
 
-    const cancelRecordingRef = useRef(false);
-
     const stopRecording = () => {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-            mediaRecorderRef.current.stop();
-            setIsRecording(false);
-            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+        if (recorderRef.current) {
+            recorderRef.current.stopRecording(() => {
+                const blob = recorderRef.current.getBlob();
+                setIsRecording(false);
+
+                if (blob && !cancelRecordingRef.current) {
+                    sendVoiceMessage(blob);
+                }
+
+                // Cleanup stream
+                const stream = recorderRef.current.stream;
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+
+                cancelRecordingRef.current = false;
+            });
         }
     };
 
@@ -304,7 +326,7 @@ export default function Chat({ chatWith, messages: initialMessages }) {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] flex flex-col font-sans text-[#101322] dark:text-white transition-colors duration-500">
+        <div className="h-screen bg-gray-50 dark:bg-[#101322] flex flex-col font-sans text-[#101322] dark:text-white transition-colors duration-500 overflow-hidden">
             <Head title={`Chat avec ${chatWith?.name}`} />
 
             {/* Chat Header */}
@@ -397,7 +419,7 @@ export default function Chat({ chatWith, messages: initialMessages }) {
             <div
                 ref={containerRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto p-4 space-y-4"
+                className="flex-1 overflow-y-auto p-4 space-y-4 pb-20"
             >
                 {isLoadingOlder && (
                     <div className="flex justify-center py-4">
@@ -447,17 +469,11 @@ export default function Chat({ chatWith, messages: initialMessages }) {
                                     {msg.type === 'text' ? (
                                         <p className="text-sm leading-relaxed">{msg.content}</p>
                                     ) : msg.type === 'voice' ? (
-                                        <div className="flex items-center space-x-3 w-48">
-                                            <button className={`size-8 rounded-full flex items-center justify-center shrink-0 ${isMine ? 'bg-[#101322]/10' : 'bg-[#D4AF37]/20'} text-current`}>
-                                                <span className="material-symbols-outlined text-lg">play_arrow</span>
-                                            </button>
-                                            <div className="flex-1">
-                                                <div className="h-1 bg-current opacity-20 rounded-full w-full overflow-hidden mb-1">
-                                                    <div className="h-full bg-current w-1/3 rounded-full"></div>
-                                                </div>
-                                                <span className="text-[10px] font-bold opacity-70">{msg.duration || '0:00'}</span>
-                                            </div>
-                                        </div>
+                                        <VoicePlayer
+                                            src={msg.media_path}
+                                            duration={msg.duration}
+                                            isMine={isMine}
+                                        />
                                     ) : (
                                         <div className="rounded-xl overflow-hidden mb-1">
                                             <img src={msg.media_path} className="max-w-full h-auto max-h-60 object-cover" alt="Media" />
@@ -481,26 +497,33 @@ export default function Chat({ chatWith, messages: initialMessages }) {
             </div>
 
             {/* Input Bar (Redesigned) */}
-            <div className="p-4 bg-white dark:bg-[#161b2e] border-t border-gray-100 dark:border-white/5 transition-colors duration-500">
+            <div className="p-4 bg-white dark:bg-[#161b2e] border-t border-gray-100 dark:border-white/5 transition-colors duration-500 sticky bottom-0">
                 <div className="flex items-center gap-2">
-                    {/* Attachments */}
-                    <button
-                        onClick={() => document.getElementById('galleryInput').click()}
-                        className="size-10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
-                    >
-                        <span className="material-symbols-outlined text-xl">add</span>
-                        <input type="file" id="galleryInput" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                    </button>
+                    {/* Attachments (Hidden when recording) */}
+                    {!isRecording && (
+                        <button
+                            onClick={() => document.getElementById('galleryInput').click()}
+                            className="size-10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                        >
+                            <span className="material-symbols-outlined text-xl">add</span>
+                            <input type="file" id="galleryInput" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                        </button>
+                    )}
 
-                    {/* Input Field */}
-                    <div className="flex-1 bg-gray-100 dark:bg-[#1a1f35] rounded-full flex items-center px-2 py-1 transition-colors duration-500">
+                    {/* Input Field / Recording Info */}
+                    <div className={`flex-1 ${isRecording ? 'bg-red-500/10' : 'bg-gray-100 dark:bg-[#1a1f35]'} rounded-full flex items-center px-4 py-1 transition-all duration-300`}>
                         {isRecording ? (
-                            <div className="flex-1 flex items-center px-2 py-1.5 gap-3">
-                                <div className="flex items-center gap-2">
+                            <div className="flex-1 flex items-center justify-between py-1.5 ">
+                                <div className="flex items-center gap-3">
                                     <div className="size-2 bg-red-500 rounded-full animate-pulse"></div>
-                                    <span className="text-xs font-bold text-red-500">{formatTime(recordingTime)}</span>
+                                    <span className="text-sm font-black text-red-500 italic tracking-tighter uppercase">{formatTime(recordingTime)}</span>
                                 </div>
-                                <span className="text-xs text-gray-400">Enregistrement...</span>
+                                <button
+                                    onClick={handleCancelRecording}
+                                    className="text-[10px] font-black uppercase text-red-500 italic hover:underline"
+                                >
+                                    Annuler
+                                </button>
                             </div>
                         ) : (
                             <>
@@ -514,44 +537,28 @@ export default function Chat({ chatWith, messages: initialMessages }) {
                                 <input
                                     type="text"
                                     value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    onChange={(e) => {
+                                        setNewMessage(e.target.value);
+                                        enableAutoScroll();
+                                    }}
                                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                                     placeholder="Message..."
                                     className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 px-2 text-[#101322] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 font-medium"
                                 />
                             </>
                         )}
-
-                        {/* Mic / Send Button (Inside Input) */}
-                        <div className="pr-1">
-                            {!newMessage.trim() && !isRecording ? (
-                                <button
-                                    onClick={startRecording}
-                                    className="size-8 rounded-full flex items-center justify-center text-gray-400 hover:text-[#D4AF37] hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
-                                >
-                                    <span className="material-symbols-outlined text-xl">mic</span>
-                                </button>
-                            ) : isRecording ? (
-                                <button
-                                    onClick={handleCancelRecording}
-                                    className="size-8 rounded-full flex items-center justify-center text-red-500 hover:bg-red-100 dark:hover:bg-red-500/10 transition-colors"
-                                >
-                                    <span className="material-symbols-outlined text-xl">close</span>
-                                </button>
-                            ) : null}
-                        </div>
                     </div>
 
-                    {/* Send Button (Outside if typing, or Stop Rec if recording) */}
-                    {(newMessage.trim() || isRecording) && (
-                        <button
-                            onClick={isRecording ? stopRecording : handleSend}
-                            className={`size-10 rounded-full flex items-center justify-center text-white shadow-md transition-all active:scale-95 ${isRecording ? 'bg-red-500' : 'bg-[#D4AF37]'
-                                }`}
-                        >
-                            <span className="material-symbols-outlined text-xl">{isRecording ? 'send' : 'send'}</span>
-                        </button>
-                    )}
+                    {/* Main Action Button (Send or Mic) */}
+                    <button
+                        onClick={newMessage.trim() ? handleSend : (isRecording ? stopRecording : startRecording)}
+                        className={`size-12 rounded-full flex items-center justify-center text-white shadow-xl transition-all active:scale-90 ${isRecording ? 'bg-green-500 animate-pulse' : 'bg-[#D4AF37]'
+                            } ${(newMessage.trim() || isRecording) ? 'scale-100' : 'scale-95 opacity-80'}`}
+                    >
+                        <span className="material-symbols-outlined text-[24px]">
+                            {newMessage.trim() ? 'send' : (isRecording ? 'check' : 'mic')}
+                        </span>
+                    </button>
                 </div>
             </div>
             {/* <div className="h-4"></div> Space for bottom nav if needed */}

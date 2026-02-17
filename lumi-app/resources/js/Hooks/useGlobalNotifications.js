@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
 
 export default function useGlobalNotifications() {
-    const { auth, url } = usePage().props;
+    const { auth } = usePage().props;
+    const { url } = usePage();
 
     useEffect(() => {
         if (!auth.user || !window.Echo) return;
@@ -18,8 +19,14 @@ export default function useGlobalNotifications() {
 
         userChannel.listen('.match.created', (event) => {
             console.log("Global Notifications: Match Received!", event);
-            // In product, maybe a toast. For now, redirect to success or show badge
-            if (!url.includes('/match-success')) {
+            
+            // 1. If on the Matches/Likes page, refresh the list
+            if (url && url.includes('/likes')) {
+                router.reload({ only: ['receivedLikes', 'sentLikes'] });
+            }
+
+            // 2. Redirect to success if not already there
+            if (url && !url.includes('/match-success')) {
                 router.visit(route('match.success', event.matched_user.id));
             }
         });
@@ -38,13 +45,20 @@ export default function useGlobalNotifications() {
         chatChannel.listen('.message.sent', (data) => {
             console.log("Global Notifications: Message Received!", data);
             
-            // If NOT on the chat page with this person, show a notification
-            const isCurrentChatPage = url.includes(`/chat/${data.from_id}`) || url === `/chat?id=${data.from_id}`;
+            // 1. If on the Chat List page, refresh the list of matches/conversations
+            if (url && (url === '/chat' || url === '/chat/')) {
+                router.reload({ only: ['matches'] });
+            }
+
+            // 2. If NOT on the chat page with this person, show a notification
+            const isCurrentChatPage = url && (url.includes(`/chat/${data.from_id}`) || url === `/chat?id=${data.from_id}`);
             
             if (!isCurrentChatPage) {
-                // Show a global toast or update unread badge
+                // Here we could trigger a global state update or toast
                 console.log(`Nouveau message de ${data.from_id}`);
-                // Optional: trigger sound or browser notification
+                
+                // Refresh top-level props (like unread counts in navbar if we add them later)
+                router.reload({ only: ['auth'] }); 
             }
         });
 

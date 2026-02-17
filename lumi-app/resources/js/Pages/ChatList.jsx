@@ -90,10 +90,10 @@ export default function ChatList({ matches = [] }) {
                             >
                                 <Link
                                     href={route('chat.show', match.id)}
-                                    className={`flex items-center gap-4 p-4 rounded-[2rem] transition-all active:scale-[0.98] transition-colors duration-500 group ${match.unread_count > 0 ? 'bg-white dark:bg-white/5 shadow-xl shadow-black/5 border border-[#D4AF37]/30' : 'hover:bg-white dark:hover:bg-white/5 border border-transparent'}`}
+                                    className={`flex items-center gap-4 p-4 rounded-[2rem] transition-all active:scale-[0.98] transition-colors duration-500 group hover:bg-white dark:hover:bg-white/5 border border-transparent`}
                                 >
                                     <div className="relative flex-shrink-0">
-                                        <div className={`p-0.5 rounded-2xl transition-all ${match.unread_count > 0 ? 'bg-gradient-to-tr from-[#D4AF37] to-[#FFD700]' : ''}`}>
+                                        <div className={`p-0.5 rounded-2xl transition-all`}>
                                             <img
                                                 src={match.avatar}
                                                 className="w-16 h-16 rounded-[1.2rem] object-cover border-2 border-white dark:border-[#101322] transition-colors duration-500"

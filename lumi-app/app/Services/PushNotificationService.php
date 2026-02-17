@@ -23,9 +23,9 @@ class PushNotificationService
 
         $message = CloudMessage::new()
             ->withNotification(Notification::create($title, $body))
-            ->withData(array_merge($data, [
-                'click_action' => config('app.url'),
-            ]));
+            ->withData(array_merge([
+                'click_action' => $data['url'] ?? config('app.url'),
+            ], $data));
 
         try {
             return $messaging->sendMulticast($message, $tokens);

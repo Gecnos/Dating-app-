@@ -151,6 +151,7 @@ class ChatController extends Controller
             'content' => $request->content ?? '',
             'type' => $request->type ?? 'text',
             'media_path' => $mediaPath,
+            'duration' => $request->duration,
             'is_read' => false
         ]);
 
@@ -169,11 +170,24 @@ class ChatController extends Controller
             ));
 
             // 2. Real-time Push Notification (FCM)
+            $fcmBody = "Nouveau message de {$sender->name}";
+            if ($message->type === 'image') {
+                $fcmBody = "📷 {$sender->name} vous a envoyé une photo";
+            } elseif ($message->type === 'voice') {
+                $fcmBody = "🎤 {$sender->name} vous a envoyé un message vocal";
+            } elseif ($message->type === 'text') {
+                $fcmBody = "{$sender->name} : " . \Illuminate\Support\Str::limit($message->content, 50);
+            }
+
             app(\App\Services\PushNotificationService::class)->sendToUser(
                 $recipient,
                 'Lumi',
-                "Nouveau message de {$sender->name}",
-                ['type' => 'message', 'from_id' => (string)$sender->id]
+                $fcmBody,
+                [
+                    'type' => 'message', 
+                    'from_id' => (string)$sender->id,
+                    'url' => route('chat.show', $sender->id)
+                ]
             );
         }
 

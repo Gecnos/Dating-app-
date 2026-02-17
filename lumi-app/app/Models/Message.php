@@ -16,6 +16,7 @@ class Message extends Model
         'content',
         'type',
         'media_path',
+        'duration',
         'is_read',
     ];
 
