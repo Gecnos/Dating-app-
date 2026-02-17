@@ -64,6 +64,11 @@ class MatchController extends Controller
                     'favorite',
                     '#D4AF37'
                 ));
+
+                // Real-time Push (FCM)
+                $pushService = app(\App\Services\PushNotificationService::class);
+                $pushService->sendToUser($targetUser, 'Lumi', "Nouveau Match ! Vous avez matché avec {$currentUser->name}.", ['type' => 'match']);
+                $pushService->sendToUser($currentUser, 'Lumi', "Nouveau Match ! Vous avez matché avec {$targetUser->name}.", ['type' => 'match']);
             } else {
                 broadcast(new \App\Events\LikeNotification(Auth::user(), $request->target_id))->toOthers();
             }

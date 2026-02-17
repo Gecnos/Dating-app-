@@ -158,6 +158,8 @@ class ChatController extends Controller
         $recipient = User::find($request->to_id);
         if ($recipient) {
             $sender = Auth::user();
+            
+            // 1. Persistent DB Notification
             $recipient->notify(new \App\Notifications\AppNotification(
                 'message',
                 'Nouveau Message',
@@ -165,6 +167,14 @@ class ChatController extends Controller
                 'mail',
                 '#0f2cbd'
             ));
+
+            // 2. Real-time Push Notification (FCM)
+            app(\App\Services\PushNotificationService::class)->sendToUser(
+                $recipient,
+                'Lumi',
+                "Nouveau message de {$sender->name}",
+                ['type' => 'message', 'from_id' => (string)$sender->id]
+            );
         }
 
         broadcast(new MessageSent($message))->toOthers();

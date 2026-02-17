@@ -137,6 +137,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/api/photos', [UserController::class, 'addPhoto'])->name('photos.add');
     Route::delete('/api/photos/{id}', [UserController::class, 'deletePhoto'])->name('photos.delete');
     Route::post('/api/photos/reorder', [UserController::class, 'reorderPhotos'])->name('photos.reorder');
+
+    // FCM Tokens
+    Route::post('/api/fcm-token', [App\Http\Controllers\FcmController::class, 'store']);
+    Route::delete('/api/fcm-token', [App\Http\Controllers\FcmController::class, 'destroy']);
 });
 
 Route::prefix('admin')->middleware(['auth'])->group(function () {

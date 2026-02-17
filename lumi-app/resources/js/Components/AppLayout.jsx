@@ -1,15 +1,23 @@
 import { useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import useGlobalNotifications from '@/Hooks/useGlobalNotifications';
+import { requestForToken } from '@/Hooks/useFcm';
 import LocationTracker from './LocationTracker';
 
 import NavigationBar from './NavigationBar';
-
 export default function AppLayout({ children }) {
-    const { url } = usePage();
+    const { auth, url } = usePage().props;
 
     // Initialize global events listener
     useGlobalNotifications();
+
+    useEffect(() => {
+        // Initialize FCM
+        if (typeof window !== 'undefined' && auth?.user) {
+            console.log("AppLayout: Requesting FCM permission for user", auth.user.id);
+            requestForToken();
+        }
+    }, [auth?.user]);
 
     useEffect(() => {
         // Check local storage for theme preference

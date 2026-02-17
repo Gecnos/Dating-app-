@@ -170,6 +170,14 @@ class User extends Authenticatable
     }
 
     /**
+     * FCM Tokens de l'utilisateur.
+     */
+    public function fcmTokens()
+    {
+        return $this->hasMany(FcmToken::class);
+    }
+
+    /**
      * Vérifie si l'utilisateur est en ligne (dernière activité il y a moins de 5 minutes).
      */
     public function isOnline()
