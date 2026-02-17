@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Events;
+
 use App\Models\Message;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -32,6 +34,14 @@ class MessageSent implements ShouldBroadcast
         return [
             new PrivateChannel('chat.' . $this->message->to_id),
         ];
+    }
+
+    /**
+     * The event's broadcast name.
+     */
+    public function broadcastAs(): string
+    {
+        return 'message.sent';
     }
 
     /**

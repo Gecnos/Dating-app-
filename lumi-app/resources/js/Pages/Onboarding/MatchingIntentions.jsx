@@ -47,7 +47,7 @@ export default function MatchingIntentions() {
     };
 
     return (
-        <div className="min-h-screen bg-[#101322] flex flex-col p-6 text-white font-['Be_Vietnam_Pro'] relative overflow-hidden">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] flex flex-col p-6 text-[#101322] dark:text-white font-['Be_Vietnam_Pro'] relative overflow-hidden transition-colors duration-500">
             <Head title="Votre Intention" />
 
             {/* Benin Pattern Background */}
@@ -59,22 +59,22 @@ export default function MatchingIntentions() {
             </div>
 
             {/* Header / Progress bar */}
-            <div className="w-full pt-6 pb-10 flex items-center justify-between z-10">
-                <button onClick={() => window.history.back()} className="size-10 flex items-center justify-center rounded-xl bg-[#161b2e] border border-white/10 active:scale-90 transition-all">
-                    <span className="material-symbols-outlined text-gray-400 text-sm">arrow_back_ios</span>
+            <div className="w-full pt-6 pb-10 flex items-center justify-between z-10 transition-all duration-500">
+                <button onClick={() => window.history.back()} className="size-10 flex items-center justify-center rounded-xl bg-white dark:bg-[#161b2e] border border-black/5 dark:border-white/10 active:scale-90 transition-all transition-colors duration-500 shadow-sm dark:shadow-none">
+                    <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-sm">arrow_back_ios</span>
                 </button>
-                <div className="flex-1 mx-8 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                    <div className="w-2/5 h-full bg-[#D4AF37] rounded-full shadow-lg shadow-[#D4AF37]/30"></div>
+                <div className="flex-1 mx-8 h-1.5 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden border border-black/5 dark:border-white/5 transition-colors duration-500">
+                    <div className="w-2/5 h-full bg-[#D4AF37] rounded-full shadow-lg shadow-[#D4AF37]/30 transition-all duration-500"></div>
                 </div>
                 <span className="text-[10px] font-black text-[#D4AF37] tracking-[0.2em] leading-none uppercase italic">02/05</span>
             </div>
 
             <div className="flex-1 flex flex-col space-y-10 z-10">
                 <div className="space-y-4">
-                    <h1 className="text-4xl font-black tracking-tighter text-white leading-none italic uppercase">
+                    <h1 className="text-4xl font-black tracking-tighter text-[#101322] dark:text-white leading-none italic uppercase transition-colors duration-500">
                         Que recherchez- <br /> vous vraiment ?
                     </h1>
-                    <p className="text-gray-500 text-sm font-medium leading-relaxed italic">Choisissez votre intention maîtresse <br /> pour des rencontres qui vous ressemblent.</p>
+                    <p className="text-gray-400 dark:text-gray-500 text-sm font-medium leading-relaxed italic transition-colors duration-500">Choisissez votre intention maîtresse <br /> pour des rencontres qui vous ressemblent.</p>
                 </div>
 
                 <div className="space-y-5 overflow-y-auto max-h-[55vh] pb-4 px-1">
@@ -82,18 +82,18 @@ export default function MatchingIntentions() {
                         <button
                             key={intent.id}
                             onClick={() => setData('intention', intent.id)}
-                            className={`w-full text-left p-6 bg-[#161b2e] border-2 rounded-[2rem] transition-all relative ${data.intention === intent.id
+                            className={`w-full text-left p-6 bg-white dark:bg-[#161b2e] border-2 rounded-[2rem] transition-all relative transition-colors duration-500 shadow-sm dark:shadow-none ${data.intention === intent.id
                                 ? `border-[#D4AF37] bg-[#D4AF37]/5 shadow-2xl shadow-[#D4AF37]/5 scale-[1.02]`
-                                : 'border-white/5 hover:border-white/10'
+                                : 'border-black/5 dark:border-white/5 hover:border-[#D4AF37]/30'
                                 }`}
                         >
                             <div className="flex items-start space-x-5">
-                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl bg-white/5 border border-white/10`}>
+                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl bg-gray-50 dark:bg-white/5 border border-black/5 dark:border-white/10 transition-colors duration-500`}>
                                     {intent.icon}
                                 </div>
                                 <div className="flex-1 pr-8">
-                                    <h3 className="font-black text-white italic uppercase text-xs tracking-widest">{intent.label}</h3>
-                                    <p className="text-[10px] text-gray-500 mt-2 leading-relaxed font-medium italic">{intent.description}</p>
+                                    <h3 className="font-black text-[#101322] dark:text-white italic uppercase text-xs tracking-widest transition-colors duration-500">{intent.label}</h3>
+                                    <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-2 leading-relaxed font-medium italic transition-colors duration-500">{intent.description}</p>
                                 </div>
                             </div>
                             {data.intention === intent.id && (
@@ -105,11 +105,11 @@ export default function MatchingIntentions() {
                     ))}
                 </div>
 
-                <div className="bg-[#D4AF37]/5 p-5 rounded-[2rem] flex items-start space-x-4 mt-auto border border-[#D4AF37]/10">
+                <div className="bg-[#D4AF37]/5 p-5 rounded-[2rem] flex items-start space-x-4 mt-auto border border-[#D4AF37]/10 transition-colors duration-500">
                     <div className="text-[#D4AF37] mt-1">
                         <span className="material-symbols-outlined text-xl">verified_user</span>
                     </div>
-                    <p className="text-[9px] text-gray-400 leading-relaxed font-black uppercase tracking-wider italic">
+                    <p className="text-[9px] text-gray-400 dark:text-gray-500 leading-relaxed font-black uppercase tracking-wider italic transition-colors duration-500">
                         Votre intention est exclusivement visible par les membres vérifiés pour garantir <br /> l'intégrité de la communauté Lumi Benin.
                     </p>
                 </div>
@@ -118,9 +118,9 @@ export default function MatchingIntentions() {
                     <button
                         disabled={!data.intention}
                         onClick={handleSubmit}
-                        className={`w-full py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl transition-all active:scale-95 ${!data.intention
-                            ? 'bg-white/5 text-white/20 cursor-not-allowed border border-white/5'
-                            : 'bg-[#D4AF37] text-[#101322] border border-[#D4AF37] hover:brightness-110 shadow-[#D4AF37]/20 uppercase italic font-black'
+                        className={`w-full py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl transition-all active:scale-95 transition-colors duration-500 ${!data.intention
+                            ? 'bg-gray-200 dark:bg-white/5 text-gray-400 dark:text-white/20 cursor-not-allowed border border-black/5 dark:border-white/5 shadow-none'
+                            : 'bg-[#D4AF37] text-white dark:text-[#101322] border border-[#D4AF37] hover:brightness-110 shadow-[#D4AF37]/20 uppercase italic font-black shadow-[#D4AF37]/30'
                             }`}
                     >
                         Suivant

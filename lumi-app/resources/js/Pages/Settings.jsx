@@ -13,7 +13,23 @@ export default function Settings() {
         return true;
     });
     const [ghostMode, setGhostMode] = useState(auth.user.is_ghost_mode || false);
-    const [blurEnabled, setBlurEnabled] = useState(auth.user.blur_enabled || false);
+    const [securityInfo, setSecurityInfo] = useState({
+        masked_email: '',
+        password_last_changed: 'Chargement...',
+        can_change_password: false
+    });
+    const [showPasswordForm, setShowPasswordForm] = useState(false);
+    const [passwordData, setPasswordData] = useState({
+        current_password: '',
+        password: '',
+        password_confirmation: ''
+    });
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState({});
+
+    useEffect(() => {
+        axios.get('/api/security/info').then(res => setSecurityInfo(res.data));
+    }, []);
 
     const toggleDarkMode = () => {
         const newMode = !darkMode;
@@ -36,61 +52,142 @@ export default function Settings() {
         });
     };
 
-    const toggleBlur = (e) => {
-        const value = e.target.checked;
-        setBlurEnabled(value);
-        router.post(route('profile.update'), { blur_enabled: value }, { preserveState: true });
+    const handlePasswordUpdate = (e) => {
+        e.preventDefault();
+        setProcessing(true);
+        setErrors({});
+
+        axios.post(route('security.password.update'), passwordData)
+            .then(res => {
+                setShowPasswordForm(false);
+                setPasswordData({ current_password: '', password: '', password_confirmation: '' });
+                alert('Mot de passe mis à jour !');
+                return axios.get('/api/security/info');
+            })
+            .then(res => res && setSecurityInfo(res.data))
+            .catch(err => {
+                if (err.response?.data?.errors) {
+                    setErrors(err.response.data.errors);
+                } else if (err.response?.data?.message) {
+                    setErrors({ general: err.response.data.message });
+                }
+            })
+            .finally(() => setProcessing(false));
     };
 
     return (
-        <div className={`min-h-screen ${darkMode ? 'bg-[#101322] text-white' : 'bg-[#F9F9FB] text-[#111218]'} font-sans pb-32 overflow-x-hidden transition-colors duration-500`}>
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-sans pb-32 overflow-x-hidden transition-colors duration-500">
             <Head title="Paramètres - Lumi" />
 
+            {/* Password Change Modal */}
+            <AnimatePresence>
+                {showPasswordForm && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            className="bg-white dark:bg-[#161b2e] w-full max-w-sm rounded-[2.5rem] p-8 border border-black/5 dark:border-white/10 shadow-2xl"
+                        >
+                            <h2 className="text-xl font-black italic tracking-tighter mb-6 text-[#101322] dark:text-white">Sécurité</h2>
+                            <form onSubmit={handlePasswordUpdate} className="space-y-4">
+                                <div>
+                                    <label className="text-[10px] font-black uppercase text-gray-500 ml-2">Mot de passe actuel</label>
+                                    <input
+                                        type="password"
+                                        value={passwordData.current_password}
+                                        onChange={e => setPasswordData({ ...passwordData, current_password: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-white/5 border-none rounded-2xl p-4 text-xs italic focus:ring-[#D4AF37]"
+                                    />
+                                    {errors.current_password && <p className="text-red-500 text-[9px] mt-1 ml-2">{errors.current_password[0]}</p>}
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black uppercase text-gray-500 ml-2">Nouveau mot de passe</label>
+                                    <input
+                                        type="password"
+                                        value={passwordData.password}
+                                        onChange={e => setPasswordData({ ...passwordData, password: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-white/5 border-none rounded-2xl p-4 text-xs italic focus:ring-[#D4AF37]"
+                                    />
+                                    {errors.password && <p className="text-red-500 text-[9px] mt-1 ml-2">{errors.password[0]}</p>}
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black uppercase text-gray-500 ml-2">Confirmer</label>
+                                    <input
+                                        type="password"
+                                        value={passwordData.password_confirmation}
+                                        onChange={e => setPasswordData({ ...passwordData, password_confirmation: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-white/5 border-none rounded-2xl p-4 text-xs italic focus:ring-[#D4AF37]"
+                                    />
+                                </div>
+                                {errors.general && <p className="text-red-500 text-[9px] text-center font-bold">{errors.general}</p>}
+                                <div className="flex gap-3 pt-4">
+                                    <button type="button" onClick={() => setShowPasswordForm(false)} className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-white/10 font-bold text-xs uppercase">Annuler</button>
+                                    <button type="submit" disabled={processing} className="flex-1 py-4 rounded-2xl bg-[#D4AF37] text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-[#D4AF37]/30">
+                                        {processing ? '...' : 'Valider'}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Header */}
-            <header className={`sticky top-0 z-50 px-6 py-4 flex items-center justify-between border-b ${darkMode ? 'bg-[#101322]/80 border-white/10' : 'bg-white/80 border-gray-100'} backdrop-blur-xl`}>
+            <header className="sticky top-0 z-50 px-6 py-4 flex items-center justify-between border-b bg-white/90 dark:bg-[#101322]/90 border-black/5 dark:border-white/10 backdrop-blur-xl transition-all duration-500">
                 <Link href={route('profile', 'me')} className="w-10 h-10 flex items-center justify-start">
-                    <span className={`material-symbols-outlined ${darkMode ? 'text-white' : 'text-gray-800'}`}>arrow_back_ios</span>
+                    <span className="material-symbols-outlined text-[#101322] dark:text-white transition-colors duration-500">arrow_back_ios</span>
                 </Link>
-                <h1 className="text-lg font-bold">Paramètres</h1>
+                <h1 className="text-lg font-bold text-[#101322] dark:text-white transition-colors duration-500">Paramètres</h1>
                 <div className="w-10" />
             </header>
 
             <main className="max-w-lg mx-auto p-6 space-y-8">
                 {/* Account Section */}
                 <section className="space-y-4">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-2">Compte & Sécurité</h3>
-                    <div className={`rounded-3xl border ${darkMode ? 'bg-[#161b2e] border-white/5' : 'bg-white border-gray-100'} shadow-sm divide-y ${darkMode ? 'divide-white/5' : 'divide-gray-50'}`}>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 ml-2 transition-colors duration-500">Compte & Sécurité</h3>
+                    <div className="rounded-3xl border bg-white dark:bg-[#161b2e] border-black/5 dark:border-white/5 shadow-sm divide-y divide-black/5 dark:divide-white/5 transition-colors duration-500">
                         <div className="p-5 flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${darkMode ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 transition-colors duration-500">
                                     <span className="material-symbols-outlined text-xl">alternate_email</span>
                                 </div>
                                 <div>
                                     <p className="text-xs font-bold">Email</p>
-                                    <p className="text-[10px] text-gray-500">{auth.user.email}</p>
+                                    <p className="text-[10px] text-gray-500">{securityInfo.masked_email || auth.user.email}</p>
                                 </div>
                             </div>
                             <span className="material-symbols-outlined text-gray-400 text-sm">chevron_right</span>
                         </div>
-                        <div className="p-5 flex items-center justify-between">
+                        <button
+                            onClick={() => setShowPasswordForm(true)}
+                            className="w-full text-left p-5 flex items-center justify-between group active:bg-black/5 dark:active:bg-white/5 transition-all"
+                        >
                             <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${darkMode ? 'bg-orange-500/10 text-orange-400' : 'bg-orange-50 text-orange-600'}`}>
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 transition-colors duration-500">
                                     <span className="material-symbols-outlined text-xl">lock</span>
                                 </div>
-                                <p className="text-xs font-bold">Changer le mot de passe</p>
+                                <div>
+                                    <p className="text-xs font-bold">Changer le mot de passe</p>
+                                    <p className="text-[9px] text-gray-500 italic">Mise à jour : {securityInfo.password_last_changed}</p>
+                                </div>
                             </div>
-                            <span className="material-symbols-outlined text-gray-400 text-sm">chevron_right</span>
-                        </div>
+                            <span className="material-symbols-outlined text-gray-400 text-sm group-hover:translate-x-1 transition-transform">chevron_right</span>
+                        </button>
                     </div>
                 </section>
 
                 {/* Privacy Management section (New) */}
                 <section className="space-y-4">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-2">Confidentialité</h3>
-                    <div className={`rounded-3xl border ${darkMode ? 'bg-[#161b2e] border-white/5' : 'bg-white border-gray-100'} shadow-sm divide-y ${darkMode ? 'divide-white/5' : 'divide-gray-50'}`}>
-                        <Link href={route('settings.blocked')} className="w-full text-left p-5 flex items-center justify-between group active:bg-white/5 transition-colors">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 ml-2 transition-colors duration-500">Confidentialité</h3>
+                    <div className="rounded-3xl border bg-white dark:bg-[#161b2e] border-black/5 dark:border-white/5 shadow-sm divide-y divide-black/5 dark:divide-white/5 transition-colors duration-500">
+                        <Link href={route('settings.blocked')} className="w-full text-left p-5 flex items-center justify-between group active:bg-black/5 dark:active:bg-white/5 transition-colors">
                             <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${darkMode ? 'bg-red-500/10 text-red-400' : 'bg-red-50 text-red-600'}`}>
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 transition-colors duration-500">
                                     <span className="material-symbols-outlined text-xl">block</span>
                                 </div>
                                 <div>
@@ -100,9 +197,9 @@ export default function Settings() {
                             </div>
                             <span className="material-symbols-outlined text-gray-400 text-sm group-hover:translate-x-1 transition-transform">chevron_right</span>
                         </Link>
-                        <Link href={route('settings.reports')} className="w-full text-left p-5 flex items-center justify-between group active:bg-white/5 transition-colors">
+                        <Link href={route('settings.reports')} className="w-full text-left p-5 flex items-center justify-between group active:bg-black/5 dark:active:bg-white/5 transition-colors">
                             <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${darkMode ? 'bg-yellow-500/10 text-yellow-400' : 'bg-yellow-50 text-yellow-600'}`}>
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-yellow-50 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 transition-colors duration-500">
                                     <span className="material-symbols-outlined text-xl">report</span>
                                 </div>
                                 <div>
@@ -117,12 +214,12 @@ export default function Settings() {
 
                 {/* Preferences Section */}
                 <section className="space-y-4">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-2">Préférences</h3>
-                    <div className={`rounded-3xl border ${darkMode ? 'bg-[#161b2e] border-white/5' : 'bg-white border-gray-100'} shadow-sm divide-y ${darkMode ? 'divide-white/5' : 'divide-gray-50'}`}>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 ml-2 transition-colors duration-500">Préférences</h3>
+                    <div className="rounded-3xl border bg-white dark:bg-[#161b2e] border-black/5 dark:border-white/5 shadow-sm divide-y divide-black/5 dark:divide-white/5 transition-colors duration-500">
                         {/* Dark Mode Toggle */}
                         <div className="p-5 flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${darkMode ? 'bg-purple-500/10 text-purple-400' : 'bg-purple-50 text-purple-600'}`}>
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 transition-colors duration-500">
                                     <span className="material-symbols-outlined text-xl">{darkMode ? 'dark_mode' : 'light_mode'}</span>
                                 </div>
                                 <p className="text-xs font-bold">Mode Sombre</p>
@@ -136,7 +233,7 @@ export default function Settings() {
                         {/* Ghost Mode Toggle */}
                         <div className="p-5 flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${darkMode ? 'bg-indigo-500/10 text-indigo-400' : 'bg-indigo-50 text-indigo-600'}`}>
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 transition-colors duration-500">
                                     <span className="material-symbols-outlined text-xl">visibility_off</span>
                                 </div>
                                 <div>
@@ -150,50 +247,35 @@ export default function Settings() {
                             </label>
                         </div>
 
-                        {/* Blur Mode Toggle */}
-                        <div className="p-5 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${darkMode ? 'bg-cyan-500/10 text-cyan-400' : 'bg-cyan-50 text-cyan-600'}`}>
-                                    <span className="material-symbols-outlined text-xl">blur_on</span>
-                                </div>
-                                <div>
-                                    <p className="text-xs font-bold">Protection Photo (Flou)</p>
-                                    <p className="text-[9px] text-gray-500">Photos floues jusqu'au match</p>
-                                </div>
-                            </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" checked={blurEnabled} onChange={toggleBlur} className="sr-only peer" />
-                                <div className={`w-11 h-6 rounded-full peer transition-all ${blurEnabled ? 'bg-[#D4AF37] after:translate-x-full after:border-white' : 'bg-gray-200'} after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all`}></div>
-                            </label>
-                        </div>
+
                     </div>
                 </section>
 
                 {/* Support Section */}
                 <section className="space-y-4">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-2">Support & Légal</h3>
-                    <div className={`rounded-3xl border ${darkMode ? 'bg-[#161b2e] border-white/5' : 'bg-white border-gray-100'} shadow-sm divide-y ${darkMode ? 'divide-white/5' : 'divide-gray-50'}`}>
-                        <Link href={route('help')} className="p-5 flex items-center justify-between group active:bg-white/5 transition-colors">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 ml-2 transition-colors duration-500">Support & Légal</h3>
+                    <div className="rounded-3xl border bg-white dark:bg-[#161b2e] border-black/5 dark:border-white/5 shadow-sm divide-y divide-black/5 dark:divide-white/5 transition-colors duration-500">
+                        <Link href={route('help')} className="p-5 flex items-center justify-between group active:bg-black/5 dark:active:bg-white/5 transition-colors">
                             <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${darkMode ? 'bg-green-500/10 text-green-400' : 'bg-green-50 text-green-600'}`}>
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 transition-colors duration-500">
                                     <span className="material-symbols-outlined text-xl">help</span>
                                 </div>
                                 <p className="text-xs font-bold">Centre d'aide</p>
                             </div>
                             <span className="material-symbols-outlined text-gray-400 text-sm">chevron_right</span>
                         </Link>
-                        <Link href={route('legal.terms')} className="p-5 flex items-center justify-between group active:bg-white/5 transition-colors">
+                        <Link href={route('legal.terms')} className="p-5 flex items-center justify-between group active:bg-black/5 dark:active:bg-white/5 transition-colors">
                             <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${darkMode ? 'bg-gray-500/10 text-gray-400' : 'bg-gray-50 text-gray-600'}`}>
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-50 dark:bg-gray-500/10 text-gray-600 dark:text-gray-400 transition-colors duration-500">
                                     <span className="material-symbols-outlined text-xl">description</span>
                                 </div>
                                 <p className="text-xs font-bold">Conditions générales</p>
                             </div>
                             <span className="material-symbols-outlined text-gray-400 text-sm group-hover:translate-x-1 transition-transform">chevron_right</span>
                         </Link>
-                        <Link href={route('legal.privacy')} className="p-5 flex items-center justify-between group active:bg-white/5 transition-colors">
+                        <Link href={route('legal.privacy')} className="p-5 flex items-center justify-between group active:bg-black/5 dark:active:bg-white/5 transition-colors">
                             <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${darkMode ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 transition-colors duration-500">
                                     <span className="material-symbols-outlined text-xl">security</span>
                                 </div>
                                 <p className="text-xs font-bold">Politique de confidentialité</p>

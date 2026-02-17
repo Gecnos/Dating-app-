@@ -28,7 +28,7 @@ export default function SplashScreen() {
     }, [progress]);
 
     return (
-        <div className="min-h-screen bg-[#0a0c1a] font-['Be_Vietnam_Pro'] antialiased overflow-hidden flex flex-col items-center justify-between relative px-8 pb-16">
+        <div className="min-h-screen bg-white dark:bg-[#0a0c1a] font-['Be_Vietnam_Pro'] antialiased overflow-hidden flex flex-col items-center justify-between relative px-8 pb-16 transition-colors duration-500">
             <Head>
                 <title>Lumi - Premium Dating Benin</title>
                 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@100;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -78,7 +78,7 @@ export default function SplashScreen() {
 
                 {/* App Name */}
                 <div className="mt-10 text-center">
-                    <h1 className="text-7xl font-black tracking-tighter text-white italic uppercase">Lumi</h1>
+                    <h1 className="text-7xl font-black tracking-tighter text-[#101322] dark:text-white italic uppercase transition-colors duration-500">Lumi</h1>
                     <div className="h-2 w-16 bg-[#D4AF37] mx-auto mt-4 rounded-full shadow-lg shadow-[#D4AF37]/50"></div>
                     <p className="text-[#D4AF37]/80 mt-6 text-[10px] font-black tracking-[0.3em] uppercase italic">L'excellence au Bénin</p>
                 </div>
@@ -89,7 +89,7 @@ export default function SplashScreen() {
                 {/* Goal-oriented matching hint */}
                 <div className="flex items-center justify-center gap-3 opacity-50">
                     <span className="material-symbols-outlined text-[#D4AF37] text-sm">favorite</span>
-                    <p className="text-white text-[10px] font-black uppercase tracking-widest italic">Connecter les cœurs au Bénin</p>
+                    <p className="text-[#101322] dark:text-white text-[10px] font-black uppercase tracking-widest italic transition-colors duration-500">Connecter les cœurs au Bénin</p>
                 </div>
 
                 {/* Loading Indicator */}
@@ -110,7 +110,7 @@ export default function SplashScreen() {
 
             {/* Background Depth Overlay */}
             <div className="fixed inset-0 z-[-1] opacity-20 pointer-events-none">
-                <div className="w-full h-full bg-gradient-to-b from-[#0a0c1a]/90 to-[#0f2cbd]/40"></div>
+                <div className="w-full h-full bg-gradient-to-b from-gray-100 dark:from-[#0a0c1a]/90 to-[#0f2cbd]/20 dark:to-[#0f2cbd]/40 transition-colors duration-500"></div>
             </div>
         </div>
     );

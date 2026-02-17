@@ -43,14 +43,12 @@ class MatchController extends Controller
                 $match->update(['is_mutual' => true]);
                 $reciprocal->update(['is_mutual' => true]);
                 
-                // Diffuser l'événement de match pour les deux utilisateurs
                 $targetUser = User::find($request->target_id);
                 $currentUser = Auth::user();
                 
                 broadcast(new \App\Events\MatchNotification($match, $targetUser))->toOthers();
                 broadcast(new \App\Events\MatchNotification($reciprocal, $currentUser))->toOthers();
 
-                // Store persistent notifications
                 $targetUser->notify(new \App\Notifications\AppNotification(
                     'match',
                     'Nouveau Match !',
@@ -66,6 +64,8 @@ class MatchController extends Controller
                     'favorite',
                     '#D4AF37'
                 ));
+            } else {
+                broadcast(new \App\Events\LikeNotification(Auth::user(), $request->target_id))->toOthers();
             }
         }
 

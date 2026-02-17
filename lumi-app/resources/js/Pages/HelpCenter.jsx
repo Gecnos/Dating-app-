@@ -19,12 +19,12 @@ export default function HelpCenter() {
     ];
 
     return (
-        <div className="min-h-screen bg-white dark:bg-[#101322] text-slate-900 dark:text-white font-sans flex justify-center overflow-x-hidden">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-slate-900 dark:text-white font-sans flex justify-center overflow-x-hidden transition-colors duration-500">
             <Head title="Centre d'Aide & Sécurité - Lumi" />
 
-            <div className="w-full max-w-md bg-white dark:bg-[#101322] flex flex-col h-full min-h-screen relative overflow-hidden shadow-2xl">
+            <div className="w-full max-w-md bg-white dark:bg-[#101322] flex flex-col h-full min-h-screen relative overflow-hidden shadow-2xl transition-colors duration-500">
                 {/* Header Section */}
-                <div className="relative z-10 px-6 pt-6 pb-4 bg-white dark:bg-[#101322]">
+                <div className="relative z-10 px-6 pt-6 pb-4 bg-white dark:bg-[#101322] transition-colors duration-500">
                     <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-primary/20 rounded-full blur-[80px] pointer-events-none"></div>
 
                     <div className="flex items-center justify-between mb-6">
@@ -51,7 +51,7 @@ export default function HelpCenter() {
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="block w-full pl-11 pr-4 py-3.5 bg-slate-100 dark:bg-[#1c1d27] border-0 rounded-2xl text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-[#D4AF37]/50 focus:bg-white dark:focus:bg-[#252836] transition-all shadow-sm"
+                            className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-[#1c1d27] border-0 rounded-2xl text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-[#D4AF37]/50 focus:bg-white dark:focus:bg-[#252836] transition-all shadow-sm transition-colors duration-500"
                             placeholder="Rechercher une réponse..."
                         />
                     </div>
@@ -64,15 +64,13 @@ export default function HelpCenter() {
                         <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Catégories</h2>
                         <div className="grid grid-cols-2 gap-3">
                             {categories.map((cat) => (
-                                <div
-                                    key={cat.id}
-                                    className={`${cat.featured ? 'col-span-2' : ''} relative overflow-hidden rounded-2xl ${cat.featured ? 'bg-gradient-to-br from-[#1c1d27] to-[#0f2cbd]/20 border border-[#D4AF37]/20 p-5' : 'bg-slate-100 dark:bg-[#1c1d27] p-4 border border-transparent'} flex ${cat.featured ? 'items-center justify-between' : 'flex-col gap-3 items-start'} group active:scale-[0.98] transition-all cursor-pointer shadow-sm`}
+                                <div className={`${cat.featured ? 'col-span-2' : ''} relative overflow-hidden rounded-2xl ${cat.featured ? 'bg-gradient-to-br from-[#1c1d27] to-[#0f2cbd]/20 border border-[#D4AF37]/20 p-5 shadow-lg shadow-[#0f2cbd]/10' : 'bg-gray-50 dark:bg-[#1c1d27] p-4 border border-black/5 dark:border-white/5'} flex ${cat.featured ? 'items-center justify-between' : 'flex-col gap-3 items-start'} group active:scale-[0.98] transition-all cursor-pointer shadow-sm transition-colors duration-500`}
                                 >
                                     <div className={`flex flex-col gap-1 z-10 ${cat.featured ? 'flex-1' : ''}`}>
-                                        <h3 className={`${cat.featured ? 'text-white text-lg' : 'text-slate-900 dark:text-white text-sm'} font-bold`}>{cat.title}</h3>
-                                        <p className={`${cat.featured ? 'text-slate-400' : 'hidden'} text-xs`}>{cat.subtitle}</p>
+                                        <h3 className={`${cat.featured ? 'text-white text-lg' : 'text-slate-900 dark:text-white text-sm'} font-bold transition-colors duration-500`}>{cat.title}</h3>
+                                        <p className={`${cat.featured ? 'text-slate-400' : 'hidden'} text-xs transition-colors duration-500`}>{cat.subtitle}</p>
                                     </div>
-                                    <div className={`${cat.featured ? 'w-12 h-12 border border-[#D4AF37]/30 text-[#D4AF37] group-hover:bg-[#D4AF37] group-hover:text-black' : 'w-10 h-10 bg-primary/10 dark:bg-white/5 text-primary dark:text-white'} rounded-full flex items-center justify-center transition-colors z-10`}>
+                                    <div className={`${cat.featured ? 'w-12 h-12 border border-[#D4AF37]/30 text-[#D4AF37] dark:group-hover:bg-[#D4AF37] dark:group-hover:text-black group-hover:bg-[#101322] group-hover:text-white' : 'w-10 h-10 bg-[#D4AF37]/10 dark:bg-white/5 text-[#D4AF37] dark:text-white'} rounded-full flex items-center justify-center transition-colors z-10 transition-colors duration-500`}>
                                         <span className={`material-symbols-outlined ${cat.featured ? '' : 'text-[20px]'}`}>{cat.icon}</span>
                                     </div>
                                     {cat.featured && <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none"></div>}
@@ -83,15 +81,15 @@ export default function HelpCenter() {
 
                     {/* Popular Articles */}
                     <div className="mt-6 px-6">
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Articles Populaires</h2>
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 transition-colors duration-500">Articles Populaires</h2>
                         <div className="flex flex-col space-y-3">
                             {popularArticles.map((article) => (
-                                <button key={article.id} className="w-full text-left bg-white dark:bg-[#1c1d27] p-4 rounded-xl shadow-sm border border-slate-100 dark:border-[#282b39] flex items-center justify-between group active:scale-[0.99] transition-all">
+                                <button key={article.id} className="w-full text-left bg-white dark:bg-[#1c1d27] p-4 rounded-xl shadow-sm border border-black/5 dark:border-[#282b39] flex items-center justify-between group active:scale-[0.99] transition-all transition-colors duration-500">
                                     <div className="flex gap-3 items-center">
                                         <div className="shrink-0" style={{ color: article.color }}>
                                             <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>{article.icon}</span>
                                         </div>
-                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-primary dark:group-hover:text-white transition-colors">{article.title}</span>
+                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-[#D4AF37] dark:group-hover:text-white transition-colors">{article.title}</span>
                                     </div>
                                     <span className="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
                                 </button>
@@ -111,14 +109,14 @@ export default function HelpCenter() {
                 </div>
 
                 {/* Sticky Footer */}
-                <div className="absolute bottom-0 w-full bg-white/95 dark:bg-[#101322]/98 backdrop-blur-lg border-t border-slate-100 dark:border-[#1c1d27] p-5 pb-10 z-20 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
-                    <h2 className="text-[10px] font-black text-slate-500 dark:text-slate-400 mb-4 uppercase tracking-[0.2em] text-center">Besoin d'aide supplémentaire ?</h2>
+                <div className="absolute bottom-0 w-full bg-white/95 dark:bg-[#101322]/98 backdrop-blur-lg border-t border-black/5 dark:border-[#1c1d27] p-5 pb-10 z-20 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] transition-colors duration-500">
+                    <h2 className="text-[10px] font-black text-slate-500 dark:text-slate-400 mb-4 uppercase tracking-[0.2em] text-center transition-colors duration-500">Besoin d'aide supplémentaire ?</h2>
                     <div className="flex flex-col gap-3">
                         <button className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-4 px-4 rounded-2xl font-bold text-sm shadow-lg shadow-green-900/10 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
                             <span className="material-symbols-outlined">chat</span>
                             Contacter le Support via WhatsApp
                         </button>
-                        <button className="w-full bg-slate-100 dark:bg-[#1c1d27] text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-[#282b39] py-4 px-4 rounded-2xl font-bold text-sm border border-slate-200 dark:border-[#2f3344] flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+                        <button className="w-full bg-gray-50 dark:bg-[#1c1d27] text-slate-900 dark:text-white hover:bg-gray-100 dark:hover:bg-[#282b39] py-4 px-4 rounded-2xl font-bold text-sm border border-black/5 dark:border-[#2f3344] flex items-center justify-center gap-2 transition-all active:scale-[0.98] transition-colors duration-500">
                             <span className="material-symbols-outlined">mail</span>
                             Envoyer un Email
                         </button>

@@ -66,18 +66,18 @@ export default function Explorer({ profiles: initialProfiles, filters, intention
     ];
 
     return (
-        <div className="flex min-h-screen w-full flex-col bg-[#101322] font-sans text-white overflow-x-hidden">
+        <div className="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-[#101322] font-sans text-[#101322] dark:text-white overflow-x-hidden transition-colors duration-500">
             <Head title="Découverte" />
 
             {/* Header / Search */}
-            <header className="flex flex-col bg-[#101322] p-4 pb-6 sticky top-0 z-40 border-b border-white/10 gap-4">
+            <header className="flex flex-col bg-white dark:bg-[#101322] p-4 pb-6 sticky top-0 z-40 border-b border-black/5 dark:border-white/10 gap-4 transition-colors duration-500">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-black tracking-tight uppercase italic text-[#D4AF37]">Explorer</h1>
                         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Trouvez votre perle rare</p>
                     </div>
-                    <Link href={route('profile', 'me')} className="size-10 rounded-2xl bg-[#1a1f35] flex items-center justify-center border border-white/10 overflow-hidden shadow-lg shadow-black/20">
-                        <span className="material-symbols-outlined text-gray-400">person</span>
+                    <Link href={route('profile', 'me')} className="size-10 rounded-2xl bg-gray-100 dark:bg-[#1a1f35] flex items-center justify-center border border-black/5 dark:border-white/10 overflow-hidden shadow-lg shadow-black/5 dark:shadow-black/20 transition-colors duration-500">
+                        <span className="material-symbols-outlined text-gray-500 dark:text-gray-400">person</span>
                     </Link>
                 </div>
 
@@ -91,12 +91,12 @@ export default function Explorer({ profiles: initialProfiles, filters, intention
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Nom, intérêt, ville..."
-                            className="block w-full py-4 pl-12 pr-4 text-sm bg-[#1a1f35] border border-white/10 rounded-2xl focus:ring-1 focus:ring-[#D4AF37] placeholder-gray-500 transition-all outline-none"
+                            className="block w-full py-4 pl-12 pr-4 text-sm bg-gray-100 dark:bg-[#1a1f35] border border-black/5 dark:border-white/10 rounded-2xl focus:ring-1 focus:ring-[#D4AF37] text-[#101322] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 transition-all outline-none"
                         />
                     </form>
                     <button
                         onClick={() => setShowFilters(true)}
-                        className={`size-14 rounded-2xl border flex items-center justify-center transition-all ${showFilters || Object.keys(filters).length > 1 ? 'bg-[#D4AF37] border-[#D4AF37] text-[#101322]' : 'bg-[#1a1f35] border-[#white/10] text-white'}`}
+                        className={`size-14 rounded-2xl border flex items-center justify-center transition-all ${showFilters || Object.keys(filters).length > 1 ? 'bg-[#D4AF37] border-[#D4AF37] text-[#101322]' : 'bg-gray-100 dark:bg-[#1a1f35] border-black/5 dark:border-white/10 text-[#101322] dark:text-white'}`}
                     >
                         <span className="material-symbols-outlined">tune</span>
                     </button>
@@ -112,10 +112,10 @@ export default function Explorer({ profiles: initialProfiles, filters, intention
                             <button
                                 key={cat.label}
                                 onClick={() => router.get(route('explorer'), { search: cat.label })}
-                                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#1a1f35] border border-white/10 whitespace-nowrap active:scale-95 transition-all hover:border-[#D4AF37]/30"
+                                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white dark:bg-[#1a1f35] border border-black/5 dark:border-white/10 whitespace-nowrap active:scale-95 transition-all hover:border-[#D4AF37]/30 shadow-sm dark:shadow-none transition-colors duration-500"
                             >
                                 <span className="material-symbols-outlined text-sm text-[#D4AF37]">{cat.icon}</span>
-                                <span className="text-[11px] font-black uppercase tracking-widest">{cat.label}</span>
+                                <span className="text-[11px] font-black uppercase tracking-widest text-[#101322] dark:text-white">{cat.label}</span>
                             </button>
                         ))}
                     </div>
@@ -150,7 +150,7 @@ export default function Explorer({ profiles: initialProfiles, filters, intention
                                     >
                                         <Link
                                             href={route('profile', profile.id)}
-                                            className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden bg-[#1a1f35] shadow-2xl transition-transform active:scale-95 flex flex-col border border-white/5"
+                                            className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden bg-white dark:bg-[#1a1f35] shadow-xl dark:shadow-2xl transition-transform active:scale-95 flex flex-col border border-black/5 dark:border-white/5 transition-colors duration-500"
                                         >
                                             <img
                                                 src={profile.avatar || 'https://via.placeholder.com/400x600'}
@@ -208,8 +208,8 @@ export default function Explorer({ profiles: initialProfiles, filters, intention
 
                         {profiles.length === 0 && (
                             <div className="flex flex-col items-center justify-center py-24 text-center">
-                                <div className="size-20 rounded-full bg-[#1a1f35] flex items-center justify-center mb-6 border border-white/5">
-                                    <span className="material-symbols-outlined text-4xl text-gray-700">person_search</span>
+                                <div className="size-20 rounded-full bg-gray-100 dark:bg-[#1a1f35] flex items-center justify-center mb-6 border border-black/5 dark:border-white/5 transition-colors duration-500">
+                                    <span className="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-700">person_search</span>
                                 </div>
                                 <h4 className="text-lg font-black uppercase tracking-tighter italic mb-2">Aucun résultat</h4>
                                 <p className="text-xs text-gray-500 max-w-[200px] leading-relaxed">
@@ -241,11 +241,11 @@ export default function Explorer({ profiles: initialProfiles, filters, intention
                             animate={{ y: 0 }}
                             exit={{ y: "100%" }}
                             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="w-full bg-[#161a2e] border-t border-white/10 rounded-t-[3rem] p-8 space-y-8 max-h-[90vh] overflow-y-auto"
+                            className="w-full bg-white dark:bg-[#161a2e] border-t border-black/5 dark:border-white/10 rounded-t-[3rem] p-8 space-y-8 max-h-[90vh] overflow-y-auto transition-colors duration-500"
                         >
                             <div className="flex items-center justify-between font-black uppercase italic italic tracking-tighter">
                                 <h2 className="text-2xl text-[#D4AF37]">Filtres</h2>
-                                <button onClick={() => setShowFilters(false)} className="size-10 flex items-center justify-center bg-white/5 rounded-full">
+                                <button onClick={() => setShowFilters(false)} className="size-10 flex items-center justify-center bg-gray-100 dark:bg-white/5 text-[#101322] dark:text-white rounded-full transition-colors duration-500">
                                     <span className="material-symbols-outlined">close</span>
                                 </button>
                             </div>
@@ -258,7 +258,7 @@ export default function Explorer({ profiles: initialProfiles, filters, intention
                                         <button
                                             key={g}
                                             onClick={() => setGender(g)}
-                                            className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${gender === g ? 'bg-[#D4AF37] text-[#101322] border-[#D4AF37]' : 'bg-[#1a1f35] border-white/5 text-gray-400'}`}
+                                            className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${gender === g ? 'bg-[#D4AF37] text-[#101322] border-[#D4AF37]' : 'bg-gray-50 dark:bg-[#1a1f35] border-black/5 dark:border-white/5 text-gray-500 dark:text-gray-400'}`}
                                         >
                                             {g || 'Peu importe'}
                                         </button>
@@ -276,12 +276,12 @@ export default function Explorer({ profiles: initialProfiles, filters, intention
                                     <input
                                         type="range" min="18" max="60" value={ageMin}
                                         onChange={e => setAgeMin(parseInt(e.target.value))}
-                                        className="w-full h-1.5 bg-[#1a1f35] rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
+                                        className="w-full h-1.5 bg-gray-100 dark:bg-[#1a1f35] rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
                                     />
                                     <input
                                         type="range" min="18" max="60" value={ageMax}
                                         onChange={e => setAgeMax(Math.max(ageMin + 1, parseInt(e.target.value)))}
-                                        className="w-full h-1.5 bg-[#1a1f35] rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
+                                        className="w-full h-1.5 bg-gray-100 dark:bg-[#1a1f35] rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
                                     />
                                 </div>
                             </div>
@@ -295,7 +295,7 @@ export default function Explorer({ profiles: initialProfiles, filters, intention
                                 <input
                                     type="range" min="5" max="200" step="5" value={distance}
                                     onChange={e => setDistance(parseInt(e.target.value))}
-                                    className="w-full h-1.5 bg-[#1a1f35] rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
+                                    className="w-full h-1.5 bg-gray-100 dark:bg-[#1a1f35] rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
                                 />
                             </div>
 
@@ -305,7 +305,7 @@ export default function Explorer({ profiles: initialProfiles, filters, intention
                                 <div className="flex flex-wrap gap-2">
                                     <button
                                         onClick={() => setIntentionId('')}
-                                        className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${intentionId === '' ? 'bg-[#D4AF37] text-[#101322] border-[#D4AF37]' : 'bg-[#1a1f35] border-white/5 text-gray-400'}`}
+                                        className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${intentionId === '' ? 'bg-[#D4AF37] text-[#101322] border-[#D4AF37]' : 'bg-gray-50 dark:bg-[#1a1f35] border-black/5 dark:border-white/5 text-gray-500 dark:text-gray-400'}`}
                                     >
                                         Toutes
                                     </button>
@@ -313,7 +313,7 @@ export default function Explorer({ profiles: initialProfiles, filters, intention
                                         <button
                                             key={int.id}
                                             onClick={() => setIntentionId(int.id)}
-                                            className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${intentionId === int.id ? 'bg-[#D4AF37] text-[#101322] border-[#D4AF37]' : 'bg-[#1a1f35] border-white/5 text-gray-400'}`}
+                                            className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${intentionId === int.id ? 'bg-[#D4AF37] text-[#101322] border-[#D4AF37]' : 'bg-gray-50 dark:bg-[#1a1f35] border-black/5 dark:border-white/5 text-gray-500 dark:text-gray-400'}`}
                                         >
                                             {int.label}
                                         </button>

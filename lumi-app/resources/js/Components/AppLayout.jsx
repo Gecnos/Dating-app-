@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
-import useMatchNotifications from '@/Hooks/useMatchNotifications';
+import useGlobalNotifications from '@/Hooks/useGlobalNotifications';
 import LocationTracker from './LocationTracker';
 
 import NavigationBar from './NavigationBar';
@@ -8,8 +8,8 @@ import NavigationBar from './NavigationBar';
 export default function AppLayout({ children }) {
     const { url } = usePage();
 
-    // Initialize match notifications listener
-    useMatchNotifications();
+    // Initialize global events listener
+    useGlobalNotifications();
 
     useEffect(() => {
         // Check local storage for theme preference

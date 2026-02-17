@@ -40,6 +40,7 @@ class User extends Authenticatable
         'languages',
         'city',
         'is_ghost_mode',
+        'password_changed_at',
     ];
 
     /**
@@ -50,6 +51,17 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    /**
+     * The attributes that should be appended to arrays.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'age',
+        'masked_email',
+        'avatar_url',
     ];
 
     /**
@@ -65,6 +77,7 @@ class User extends Authenticatable
             'interests' => 'array',
             'languages' => 'array',
             'is_ghost_mode' => 'boolean',
+            'password_changed_at' => 'datetime',
         ];
     }
 
@@ -154,5 +167,59 @@ class User extends Authenticatable
     public function blockedBy()
     {
         return $this->hasMany(Block::class, 'blocked_id');
+    }
+
+    /**
+     * Vérifie si l'utilisateur est en ligne (dernière activité il y a moins de 5 minutes).
+     */
+    public function isOnline()
+    {
+        return $this->updated_at && $this->updated_at->gt(now()->subMinutes(5));
+    }
+
+    /**
+     * Accesseur pour l'URL de l'avatar.
+     */
+    public function getAvatarUrlAttribute()
+    {
+        if (!$this->avatar) {
+            return "https://ui-avatars.com/api/?name=" . urlencode($this->name) . "&color=D4AF37&background=101322";
+        }
+        
+        if (strpos($this->avatar, 'http') === 0) {
+            return $this->avatar;
+        }
+
+        return asset('storage/' . $this->avatar);
+    }
+
+    /**
+     * Accesseur pour l'email masqué (ex: v...y@gmail.com).
+     */
+    public function getMaskedEmailAttribute()
+    {
+        $email = $this->email;
+        if (!$email) return '';
+        
+        $parts = explode('@', $email);
+        $name = $parts[0];
+        $domain = $parts[1];
+        
+        $len = strlen($name);
+        if ($len <= 2) {
+            $maskedName = $name;
+        } else {
+            $maskedName = substr($name, 0, 1) . str_repeat('.', 3) . substr($name, -1);
+        }
+        
+        return $maskedName . '@' . $domain;
+    }
+
+    /**
+     * Accesseur pour l'âge.
+     */
+    public function getAgeAttribute()
+    {
+        return $this->date_of_birth ? \Carbon\Carbon::parse($this->date_of_birth)->age : null;
     }
 }

@@ -73,7 +73,7 @@ export default function ProfileDetails({ profile, isMutual }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#101322] text-white font-sans pb-32 overflow-x-hidden">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-sans pb-32 overflow-x-hidden transition-colors duration-500">
             <Head title={`${profile.name} - Profil`} />
 
             {/* Photo Enlargement Popup */}
@@ -114,26 +114,26 @@ export default function ProfileDetails({ profile, isMutual }) {
                             initial={{ y: "100%" }}
                             animate={{ y: 0 }}
                             exit={{ y: "100%" }}
-                            className="relative w-full max-w-md bg-[#161b2e] rounded-t-[3rem] p-8 border-t border-white/10 shadow-2xl"
+                            className="relative w-full max-w-md bg-white dark:bg-[#161b2e] rounded-t-[3rem] p-8 border-t border-black/5 dark:border-white/10 shadow-2xl transition-colors duration-500"
                         >
-                            <div className="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" />
-                            <h3 className="text-xl font-black italic tracking-tighter mb-6 text-center">Options du profil</h3>
+                            <div className="w-12 h-1 bg-gray-200 dark:bg-white/10 rounded-full mx-auto mb-8" />
+                            <h3 className="text-xl font-black italic tracking-tighter mb-6 text-center text-[#101322] dark:text-white transition-colors duration-500">Options du profil</h3>
                             <div className="space-y-3">
                                 <button
                                     onClick={() => setReportModal(true)}
-                                    className="w-full py-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center gap-3 text-red-500 font-bold active:scale-95 transition-all"
+                                    className="w-full py-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-black/5 dark:border-white/5 flex items-center justify-center gap-3 text-red-500 font-bold active:scale-95 transition-all transition-colors duration-500"
                                 >
                                     <span className="material-symbols-outlined text-xl">report</span>
                                     Signaler le profil
                                 </button>
                                 <button
                                     onClick={() => setBlockConfirm(true)}
-                                    className="w-full py-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center gap-3 text-gray-400 font-bold active:scale-95 transition-all"
+                                    className="w-full py-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-black/5 dark:border-white/5 flex items-center justify-center gap-3 text-gray-500 dark:text-gray-400 font-bold active:scale-95 transition-all transition-colors duration-500"
                                 >
                                     <span className="material-symbols-outlined text-xl">block</span>
                                     Bloquer cet utilisateur
                                 </button>
-                                <button onClick={() => setShowOptions(false)} className="w-full py-4 rounded-2xl bg-white/10 flex items-center justify-center text-sm font-black uppercase tracking-widest mt-4">
+                                <button onClick={() => setShowOptions(false)} className="w-full py-4 rounded-2xl bg-gray-100 dark:bg-white/10 flex items-center justify-center text-sm font-black uppercase tracking-widest mt-4 text-[#101322] dark:text-white transition-colors duration-500">
                                     Annuler
                                 </button>
                             </div>
@@ -145,14 +145,14 @@ export default function ProfileDetails({ profile, isMutual }) {
                 {reportModal && (
                     <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-                        <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="relative bg-[#161b2e] w-full max-w-sm rounded-[2.5rem] p-8 border border-white/10 shadow-2xl">
-                            <h3 className="text-xl font-black italic tracking-tight mb-6">Signaler {profile.name}</h3>
+                        <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="relative bg-white dark:bg-[#161b2e] w-full max-w-sm rounded-[2.5rem] p-8 border border-black/5 dark:border-white/10 shadow-2xl transition-colors duration-500">
+                            <h3 className="text-xl font-black italic tracking-tight mb-6 text-[#101322] dark:text-white transition-colors duration-500">Signaler {profile.name}</h3>
                             <div className="space-y-2 mb-6">
                                 {reportReasons.map(reason => (
                                     <button
                                         key={reason}
                                         onClick={() => setReportReason(reason)}
-                                        className={`w-full p-4 rounded-2xl text-xs font-bold text-left transition-all ${reportReason === reason ? 'bg-[#D4AF37] text-[#101322]' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+                                        className={`w-full p-4 rounded-2xl text-xs font-bold text-left transition-all ${reportReason === reason ? 'bg-[#D4AF37] text-white dark:text-[#101322]' : 'bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10'} transition-colors duration-500`}
                                     >
                                         {reason}
                                     </button>
@@ -162,7 +162,7 @@ export default function ProfileDetails({ profile, isMutual }) {
                                 value={reportDescription}
                                 onChange={(e) => setReportDescription(e.target.value)}
                                 placeholder="Détails supplémentaires (optionnel)..."
-                                className="w-full bg-white/5 border-none rounded-2xl p-4 text-xs italic text-gray-300 mb-6 min-h-[100px] focus:ring-[#D4AF37]"
+                                className="w-full bg-gray-50 dark:bg-white/5 border-black/5 dark:border-none rounded-2xl p-4 text-xs italic text-[#101322] dark:text-gray-300 mb-6 min-h-[100px] focus:ring-[#D4AF37] transition-colors duration-500"
                             ></textarea>
                             <div className="flex gap-3">
                                 <button onClick={() => setReportModal(false)} className="flex-1 py-4 rounded-2xl bg-white/10 font-bold text-xs">Annuler</button>
@@ -176,17 +176,17 @@ export default function ProfileDetails({ profile, isMutual }) {
                 {blockConfirm && (
                     <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-                        <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="relative bg-[#161b2e] w-full max-w-sm rounded-[2.5rem] p-8 border border-white/10 shadow-2xl text-center">
-                            <div className="size-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
+                        <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="relative bg-white dark:bg-[#161b2e] w-full max-w-sm rounded-[2.5rem] p-8 border border-black/5 dark:border-white/10 shadow-2xl text-center transition-colors duration-500">
+                            <div className="size-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500 transition-colors duration-500">
                                 <span className="material-symbols-outlined text-4xl">block_flipped</span>
                             </div>
-                            <h3 className="text-xl font-black italic tracking-tight mb-2">Bloquer {profile.name} ?</h3>
-                            <p className="text-xs text-gray-500 mb-8 leading-relaxed">
+                            <h3 className="text-xl font-black italic tracking-tight mb-2 text-[#101322] dark:text-white transition-colors duration-500">Bloquer {profile.name} ?</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-8 leading-relaxed transition-colors duration-500">
                                 Vous ne verrez plus ce profil et cet utilisateur ne pourra plus interagir avec vous.
                             </p>
                             <div className="flex gap-3">
-                                <button onClick={() => setBlockConfirm(false)} className="flex-1 py-4 rounded-2xl bg-white/10 font-bold text-xs text-white">Annuler</button>
-                                <button onClick={handleBlock} className="flex-1 py-4 rounded-2xl bg-white text-red-600 font-black text-xs uppercase tracking-widest">Bloquer</button>
+                                <button onClick={() => setBlockConfirm(false)} className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-white/10 font-bold text-xs text-[#101322] dark:text-white transition-colors duration-500">Annuler</button>
+                                <button onClick={handleBlock} className="flex-1 py-4 rounded-2xl bg-[#101322] dark:bg-white text-white dark:text-red-500 font-black text-xs uppercase tracking-widest transition-colors duration-500">Bloquer</button>
                             </div>
                         </motion.div>
                     </div>
@@ -194,17 +194,17 @@ export default function ProfileDetails({ profile, isMutual }) {
             </AnimatePresence>
 
             {/* Sticky Header */}
-            <header className="fixed top-0 inset-x-0 h-16 bg-[#101322] z-50 flex items-center justify-between px-6 border-b border-white/10">
-                <button onClick={() => window.history.back()} className="size-10 flex items-center justify-center rounded-xl bg-[#1a1f35] border border-white/10 active:scale-90 transition-transform">
-                    <span className="material-symbols-outlined text-gray-400">arrow_back</span>
+            <header className="fixed top-0 inset-x-0 h-16 bg-white/90 dark:bg-[#101322]/90 backdrop-blur-xl z-50 flex items-center justify-between px-6 border-b border-black/5 dark:border-white/10 transition-all duration-500">
+                <button onClick={() => window.history.back()} className="size-10 flex items-center justify-center rounded-xl bg-gray-50 dark:bg-[#1a1f35] border border-black/5 dark:border-white/10 active:scale-90 transition-all transition-colors duration-500">
+                    <span className="material-symbols-outlined text-gray-500 dark:text-gray-400">arrow_back</span>
                 </button>
-                <div className="flex items-center gap-2 bg-[#D4AF37]/20 px-3 py-1.5 rounded-full border border-[#D4AF37]/30">
+                <div className="flex items-center gap-2 bg-[#D4AF37]/10 dark:bg-[#D4AF37]/20 px-3 py-1.5 rounded-full border border-[#D4AF37]/20 dark:border-[#D4AF37]/30 transition-colors duration-500">
                     <span className="material-symbols-outlined text-[#D4AF37] text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                     <span className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-wider">Certifié</span>
                 </div>
                 {!isOwnProfile && (
-                    <button onClick={() => setShowOptions(true)} className="size-10 flex items-center justify-center rounded-xl bg-[#1a1f35] border border-white/10 active:scale-90 transition-transform">
-                        <span className="material-symbols-outlined text-gray-400">more_vert</span>
+                    <button onClick={() => setShowOptions(true)} className="size-10 flex items-center justify-center rounded-xl bg-gray-50 dark:bg-[#1a1f35] border border-black/5 dark:border-white/10 active:scale-90 transition-all transition-colors duration-500">
+                        <span className="material-symbols-outlined text-gray-500 dark:text-gray-400">more_vert</span>
                     </button>
                 )}
                 {isOwnProfile && <div className="size-10" />}
@@ -249,12 +249,12 @@ export default function ProfileDetails({ profile, isMutual }) {
 
                 {/* Verification/Badge Overlay */}
                 <div className="absolute bottom-10 left-6 z-30">
-                    <div className="flex items-center gap-3 bg-[#1a1f35] border border-white/10 p-4 rounded-[2rem] shadow-2xl">
+                    <div className="flex items-center gap-3 bg-white/90 dark:bg-[#1a1f35]/90 backdrop-blur-xl border border-black/5 dark:border-white/10 p-4 rounded-[2rem] shadow-2xl transition-all duration-500">
                         <div className="size-12 rounded-full bg-[#D4AF37] flex items-center justify-center shadow-lg shadow-[#D4AF37]/20">
-                            <span className="material-symbols-outlined text-[#101322] text-2xl">{profile.intention?.icon || 'favorite'}</span>
+                            <span className="material-symbols-outlined text-white dark:text-[#101322] text-2xl transition-colors duration-500">{profile.intention?.icon || 'favorite'}</span>
                         </div>
                         <div>
-                            <p className="text-[10px] font-black uppercase text-gray-400 tracking-tighter leading-none">Intention</p>
+                            <p className="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-tighter leading-none transition-colors duration-500">Intention</p>
                             <p className="text-sm font-black italic text-[#D4AF37] uppercase">{profile.intention?.label || 'Sérieux'}</p>
                         </div>
                     </div>
@@ -266,8 +266,8 @@ export default function ProfileDetails({ profile, isMutual }) {
                 {/* Header Info */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-4xl font-black italic tracking-tighter">{profile.name}, {age} ans</h1>
-                        <div className="flex items-center gap-1.5 text-gray-400 mt-1">
+                        <h1 className="text-4xl font-black italic tracking-tighter text-[#101322] dark:text-white transition-colors duration-500">{profile.name}, {age} ans</h1>
+                        <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 mt-1 transition-colors duration-500">
                             <span className="material-symbols-outlined text-sm text-[#D4AF37]">location_on</span>
                             <span className="text-xs font-bold uppercase tracking-widest">{profile.city || 'Cotonou'} • {profile.distance_km ? `${profile.distance_km}km` : 'À proximité'}</span>
                         </div>
@@ -278,11 +278,11 @@ export default function ProfileDetails({ profile, isMutual }) {
                 {/* Stats/Attributes Grid */}
                 <div className="grid grid-cols-2 gap-3">
                     {attributes.map((attr, idx) => (
-                        <div key={idx} className="p-4 rounded-3xl bg-[#1a1f35] border border-white/10 flex items-center gap-3">
+                        <div key={idx} className="p-4 rounded-3xl bg-white dark:bg-[#1a1f35] border border-black/5 dark:border-white/10 flex items-center gap-3 transition-colors duration-500 shadow-sm dark:shadow-none">
                             <span className="material-symbols-outlined text-[#D4AF37] opacity-60 text-xl">{attr.icon}</span>
                             <div className="min-w-0">
-                                <p className="text-[9px] font-black text-gray-500 uppercase tracking-tighter leading-none">{attr.label}</p>
-                                <p className="text-xs font-bold truncate text-gray-200">{attr.value}</p>
+                                <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-tighter leading-none transition-colors duration-500">{attr.label}</p>
+                                <p className="text-xs font-bold truncate text-[#101322] dark:text-gray-200 transition-colors duration-500">{attr.value}</p>
                             </div>
                         </div>
                     ))}
@@ -291,11 +291,11 @@ export default function ProfileDetails({ profile, isMutual }) {
                 {/* Bio Section */}
                 <section className="space-y-4">
                     <div className="flex items-center gap-3">
-                        <span className="h-px flex-1 bg-white/10" />
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">À propos</h3>
-                        <span className="h-px flex-1 bg-white/10" />
+                        <span className="h-px flex-1 bg-black/5 dark:bg-white/10 transition-colors duration-500" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500 transition-colors duration-500">À propos</h3>
+                        <span className="h-px flex-1 bg-black/5 dark:bg-white/10 transition-colors duration-500" />
                     </div>
-                    <p className="text-sm font-medium leading-relaxed text-gray-300 italic text-center px-4">
+                    <p className="text-sm font-medium leading-relaxed text-gray-500 dark:text-gray-300 italic text-center px-4 transition-colors duration-500">
                         "{profile.bio || 'Cet utilisateur n\'a pas encore rédigé de bio.'}"
                     </p>
                 </section>
@@ -305,7 +305,7 @@ export default function ProfileDetails({ profile, isMutual }) {
                     <h3 className="text-xs font-black uppercase tracking-widest text-[#D4AF37]">Mes centres d'intérêt</h3>
                     <div className="flex flex-wrap gap-2">
                         {(profile.interests || []).map((interest, i) => (
-                            <span key={i} className="px-5 py-2.5 bg-[#1a1f35] border border-white/10 rounded-2xl text-[11px] font-bold text-gray-200 hover:border-[#D4AF37]/40 transition-colors">
+                            <span key={i} className="px-5 py-2.5 bg-white dark:bg-[#1a1f35] border border-black/5 dark:border-white/10 rounded-2xl text-[11px] font-bold text-gray-500 dark:text-gray-200 hover:border-[#D4AF37]/40 transition-colors duration-500 shadow-sm dark:shadow-none">
                                 {typeof interest === 'string' ? interest : interest.label}
                             </span>
                         ))}

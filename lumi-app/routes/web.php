@@ -11,6 +11,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SecurityController;
 
 use Inertia\Inertia;
 
@@ -122,11 +123,20 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/api/blocks/{user}', [BlockController::class, 'destroy']);
 
     Route::get('/api/messages/{user_id}', [ChatController::class, 'index']);
+    Route::get('/api/messages/{user_id}/fetch', [ChatController::class, 'fetchMessages']);
     Route::post('/api/messages', [ChatController::class, 'store']);
 
     Route::get('/api/notifications', [NotificationController::class, 'index']);
     Route::post('/api/notifications/read', [NotificationController::class, 'markAsRead']);
     Route::delete('/api/notifications/{id}', [NotificationController::class, 'destroy']);
+
+    Route::get('/api/security/info', [SecurityController::class, 'getSecurityInfo']);
+    Route::post('/api/security/password', [SecurityController::class, 'updatePassword'])->name('security.password.update');
+
+    Route::get('/photos/manage', [UserController::class, 'photoManagement'])->name('photos.manage');
+    Route::post('/api/photos', [UserController::class, 'addPhoto'])->name('photos.add');
+    Route::delete('/api/photos/{id}', [UserController::class, 'deletePhoto'])->name('photos.delete');
+    Route::post('/api/photos/reorder', [UserController::class, 'reorderPhotos'])->name('photos.reorder');
 });
 
 Route::prefix('admin')->middleware(['auth'])->group(function () {

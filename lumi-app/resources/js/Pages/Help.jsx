@@ -22,14 +22,14 @@ export default function Help() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#F9F9FB] dark:bg-[#101322] text-[#111218] dark:text-white font-sans pb-10">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-sans pb-10 transition-colors duration-500">
             <Head title="Aide & Support - Lumi" />
 
-            <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#101322]/80 backdrop-blur-xl px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
+            <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#101322]/80 backdrop-blur-xl px-6 py-4 flex items-center justify-between border-b border-black/5 dark:border-white/10 transition-all duration-500">
                 <Link href={route('settings')} className="w-10 h-10 flex items-center justify-start">
-                    <span className="material-symbols-outlined text-gray-800 dark:text-white">arrow_back_ios</span>
+                    <span className="material-symbols-outlined text-[#101322] dark:text-white transition-colors duration-500">arrow_back_ios</span>
                 </Link>
-                <h1 className="text-lg font-bold">Centre d'aide</h1>
+                <h1 className="text-lg font-bold text-[#101322] dark:text-white transition-colors duration-500">Centre d'aide</h1>
                 <div className="w-10" />
             </header>
 
@@ -41,21 +41,21 @@ export default function Help() {
                             <span className="material-symbols-outlined text-2xl">support_agent</span>
                         </div>
                         <div>
-                            <h2 className="font-bold text-lg">Besoin d'aide ?</h2>
-                            <p className="text-xs opacity-90">Notre équipe est là pour vous 24/7</p>
+                            <h2 className="font-bold text-lg text-white">Besoin d'aide ?</h2>
+                            <p className="text-xs text-white/90">Notre équipe est là pour vous 24/7</p>
                         </div>
                     </div>
-                    <button className="w-full py-3 bg-white text-[#D4AF37] font-bold rounded-xl text-sm active:scale-95 transition-transform">
+                    <button className="w-full py-3 bg-white text-[#D4AF37] font-bold rounded-xl text-sm active:scale-95 transition-all shadow-lg shadow-black/10">
                         Contacter le support
                     </button>
                 </div>
 
                 {/* FAQs */}
                 <div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-4 ml-2">Questions Fréquentes</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 mb-4 ml-2 transition-colors duration-500">Questions Fréquentes</h3>
                     <div className="space-y-3">
                         {faqs.map((faq, index) => (
-                            <div key={index} className="bg-white dark:bg-[#161b2e] p-5 rounded-2xl shadow-sm border border-gray-50 dark:border-white/5">
+                            <div key={index} className="bg-white dark:bg-[#161b2e] p-5 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 transition-colors duration-500">
                                 <h4 className="font-bold text-sm mb-2 text-[#D4AF37]">{faq.q}</h4>
                                 <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{faq.a}</p>
                             </div>

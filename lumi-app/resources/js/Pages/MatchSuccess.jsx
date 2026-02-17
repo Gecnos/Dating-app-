@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 export default function MatchSuccess({ user1, user2 }) {
     return (
-        <div className="flex min-h-screen w-full flex-col items-center justify-center bg-[#101322] font-sans text-white p-8 overflow-hidden">
+        <div className="flex min-h-screen w-full flex-col items-center justify-center bg-white dark:bg-[#101322] font-sans text-[#101322] dark:text-white p-8 overflow-hidden transition-colors duration-500">
             <Head title="C'est un Match !" />
 
             {/* Background elements (Animated) */}
@@ -36,9 +36,9 @@ export default function MatchSuccess({ user1, user2 }) {
                     Félicitations !
                 </motion.span>
 
-                <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter leading-none mb-12">
+                <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter leading-none mb-12 text-[#101322] dark:text-white transition-colors duration-500">
                     C'EST UN <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#D4AF37] to-white">MATCH !</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#E1AD01] to-[#D4AF37] dark:from-white dark:via-[#D4AF37] dark:to-white">MATCH !</span>
                 </h1>
 
                 {/* Avatars with matching animation */}
@@ -47,7 +47,7 @@ export default function MatchSuccess({ user1, user2 }) {
                         initial={{ x: -100, rotate: -20, opacity: 0 }}
                         animate={{ x: 0, rotate: -10, opacity: 1 }}
                         transition={{ type: 'spring', damping: 12 }}
-                        className="relative z-10 size-32 md:size-40 rounded-[2.5rem] border-4 border-[#101322] shadow-2xl overflow-hidden"
+                        className="relative z-10 size-32 md:size-40 rounded-[2.5rem] border-4 border-white dark:border-[#101322] shadow-2xl overflow-hidden transition-colors duration-500"
                     >
                         <img src={user1?.avatar || 'https://via.placeholder.com/400'} alt="Vous" className="w-full h-full object-cover" />
                     </motion.div>
@@ -58,20 +58,20 @@ export default function MatchSuccess({ user1, user2 }) {
                         transition={{ delay: 0.5, type: 'spring' }}
                         className="relative z-20 size-16 bg-[#D4AF37] rounded-full flex items-center justify-center shadow-2xl shadow-[#D4AF37]/40"
                     >
-                        <span className="material-symbols-outlined text-[#101322] text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+                        <span className="material-symbols-outlined text-white dark:text-[#101322] text-3xl transition-colors duration-500" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
                     </motion.div>
 
                     <motion.div
                         initial={{ x: 100, rotate: 20, opacity: 0 }}
                         animate={{ x: 0, rotate: 10, opacity: 1 }}
                         transition={{ type: 'spring', damping: 12 }}
-                        className="relative z-10 size-32 md:size-40 rounded-[2.5rem] border-4 border-[#101322] shadow-2xl overflow-hidden"
+                        className="relative z-10 size-32 md:size-40 rounded-[2.5rem] border-4 border-white dark:border-[#101322] shadow-2xl overflow-hidden transition-colors duration-500"
                     >
                         <img src={user2?.avatar || 'https://via.placeholder.com/400'} alt="Match" className="w-full h-full object-cover" />
                     </motion.div>
                 </div>
 
-                <p className="text-gray-400 text-sm font-medium mb-12 max-w-xs mx-auto">
+                <p className="text-gray-400 dark:text-gray-500 text-sm font-medium mb-12 max-w-xs mx-auto transition-colors duration-500">
                     Vous et <strong>{user2?.name || 'votre match'}</strong> vous plaisez mutuellement !
                 </p>
 
@@ -79,13 +79,13 @@ export default function MatchSuccess({ user1, user2 }) {
                 <div className="flex flex-col gap-4 w-full max-w-xs mx-auto">
                     <Link
                         href={route('chat.show', user2?.id || 1)}
-                        className="flex h-16 items-center justify-center rounded-2xl bg-white text-[#101322] font-black uppercase tracking-widest text-xs shadow-xl shadow-white/5 active:scale-95 transition-all"
+                        className="flex h-16 items-center justify-center rounded-2xl bg-[#D4AF37] dark:bg-white text-white dark:text-[#101322] font-black uppercase tracking-widest text-xs shadow-xl shadow-[#D4AF37]/20 dark:shadow-white/5 active:scale-95 transition-all transition-colors duration-500"
                     >
                         Envoyer un message
                     </Link>
                     <Link
                         href={route('discovery')}
-                        className="flex h-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-xs active:scale-95 transition-all"
+                        className="flex h-16 items-center justify-center rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 text-gray-400 dark:text-white font-black uppercase tracking-widest text-xs active:scale-95 transition-all transition-colors duration-500"
                     >
                         Continuer à swiper
                     </Link>

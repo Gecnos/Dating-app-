@@ -13,30 +13,30 @@ export default function Likes({ receivedLikes: initialReceived, sentLikes: initi
     }, [initialReceived, initialSent]);
 
     return (
-        <div className="flex min-h-screen w-full flex-col bg-[#101322] font-sans text-white">
+        <div className="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-[#101322] font-sans text-[#101322] dark:text-white transition-colors duration-500">
             <Head title="Likes" />
 
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-[#101322] border-b border-white/10 px-6 py-4">
+            <header className="sticky top-0 z-50 bg-white dark:bg-[#101322] border-b border-black/5 dark:border-white/10 px-6 py-4 transition-colors duration-500">
                 <div className="flex items-center justify-between max-w-lg mx-auto">
-                    <h1 className="text-xl font-black tracking-tight uppercase italic">Vos Coups de Cœur</h1>
-                    <div className="flex items-center gap-2 bg-[#D4AF37]/20 px-3 py-1.5 rounded-full border border-[#D4AF37]/30">
+                    <h1 className="text-xl font-black tracking-tight uppercase italic text-[#101322] dark:text-white transition-colors duration-500">Vos Coups de Cœur</h1>
+                    <div className="flex items-center gap-2 bg-[#D4AF37]/10 dark:bg-[#D4AF37]/20 px-3 py-1.5 rounded-full border border-[#D4AF37]/20 dark:border-[#D4AF37]/30">
                         <span className="material-symbols-outlined text-[#D4AF37] text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
                         <span className="text-[10px] font-black text-[#D4AF37] uppercase tracking-wider">{isPremium ? 'Membre Premium' : 'Lumi Free'}</span>
                     </div>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex mt-8 bg-[#161b2e] rounded-2xl p-1.5 max-w-lg mx-auto border border-white/5 shadow-inner">
+                <div className="flex mt-8 bg-gray-100 dark:bg-[#161b2e] rounded-2xl p-1.5 max-w-lg mx-auto border border-black/5 dark:border-white/5 shadow-inner transition-colors duration-500">
                     <button
                         onClick={() => setActiveTab('received')}
-                        className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'received' ? 'bg-[#D4AF37] text-[#101322] shadow-xl' : 'text-gray-500 hover:text-gray-300'}`}
+                        className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'received' ? 'bg-[#D4AF37] text-[#101322] shadow-xl' : 'text-gray-400 dark:text-gray-500 hover:text-[#101322] dark:hover:text-gray-300'}`}
                     >
                         Reçus ({receivedLikes?.length || 0})
                     </button>
                     <button
                         onClick={() => setActiveTab('sent')}
-                        className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'sent' ? 'bg-[#D4AF37] text-[#101322] shadow-xl' : 'text-gray-500 hover:text-gray-300'}`}
+                        className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'sent' ? 'bg-[#D4AF37] text-[#101322] shadow-xl' : 'text-gray-400 dark:text-gray-500 hover:text-[#101322] dark:hover:text-gray-300'}`}
                     >
                         Envoyés ({sentLikes?.length || 0})
                     </button>
@@ -64,7 +64,7 @@ export default function Likes({ receivedLikes: initialReceived, sentLikes: initi
                                 <Link
                                     key={like.id}
                                     href={route('profile', like.user?.id || '#')}
-                                    className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl transition-all active:scale-95 bg-[#161b2e]"
+                                    className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden border border-black/5 dark:border-white/10 shadow-xl dark:shadow-2xl transition-all active:scale-95 bg-white dark:bg-[#161b2e] transition-colors duration-500"
                                 >
                                     <div className="absolute inset-0">
                                         <img
@@ -98,10 +98,10 @@ export default function Likes({ receivedLikes: initialReceived, sentLikes: initi
                 {/* Empty State */}
                 {(activeTab === 'received' ? receivedLikes : sentLikes).length === 0 && (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <div className="size-20 bg-[#161b2e] rounded-full flex items-center justify-center mb-6 border border-white/5">
-                            <span className="material-symbols-outlined text-4xl text-gray-600">favorite</span>
+                        <div className="size-20 bg-white dark:bg-[#161b2e] rounded-full flex items-center justify-center mb-6 border border-black/5 dark:border-white/5 shadow-sm transition-colors duration-500">
+                            <span className="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600 transition-colors duration-500">favorite</span>
                         </div>
-                        <p className="text-sm font-black uppercase tracking-[0.2em] text-gray-500">Aucun Like</p>
+                        <p className="text-sm font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 transition-colors duration-500">Aucun Like</p>
                         <p className="text-xs mt-3 text-gray-600 font-medium px-10 leading-relaxed italic">
                             {activeTab === 'received'
                                 ? "Ne découragez pas ! Votre profil sera bientôt remarqué."

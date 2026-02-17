@@ -31,8 +31,8 @@ class MatchNotification implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('user.' . $this->match->user_id),
-            new Channel('user.' . $this->match->target_id),
+            new PrivateChannel('user.' . $this->match->user_id),
+            new PrivateChannel('user.' . $this->match->target_id),
         ];
     }
 

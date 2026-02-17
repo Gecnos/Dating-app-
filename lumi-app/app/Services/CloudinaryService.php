@@ -89,15 +89,29 @@ class CloudinaryService
     }
 
     /**
-     * Applique une transformation de flou.
+     * Supprime une image de Cloudinary.
      */
-    public function getBlurredUrl($url)
+    public function deleteImage($url)
     {
-        if (strpos($url, 'cloudinary.com') !== false) {
-            return str_replace('/upload/', '/upload/e_blur:2000/', $url);
+        if (!$this->isCloudinaryConfigured() || strpos($url, 'cloudinary.com') === false) {
+            return;
         }
-        
-        // Pas de transformation de flou facile en local sans bibliothèque type Intervention Image
-        return $url;
+
+        try {
+            $parts = explode('/upload/', $url);
+            if (count($parts) < 2) return;
+            
+            $pathParts = explode('/', $parts[1]);
+            if (strpos($pathParts[0], 'v') === 0 && is_numeric(substr($pathParts[0], 1))) {
+                array_shift($pathParts);
+            }
+            
+            $idWithExtension = implode('/', $pathParts);
+            $publicId = pathinfo($idWithExtension, PATHINFO_DIRNAME) . '/' . pathinfo($idWithExtension, PATHINFO_FILENAME);
+            if ($publicId[0] === '/') $publicId = substr($publicId, 1);
+
+            Cloudinary::destroy($publicId);
+        } catch (\Exception $e) {
+        }
     }
 }

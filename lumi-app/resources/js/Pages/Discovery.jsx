@@ -57,7 +57,7 @@ export default function Discovery({ initialProfiles }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#101322] font-['Be_Vietnam_Pro'] text-white transition-colors duration-300 flex flex-col relative overflow-hidden">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] font-['Be_Vietnam_Pro'] text-[#101322] dark:text-white transition-colors duration-500 flex flex-col relative overflow-hidden">
             <Head>
                 <title>Lumi - Découverte</title>
             </Head>
@@ -71,13 +71,13 @@ export default function Discovery({ initialProfiles }) {
             </div>
 
             {/* TopAppBar */}
-            <header className="flex items-center bg-[#101322] p-4 pb-2 justify-between sticky top-0 z-20 border-b border-white/10">
+            <header className="flex items-center bg-white dark:bg-[#101322] p-4 pb-2 justify-between sticky top-0 z-20 border-b border-black/5 dark:border-white/10 transition-colors duration-500">
                 <div className="flex size-12 items-center justify-start">
                     {/* Preferences button removed as per user request */}
                 </div>
-                <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center italic uppercase tracking-tighter">Découverte</h2>
+                <h2 className="text-[#101322] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center italic uppercase tracking-tighter transition-colors duration-500">Découverte</h2>
                 <div className="flex w-12 items-center justify-end">
-                    <button onClick={() => router.visit('/notifications')} className="flex cursor-pointer items-center justify-center rounded-full h-12 bg-transparent text-white hover:text-[#D4AF37] transition-colors">
+                    <button onClick={() => router.visit('/notifications')} className="flex cursor-pointer items-center justify-center rounded-full h-12 bg-transparent text-[#101322] dark:text-white hover:text-[#D4AF37] transition-colors">
                         <span className="material-symbols-outlined">notifications</span>
                     </button>
                 </div>
@@ -111,7 +111,7 @@ export default function Discovery({ initialProfiles }) {
                                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                             onClick={() => router.visit(`/profile/${profile.id}`)}
                                         >
-                                            <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 bg-[#161b2e]">
+                                            <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-black/5 dark:border-white/10 bg-white dark:bg-[#161b2e] transition-colors duration-500">
                                                 <div
                                                     className="absolute inset-0 bg-center bg-cover transition-transform duration-700 hover:scale-105"
                                                     style={{ backgroundImage: `url(${profile.avatar || 'https://via.placeholder.com/600'})` }}
@@ -141,13 +141,13 @@ export default function Discovery({ initialProfiles }) {
 
                                                     {/* Attributes Chips */}
                                                     <div className="flex gap-2 flex-wrap">
-                                                        <div className="flex h-7 items-center justify-center gap-x-1 rounded-full bg-[#1a1f35] px-3 border border-white/10">
+                                                        <div className="flex h-7 items-center justify-center gap-x-1 rounded-full bg-white/10 dark:bg-[#1a1f35] px-3 border border-white/20 dark:border-white/10 backdrop-blur-md">
                                                             <span className="material-symbols-outlined text-[16px] text-[#D4AF37]">business_center</span>
-                                                            <p className="text-[10px] font-medium uppercase tracking-wider">{profile.job || 'Indépendant'}</p>
+                                                            <p className="text-[10px] font-medium uppercase tracking-wider text-white">{profile.job || 'Indépendant'}</p>
                                                         </div>
-                                                        <div className="flex h-7 items-center justify-center gap-x-1 rounded-full bg-[#1a1f35] px-3 border border-white/10">
+                                                        <div className="flex h-7 items-center justify-center gap-x-1 rounded-full bg-white/10 dark:bg-[#1a1f35] px-3 border border-white/20 dark:border-white/10 backdrop-blur-md">
                                                             <span className="material-symbols-outlined text-[16px] text-[#D4AF37]">height</span>
-                                                            <p className="text-[10px] font-medium uppercase tracking-wider">{profile.height || '175'} cm</p>
+                                                            <p className="text-[10px] font-medium uppercase tracking-wider text-white">{profile.height || '175'} cm</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -167,12 +167,12 @@ export default function Discovery({ initialProfiles }) {
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center text-center p-8 space-y-6">
-                            <div className="w-24 h-24 rounded-full bg-[#161b2e] flex items-center justify-center border border-white/10 shadow-inner">
+                            <div className="w-24 h-24 rounded-full bg-white dark:bg-[#161b2e] flex items-center justify-center border border-black/5 dark:border-white/10 shadow-inner transition-colors duration-500">
                                 <span className="material-symbols-outlined text-4xl text-[#D4AF37] animate-pulse">radar</span>
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-white mb-2">Plus de profils à proximité</h3>
-                                <p className="text-gray-400 text-sm max-w-xs mx-auto">Revenez plus tard ou élargissez vos critères de recherche pour découvrir de nouvelles personnes.</p>
+                                <h3 className="text-xl font-bold text-[#101322] dark:text-white mb-2 transition-colors duration-500">Plus de profils à proximité</h3>
+                                <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs mx-auto transition-colors duration-500">Revenez plus tard ou élargissez vos critères de recherche pour découvrir de nouvelles personnes.</p>
                             </div>
                             <button onClick={() => setCurrentIndex(0)} className="px-8 py-3 bg-[#D4AF37] text-white rounded-full font-bold text-sm uppercase tracking-widest shadow-lg shadow-[#D4AF37]/20 transition-transform active:scale-95">
                                 Recharger les profils
@@ -185,13 +185,13 @@ export default function Discovery({ initialProfiles }) {
                         <div className="flex w-full justify-center gap-6 pt-8 items-center">
                             <button
                                 onClick={() => handleSwipe('passed')}
-                                className="flex size-14 items-center justify-center overflow-hidden rounded-full bg-[#1a1f35] text-red-500 shadow-xl transition-all active:scale-90 border border-white/10 hover:bg-white/5"
+                                className="flex size-14 items-center justify-center overflow-hidden rounded-full bg-white dark:bg-[#1a1f35] text-red-500 shadow-xl transition-all active:scale-90 border border-black/5 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5"
                             >
                                 <span className="material-symbols-outlined text-2xl font-bold">close</span>
                             </button>
                             <button
                                 onClick={() => router.visit(`/chat/${profiles[currentIndex].id}`)}
-                                className="flex size-20 items-center justify-center overflow-hidden rounded-full bg-[#1a1f35] text-[#D4AF37] shadow-xl shadow-black/40 transition-all active:scale-90 border-2 border-[#D4AF37]/50 hover:bg-[#D4AF37]/10"
+                                className="flex size-20 items-center justify-center overflow-hidden rounded-full bg-white dark:bg-[#1a1f35] text-[#D4AF37] shadow-xl shadow-black/10 dark:shadow-black/40 transition-all active:scale-90 border-2 border-[#D4AF37]/50 hover:bg-[#D4AF37]/5 dark:hover:bg-[#D4AF37]/10"
                             >
                                 <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 0" }}>chat</span>
                             </button>

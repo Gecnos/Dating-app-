@@ -37,7 +37,33 @@ class ChatController extends Controller
                 return $match->user_id === $me->id ? $match->target_id : $match->user_id;
             });
 
-        $users = User::whereIn('id', $matchIds)->with('intention')->get();
+        $users = Inertia::defer(fn() => User::whereIn('id', $matchIds)->with('intention')->get()->map(function($user) use ($me) {
+            // Get last message between me and this user
+            $lastMessage = Message::where(function($q) use ($me, $user) {
+                $q->where('from_id', $me->id)->where('to_id', $user->id);
+            })->orWhere(function($q) use ($me, $user) {
+                $q->where('from_id', $user->id)->where('to_id', $me->id);
+            })->orderBy('created_at', 'desc')->first();
+
+            // Count unread messages from this user
+            $unreadCount = Message::where('from_id', $user->id)
+                ->where('to_id', $me->id)
+                ->where('is_read', false)
+                ->count();
+
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'avatar' => $user->avatar_url, // Assuming avatar_url or similar exists
+                'last_message' => $lastMessage ? $lastMessage->content : ($user->gender === 'female' ? 'Elle vous attend...' : 'Il vous attend...'),
+                'last_message_time' => $lastMessage ? $lastMessage->created_at->diffForHumans() : null,
+                'last_message_timestamp' => $lastMessage ? $lastMessage->created_at->timestamp : 0,
+                'unread_count' => $unreadCount,
+                'is_online' => $user->isOnline(), // Assuming isOnline() exists or handle via session/cache
+                'type' => $lastMessage ? $lastMessage->type : 'text',
+                'duration' => $lastMessage ? $lastMessage->duration : null,
+            ];
+        })->sortByDesc('last_message_timestamp')->values());
 
         return Inertia::render('ChatList', [
             'matches' => $users
@@ -47,18 +73,55 @@ class ChatController extends Controller
     /**
      * Récupère l'historique des messages entre deux utilisateurs.
      */
+    /**
+     * Récupère l'historique des messages entre deux utilisateurs.
+     */
     public function index($user_id)
     {
         $messages = Message::where(function($q) use ($user_id) {
             $q->where('from_id', Auth::id())->where('to_id', $user_id);
         })->orWhere(function($q) use ($user_id) {
             $q->where('from_id', $user_id)->where('to_id', Auth::id());
-        })->orderBy('created_at', 'asc')->get();
+        })
+        ->orderBy('created_at', 'desc') // Get latest first
+        ->limit(20)
+        ->get()
+        ->reverse() // Reorder for display (oldest to newest)
+        ->values();
+
+        // Mark received messages as read
+        Message::where('to_id', Auth::id())
+            ->where('from_id', $user_id)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
 
         return Inertia::render('Chat', [
             'chatWith' => User::findOrFail($user_id),
             'messages' => $messages
         ]);
+    }
+
+    /**
+     * API pour charger les anciens messages (pagination).
+     */
+    public function fetchMessages($user_id, Request $request)
+    {
+        $offset = $request->input('offset', 0);
+        $limit = 20;
+
+        $messages = Message::where(function($q) use ($user_id) {
+            $q->where('from_id', Auth::id())->where('to_id', $user_id);
+        })->orWhere(function($q) use ($user_id) {
+            $q->where('from_id', $user_id)->where('to_id', Auth::id());
+        })
+        ->orderBy('created_at', 'desc')
+        ->skip($offset)
+        ->take($limit)
+        ->get()
+        ->reverse()
+        ->values();
+
+        return response()->json($messages);
     }
 
     /**
@@ -104,8 +167,7 @@ class ChatController extends Controller
             ));
         }
 
-        // TODO: Uncomment when Reverb is configured
-        // broadcast(new MessageSent($message))->toOthers();
+        broadcast(new MessageSent($message))->toOthers();
 
         return response()->json($message);
     }

@@ -5,54 +5,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function ChatList({ matches = [] }) {
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Mock matches for UI demonstration if none provided
-    const mockMatches = [
-        {
-            id: 1,
-            name: 'Grace',
-            last_message: "Salut ! Ton profil m'a beaucoup plu. 😊",
-            last_message_time: '15 min',
-            unread_count: 1,
-            avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop',
-            is_online: true,
-            type: 'text'
-        },
-        {
-            id: 2,
-            name: 'Adebayo',
-            last_message: "Note vocale",
-            last_message_time: '2 h',
-            unread_count: 0,
-            avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop',
-            is_online: false,
-            type: 'voice',
-            duration: '0:12'
-        },
-        {
-            id: 3,
-            name: 'Marie',
-            last_message: "On se voit quand ?",
-            last_message_time: 'Hier',
-            unread_count: 0,
-            avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
-            is_online: true,
-            type: 'text'
-        }
-    ];
+    // Séparer les nouveaux matches (pas de message) des conversations actives
+    const newMatches = matches.filter(m => m.last_message_timestamp === 0);
+    const activeConversations = matches.filter(m => m.last_message_timestamp > 0);
 
-    const displayMatches = matches.length > 0 ? matches : mockMatches;
-
-    const filteredMatches = displayMatches.filter(match =>
+    const filteredConversations = activeConversations.filter(match =>
         match.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
-        <div className="min-h-screen bg-[#F9F9FB] dark:bg-[#101322] text-[#111218] dark:text-white font-sans pb-32 overflow-x-hidden transition-colors duration-500">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-sans pb-32 overflow-x-hidden transition-colors duration-500">
             <Head title="Messages - Lumi" />
 
-            <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#101322]/90 backdrop-blur-xl px-6 py-4 border-b border-gray-100 dark:border-white/5 transition-all">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-black italic tracking-tighter uppercase dark:text-[#D4AF37]">Messages</h1>
+            <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#101322]/90 backdrop-blur-xl px-6 py-4 border-b border-black/5 dark:border-white/5 transition-all">
+                <div className="flex items-center justify-between mb-4">
+                    <h1 className="text-2xl font-black italic tracking-tighter uppercase text-[#101322] dark:text-[#D4AF37] transition-colors duration-500">Messages</h1>
+                    <Link href={route('settings')} className="size-10 rounded-xl bg-gray-100 dark:bg-[#1a1f35] flex items-center justify-center border border-black/5 dark:border-white/10">
+                        <span className="material-symbols-outlined text-gray-400">tune</span>
+                    </Link>
                 </div>
 
                 {/* Search Bar */}
@@ -64,41 +34,54 @@ export default function ChatList({ matches = [] }) {
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="block w-full pl-11 pr-4 py-3 bg-gray-100 dark:bg-[#161b2e] border-0 rounded-2xl text-sm text-slate-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-[#D4AF37]/50 focus:bg-white dark:focus:bg-[#1f253d] transition-all"
+                        className="block w-full pl-11 pr-4 py-3 bg-white dark:bg-[#161b2e] border border-black/5 dark:border-0 rounded-2xl text-sm text-[#101322] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-[#D4AF37]/50 focus:bg-white dark:focus:bg-[#1f253d] transition-all shadow-sm dark:shadow-none transition-colors duration-500"
                         placeholder="Rechercher une conversation..."
                     />
                 </div>
             </header>
 
-            <main className="max-w-lg mx-auto p-4">
-                {/* Active Matches (Stories-like) */}
-                <div className="mb-8">
-                    <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4 ml-2">Nouveaux Matchs</h2>
-                    <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-2">
-                        {displayMatches.map((match) => (
-                            <div key={`story-${match.id}`} className="flex flex-col items-center gap-2 shrink-0">
-                                <div className="relative">
-                                    <div className="w-16 h-16 rounded-full p-0.5 border-2 border-[#D4AF37] border-dashed animate-[spin_10s_linear_infinite]"></div>
-                                    <img
-                                        src={match.avatar}
-                                        className="absolute inset-1 w-14 h-14 rounded-full object-cover border-2 border-white dark:border-[#101322]"
-                                        alt={match.name}
-                                    />
-                                    {match.is_online && (
-                                        <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white dark:border-[#101322] rounded-full"></div>
-                                    )}
-                                </div>
-                                <span className="text-[10px] font-bold truncate w-16 text-center">{match.name}</span>
-                            </div>
-                        ))}
+            <main className="max-w-lg mx-auto">
+                {/* Nouveaux Matches - Horizontal Scroll */}
+                {newMatches.length > 0 && (
+                    <div className="py-6">
+                        <div className="px-6 mb-4 flex items-center justify-between">
+                            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Nouveaux Matches</h2>
+                            <span className="size-5 bg-[#D4AF37] text-[#101322] text-[9px] font-black rounded-full flex items-center justify-center">{newMatches.length}</span>
+                        </div>
+                        <div className="flex overflow-x-auto px-6 gap-4 no-scrollbar pb-2">
+                            {newMatches.map((match) => (
+                                <Link
+                                    key={match.id}
+                                    href={route('chat.show', match.id)}
+                                    className="flex flex-col items-center gap-2 shrink-0 group"
+                                >
+                                    <div className="relative">
+                                        <div className="size-16 rounded-[1.5rem] p-0.5 bg-gradient-to-tr from-[#D4AF37] to-[#FFD700] ring-4 ring-[#D4AF37]/10 group-active:scale-90 transition-all duration-300">
+                                            <img
+                                                src={match.avatar}
+                                                className="w-full h-full rounded-[1.3rem] object-cover border-2 border-white dark:border-[#101322]"
+                                                alt={match.name}
+                                            />
+                                        </div>
+                                        {match.is_online && (
+                                            <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white dark:border-[#101322] rounded-full"></div>
+                                        )}
+                                    </div>
+                                    <span className="text-[10px] font-black uppercase italic text-[#101322] dark:text-white truncate w-16 text-center">{match.name.split(' ')[0]}</span>
+                                </Link>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Conversations List */}
-                <div className="space-y-1">
-                    <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4 ml-2">Conversations</h2>
+                <div className="p-4 space-y-1">
+                    <div className="flex items-center justify-between mb-4 ml-2">
+                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Messages</h2>
+                    </div>
+
                     <AnimatePresence>
-                        {filteredMatches.map((match, idx) => (
+                        {filteredConversations.map((match, idx) => (
                             <motion.div
                                 key={match.id}
                                 initial={{ opacity: 0, y: 10 }}
@@ -107,24 +90,30 @@ export default function ChatList({ matches = [] }) {
                             >
                                 <Link
                                     href={route('chat.show', match.id)}
-                                    className={`flex items-center gap-4 p-4 rounded-[2rem] transition-all active:scale-[0.98] ${match.unread_count > 0 ? 'bg-[#D4AF37]/5 dark:bg-[#D4AF37]/5' : 'hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                                    className={`flex items-center gap-4 p-4 rounded-[2rem] transition-all active:scale-[0.98] transition-colors duration-500 group ${match.unread_count > 0 ? 'bg-white dark:bg-white/5 shadow-xl shadow-black/5 border border-[#D4AF37]/30' : 'hover:bg-white dark:hover:bg-white/5 border border-transparent'}`}
                                 >
                                     <div className="relative flex-shrink-0">
-                                        <img src={match.avatar} className="w-14 h-14 rounded-2xl object-cover" alt={match.name} />
+                                        <div className={`p-0.5 rounded-2xl transition-all ${match.unread_count > 0 ? 'bg-gradient-to-tr from-[#D4AF37] to-[#FFD700]' : ''}`}>
+                                            <img
+                                                src={match.avatar}
+                                                className="w-16 h-16 rounded-[1.2rem] object-cover border-2 border-white dark:border-[#101322] transition-colors duration-500"
+                                                alt={match.name}
+                                            />
+                                        </div>
                                         {match.is_online && (
-                                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-[#101322] rounded-full"></div>
+                                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-[#101322] rounded-full transition-colors duration-500"></div>
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-baseline mb-1">
-                                            <h3 className="font-bold text-sm truncate">{match.name}</h3>
-                                            <span className="text-[9px] font-bold text-gray-400 uppercase">{match.last_message_time}</span>
+                                            <h3 className={`font-black tracking-tight text-sm truncate uppercase italic transition-colors duration-500 ${match.unread_count > 0 ? 'text-[#D4AF37]' : 'text-[#101322] dark:text-white'}`}>{match.name}</h3>
+                                            <span className={`text-[9px] font-black transition-colors duration-500 ${match.unread_count > 0 ? 'text-[#D4AF37]' : 'text-gray-400'}`}>{match.last_message_time}</span>
                                         </div>
-                                        <div className="flex items-center justify-between">
-                                            <p className={`text-xs truncate ${match.unread_count > 0 ? 'text-[#111218] dark:text-white font-bold' : 'text-gray-500'}`}>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <p className={`text-xs truncate transition-colors duration-500 flex-1 ${match.unread_count > 0 ? 'text-[#101322] dark:text-white font-black italic' : 'text-gray-400 dark:text-gray-500'}`}>
                                                 {match.type === 'voice' ? (
-                                                    <span className="flex items-center gap-1">
-                                                        <span className="material-symbols-outlined text-[14px]">mic</span>
+                                                    <span className="flex items-center gap-1.5">
+                                                        <span className="material-symbols-outlined text-[16px] text-[#D4AF37]">mic</span>
                                                         Note vocale ({match.duration})
                                                     </span>
                                                 ) : (
@@ -132,7 +121,7 @@ export default function ChatList({ matches = [] }) {
                                                 )}
                                             </p>
                                             {match.unread_count > 0 && (
-                                                <div className="bg-[#D4AF37] text-[#101322] text-[9px] font-black h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center">
+                                                <div className="bg-[#D4AF37] text-[#101322] text-[10px] font-black h-5 min-w-[20px] px-2 rounded-full flex items-center justify-center shadow-lg shadow-[#D4AF37]/20">
                                                     {match.unread_count}
                                                 </div>
                                             )}
@@ -143,9 +132,19 @@ export default function ChatList({ matches = [] }) {
                         ))}
                     </AnimatePresence>
 
-                    {filteredMatches.length === 0 && (
-                        <div className="pt-20 text-center px-10">
-                            <p className="text-sm text-gray-500 italic">Aucune conversation trouvée pour "{searchQuery}"</p>
+                    {filteredConversations.length === 0 && activeConversations.length > 0 && (
+                        <div className="py-10 text-center opacity-40">
+                            <p className="text-xs italic">Aucun résultat pour "{searchQuery}"</p>
+                        </div>
+                    )}
+
+                    {activeConversations.length === 0 && (
+                        <div className="pt-20 text-center px-10 flex flex-col items-center">
+                            <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-4">
+                                <span className="material-symbols-outlined text-3xl text-gray-300 dark:text-gray-700">chat_bubble_outline</span>
+                            </div>
+                            <h3 className="font-bold text-gray-800 dark:text-white mb-1">Aucune conversation</h3>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 italic">Lancez le premier pas !</p>
                         </div>
                     )}
                 </div>

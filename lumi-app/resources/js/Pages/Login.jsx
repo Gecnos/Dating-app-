@@ -17,7 +17,7 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-[#101322] font-['Be_Vietnam_Pro'] antialiased overflow-x-hidden text-white flex flex-col relative">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] font-['Be_Vietnam_Pro'] antialiased overflow-x-hidden text-[#101322] dark:text-white flex flex-col relative transition-colors duration-500">
             <Head>
                 <title>Lumi - Connexion Premium</title>
             </Head>
@@ -49,7 +49,7 @@ export default function Login() {
                         {showEmailForm ? 'arrow_back' : 'close'}
                     </span>
                 </button>
-                <h2 className="text-white text-lg font-black italic tracking-tighter uppercase flex-1 text-center pr-12">
+                <h2 className="text-[#101322] dark:text-white text-lg font-black italic tracking-tighter uppercase flex-1 text-center pr-12 transition-colors duration-500">
                     {showEmailForm ? 'Par Email' : 'Connexion'}
                 </h2>
             </div>
@@ -57,8 +57,8 @@ export default function Login() {
             {/* Hero Section */}
             {!showEmailForm && (
                 <div className="flex w-full flex-col px-6 pt-6 z-10">
-                    <div className="w-full aspect-[4/3] rounded-[3rem] overflow-hidden mb-10 relative border border-white/10 shadow-2xl bg-[#161b2e]">
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#0f2cbd]/20 to-[#101322] flex items-center justify-center">
+                    <div className="w-full aspect-[4/3] rounded-[3rem] overflow-hidden mb-10 relative border border-black/5 dark:border-white/10 shadow-2xl bg-white dark:bg-[#161b2e] transition-colors duration-500">
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#0f2cbd]/10 dark:from-[#0f2cbd]/20 to-white dark:to-[#101322] flex items-center justify-center">
                             {/* Visual representation of "Premium Benin" */}
                             <div className="flex flex-col items-center gap-6 z-10">
                                 <div className="relative">
@@ -77,7 +77,7 @@ export default function Login() {
                     </div>
 
                     <div className="text-center space-y-4">
-                        <h1 className="text-white tracking-tighter text-4xl font-black leading-none italic uppercase">
+                        <h1 className="text-[#101322] dark:text-white tracking-tighter text-4xl font-black leading-none italic uppercase transition-colors duration-500">
                             Rencontrez <br /> autrement
                         </h1>
                         <p className="text-gray-500 text-sm font-medium leading-relaxed max-w-xs mx-auto italic">
@@ -97,7 +97,7 @@ export default function Login() {
                                 type="email"
                                 value={data.email}
                                 onChange={e => setData('email', e.target.value)}
-                                className="w-full h-16 bg-[#161b2e] border border-white/10 rounded-3xl px-6 text-white placeholder:text-gray-700 focus:outline-none focus:border-[#D4AF37]/50 transition-all font-medium italic shadow-inner"
+                                className="w-full h-16 bg-white dark:bg-[#161b2e] border border-black/5 dark:border-white/10 rounded-3xl px-6 text-[#101322] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-700 focus:outline-none focus:border-[#D4AF37]/50 transition-all font-medium italic shadow-inner"
                                 placeholder="votre@email.com"
                                 required
                             />
@@ -109,7 +109,7 @@ export default function Login() {
                                 type="password"
                                 value={data.password}
                                 onChange={e => setData('password', e.target.value)}
-                                className="w-full h-16 bg-[#161b2e] border border-white/10 rounded-3xl px-6 text-white placeholder:text-gray-700 focus:outline-none focus:border-[#D4AF37]/50 transition-all font-medium italic shadow-inner"
+                                className="w-full h-16 bg-white dark:bg-[#161b2e] border border-black/5 dark:border-white/10 rounded-3xl px-6 text-[#101322] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-700 focus:outline-none focus:border-[#D4AF37]/50 transition-all font-medium italic shadow-inner"
                                 placeholder="••••••••"
                                 required
                             />
@@ -155,7 +155,7 @@ export default function Login() {
 
                     <button
                         onClick={() => setShowEmailForm(true)}
-                        className="flex cursor-pointer items-center justify-center gap-4 overflow-hidden rounded-[2rem] h-18 px-8 bg-[#161b2e] text-white text-xs font-black uppercase tracking-[0.2em] w-full shadow-xl border border-white/10 active:scale-[0.98] transition-all"
+                        className="flex cursor-pointer items-center justify-center gap-4 overflow-hidden rounded-[2rem] h-18 px-8 bg-white dark:bg-[#161b2e] text-[#101322] dark:text-white text-xs font-black uppercase tracking-[0.2em] w-full shadow-xl border border-black/5 dark:border-white/10 active:scale-[0.98] transition-all"
                     >
                         <span className="material-symbols-outlined text-gray-400">mail</span>
                         <span className="truncate">Continuer avec Email</span>

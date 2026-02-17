@@ -46,6 +46,11 @@ const NavigationBar = () => {
                         key={item.name}
                         href={item.path}
                         prefetch
+                        onClick={(e) => {
+                            if (url.startsWith(item.path)) {
+                                e.preventDefault();
+                            }
+                        }}
                         className={`flex flex-1 flex-col items-center justify-end gap-1.5 transition-all ${isActive ? 'text-[#D4AF37]' : 'text-gray-500'
                             }`}
                     >

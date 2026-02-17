@@ -19,11 +19,17 @@ class UserController extends Controller
     }
 
     /**
-     * Affiche un profil spécifique avec logique de flou.
+     * Affiche un profil spécifique.
      */
     public function show($id)
     {
         $userId = ($id === 'me') ? Auth::id() : $id;
+
+        // Si l'utilisateur essaie de voir son propre profil "public", on le redirige vers son dashboard
+        if ($userId == Auth::id()) {
+            return redirect()->route('my.profile');
+        }
+
         $user = User::with(['intention', 'photos'])->findOrFail($userId);
         $me = Auth::user();
 
@@ -32,15 +38,9 @@ class UserController extends Controller
             $q->where('user_id', $me->id)->where('target_id', $userId);
         })->where('is_mutual', true)->exists();
 
-        // Appliquer le flou si activé et pas de match mutuel
-        if ($user->blur_enabled && !$isMutual && $user->id !== $me->id) {
-            if ($user->avatar) {
-                $user->avatar = $this->cloudinary->getBlurredUrl($user->avatar);
-            }
-            // Flouter toutes les photos de la galerie
-            foreach ($user->photos as $photo) {
-                $photo->url = $this->cloudinary->getBlurredUrl($photo->url);
-            }
+        // Ghost Mode Protection : Invisibilité totale sauf si déjà matché ou si c'est soi-même
+        if ($user->is_ghost_mode && !$isMutual && $user->id !== $me->id) {
+            abort(404); // On fait semblant que le profil n'existe pas
         }
 
         return Inertia::render('ProfileDetails', [
@@ -50,13 +50,85 @@ class UserController extends Controller
     }
 
     /**
-     * Récupère les profils pour le Discovery Deck.
+     * Page de gestion des photos.
      */
+    public function photoManagement()
+    {
+        return Inertia::render('PhotoManagement', [
+            'photos' => Auth::user()->photos()->orderBy('order')->get()
+        ]);
+    }
+
+    /**
+     * Ajoute une photo à la galerie.
+     */
+    public function addPhoto(Request $request)
+    {
+        $request->validate(['photo' => 'required|string']);
+        $user = Auth::user();
+        
+        $url = $this->cloudinary->uploadBase64($request->photo);
+        
+        $user->photos()->create([
+            'url' => $url,
+            'order' => $user->photos()->count(),
+            'is_primary' => $user->photos()->count() === 0
+        ]);
+
+        // Si c'est la première photo, on met à jour l'avatar
+        if (!$user->avatar) {
+            $user->update(['avatar' => $url]);
+        }
+
+        return redirect()->back()->with('success', 'Photo ajoutée !');
+    }
+
+    /**
+     * Supprime une photo de la galerie.
+     */
+    public function deletePhoto($id)
+    {
+        $user = Auth::user();
+        $photo = $user->photos()->findOrFail($id);
+        
+        $this->cloudinary->deleteImage($photo->url);
+        $photo->delete();
+
+        // Si on a supprimé l'avatar, on prend la suivante ou on vide
+        if ($user->avatar === $photo->url) {
+            $next = $user->photos()->orderBy('order')->first();
+            $user->update(['avatar' => $next ? $next->url : null]);
+        }
+
+        return redirect()->back()->with('success', 'Photo supprimée.');
+    }
+
+    /**
+     * Réorganise les photos.
+     */
+    public function reorderPhotos(Request $request)
+    {
+        $request->validate(['photo_ids' => 'required|array']);
+        $user = Auth::user();
+        
+        foreach ($request->photo_ids as $index => $id) {
+            $user->photos()->where('id', $id)->update(['order' => $index]);
+        }
+
+        // Mettre à jour l'avatar avec la première photo
+        $first = $user->photos()->orderBy('order')->first();
+        if ($first) {
+            $user->update(['avatar' => $first->url]);
+        }
+
+        return response()->json(['message' => 'Ordre mis à jour.']);
+    }
+
     public function discovery()
     {
         $me = Auth::user();
         
-        // IDs à exclure : déjà swipé, soi-même, bloqués (mutuel), signalés (par moi), ou en Ghost Mode
+        // IDs à exclure : déjà swipé, soi-même, bloqués, signalés
         $swipedIds = MatchModel::where('user_id', $me->id)->pluck('target_id')->toArray();
         $blockedByMe = \App\Models\Block::where('blocker_id', $me->id)->pluck('blocked_id')->toArray();
         $blockedMe = \App\Models\Block::where('blocked_id', $me->id)->pluck('blocker_id')->toArray();
@@ -64,47 +136,64 @@ class UserController extends Controller
 
         $excludeIds = array_unique(array_merge($swipedIds, $blockedByMe, $blockedMe, $reportedByMe, [$me->id]));
 
+        // GILI Algorithm: Gender → Intention → Location → Interests
         $profiles = Inertia::defer(fn() => User::whereNotIn('id', $excludeIds)
-            ->where('is_ghost_mode', false) // Exclure les profils en mode fantôme
+            ->where('is_ghost_mode', false)
             ->with(['intention', 'photos'])
-            ->limit(10)
+            // 1. Gender Filter: Same or specific preference
+            ->where('gender', $me->gender === 'Homme' ? 'Femme' : 'Homme') 
             ->get()
-            ->map(function($user) {
-                // Toujours flouter dans le discovery si blur_enabled (ou si on veut garder la logique Cloudinary)
-                if ($user->blur_enabled && $user->avatar) {
-                    $user->avatar = $this->cloudinary->getBlurredUrl($user->avatar);
+            ->map(function($user) use ($me) {
+                // Calculate score
+                $score = 0;
+                
+                // Intention Match (Weight: 100)
+                if ($user->intention_id === $me->intention_id) {
+                    $score += 100;
                 }
+
+                // Distance (Haversine)
+                $distance = $this->calculateDistance($me->latitude, $me->longitude, $user->latitude, $user->longitude);
+                $user->distance_km = round($distance, 1);
+                
+                // Proximity Score (Weight: inverse of distance, max 100)
+                $score += max(0, 100 - ($distance * 2)); 
+
+                // Interests Intersection (Weight: 20 per matching interest)
+                $common = array_intersect($user->interests ?? [], $me->interests ?? []);
+                $score += count($common) * 20;
+
+                $user->matching_score = $score;
                 return $user;
-            }));
+            })
+            ->sortByDesc('matching_score')
+            ->values()
+            ->take(20));
 
         return Inertia::render('Discovery', [
             'initialProfiles' => $profiles
         ]);
     }
 
-    /**
-     * Page Explorer / Recherche avec filtres avancés.
-     */
     public function explorer(Request $request)
     {
         $me = Auth::user();
         
-        // Filtres de base : sécurité et confidentialité
-        $blockedByMe = \App\Models\Block::where('blocker_id', $me->id)->pluck('blocked_id')->toArray();
-        $blockedMe = \App\Models\Block::where('blocked_id', $me->id)->pluck('blocker_id')->toArray();
-        $reportedByMe = \App\Models\Report::where('reporter_id', $me->id)->pluck('reported_id')->toArray();
-        $excludeIds = array_unique(array_merge($blockedByMe, $blockedMe, $reportedByMe, [$me->id]));
+        $excludeIds = array_unique(array_merge(
+            \App\Models\Block::where('blocker_id', $me->id)->pluck('blocked_id')->toArray(),
+            \App\Models\Block::where('blocked_id', $me->id)->pluck('blocker_id')->toArray(),
+            \App\Models\Report::where('reporter_id', $me->id)->pluck('reported_id')->toArray(),
+            [$me->id]
+        ));
 
         $query = User::with(['intention', 'photos'])
             ->whereNotIn('id', $excludeIds)
             ->where('is_ghost_mode', false);
 
-        // Filtre par genre
         if ($request->filled('gender')) {
             $query->where('gender', $request->gender);
         }
 
-        // Filtre par tranche d'âge
         if ($request->filled('age_min')) {
             $query->whereRaw('EXTRACT(YEAR FROM AGE(date_of_birth)) >= ?', [$request->age_min]);
         }
@@ -112,12 +201,10 @@ class UserController extends Controller
             $query->whereRaw('EXTRACT(YEAR FROM AGE(date_of_birth)) <= ?', [$request->age_max]);
         }
 
-        // Filtre par intention
         if ($request->filled('intention_id')) {
             $query->where('intention_id', $request->intention_id);
         }
 
-        // Recherche textuelle (Nom, Bio, Ville, Intérêts)
         if ($request->filled('search')) {
             $s = $request->search;
             $query->where(function($q) use ($s) {
@@ -128,30 +215,19 @@ class UserController extends Controller
             });
         }
 
-        // Filtre de proximité (Distance en KM)
         if ($request->filled('distance') && $me->latitude && $me->longitude) {
-            $distanceKm = $request->distance;
-            $query->whereRaw("ST_DistanceSphere(ST_MakePoint(longitude::double precision, latitude::double precision), ST_MakePoint(?::double precision, ?::double precision)) <= ?", [
-                $me->longitude, $me->latitude, $distanceKm * 1000
+            $lat = $me->latitude;
+            $lon = $me->longitude;
+            $dist = $request->distance;
+            
+            $query->whereRaw("(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) <= ?", [
+                $lat, $lon, $lat, $dist
             ]);
         }
 
-        // Calcul de la distance si les coordonnées sont dispos
-        if ($me->latitude && $me->longitude) {
-            $query->select('*')
-                  ->selectRaw("round((ST_DistanceSphere(ST_MakePoint(longitude::double precision, latitude::double precision), ST_MakePoint(?::double precision, ?::double precision)) / 1000)::numeric, 1) as distance_km", [
-                      $me->longitude, $me->latitude
-                  ]);
-        }
-
-        $profiles = Inertia::defer(fn() => $query->limit(40)->get()->map(function($user) {
-            // Calcul de l'âge réel
+        $profiles = Inertia::defer(fn() => $query->limit(40)->get()->map(function($user) use ($me) {
             $user->age = $user->date_of_birth ? \Carbon\Carbon::parse($user->date_of_birth)->age : null;
-            
-            // Flou si activé
-            if ($user->blur_enabled && $user->avatar) {
-                $user->avatar = $this->cloudinary->getBlurredUrl($user->avatar);
-            }
+            $user->distance_km = round($this->calculateDistance($me->latitude, $me->longitude, $user->latitude, $user->longitude), 1);
             return $user;
         }));
 
@@ -162,19 +238,23 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Page de modification de profil.
-     */
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2) {
+        if (!$lat1 || !$lon1 || !$lat2 || !$lon2) return 999;
+        $theta = $lon1 - $lon2;
+        $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+        $dist = acos($dist);
+        $dist = rad2deg($dist);
+        $miles = $dist * 60 * 1.1515;
+        return $miles * 1.609344;
+    }
+
     public function edit()
     {
         return Inertia::render('EditProfile', [
-            'user' => Auth::user()->load('photos')
+            'user' => Auth::user()->load(['photos' => fn($q) => $q->orderBy('order')])
         ]);
     }
 
-    /**
-     * Enregistre les modifications du profil.
-     */
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -195,10 +275,10 @@ class UserController extends Controller
             $url = $this->cloudinary->uploadBase64($request->avatar_data);
             $user->avatar = $url;
             
-            // On l'ajoute aussi à la galerie si elle n'y est pas
             $user->photos()->create([
                 'url' => $url,
-                'order' => $user->photos()->count()
+                'order' => $user->photos()->count(),
+                'is_primary' => true
             ]);
         }
 
@@ -207,9 +287,6 @@ class UserController extends Controller
         return redirect()->route('my.profile')->with('success', 'Profil mis à jour !');
     }
 
-    /**
-     * Enregistre les informations de base de l'onboarding.
-     */
     public function storeBasicInfo(Request $request)
     {
         $user = Auth::user();
@@ -226,16 +303,10 @@ class UserController extends Controller
         return redirect()->route('onboarding.intentions');
     }
 
-    /**
-     * Enregistre l'intention de match.
-     */
     public function storeIntentions(Request $request)
     {
         $user = Auth::user();
         
-        // On récupère l'ID correspondant au label ou on utilise une map.
-        // Ici on suppose que le front envoie des slugs 'mariage', 'decouverte', etc.
-        // Il faudrait idéalement une table intentions ou un enum.
         $intentionMap = [
             'mariage' => 1,
             'decouverte' => 2,
@@ -250,15 +321,12 @@ class UserController extends Controller
         return redirect()->route('onboarding.interests');
     }
 
-    /**
-     * Enregistre les centres d'intérêt.
-     */
     public function storeInterests(Request $request)
     {
         $user = Auth::user();
 
         $validated = $request->validate([
-            'interests' => 'required|array|min:3|max:5',
+            'interests' => 'required|array|min:3|max:10',
         ]);
 
         $user->update(['interests' => $validated['interests']]);
@@ -266,9 +334,6 @@ class UserController extends Controller
         return redirect()->route('onboarding.photos');
     }
 
-    /**
-     * Enregistre les photos (base64).
-     */
     public function storePhotos(Request $request)
     {
         $user = Auth::user();
@@ -281,14 +346,14 @@ class UserController extends Controller
             if ($base64) {
                 $url = $this->cloudinary->uploadBase64($base64);
                 
-                // Si c'est la première photo, on l'utilise comme avatar
                 if ($index === 0 && !$user->avatar) {
                     $user->update(['avatar' => $url]);
                 }
 
                 $user->photos()->create([
                     'url' => $url,
-                    'order' => $index
+                    'order' => $index,
+                    'is_primary' => $index === 0
                 ]);
             }
         }
@@ -296,17 +361,11 @@ class UserController extends Controller
         return redirect()->route('discovery');
     }
 
-    /**
-     * Récupère la liste des intérêts approuvés.
-     */
     public function getInterests()
     {
         return response()->json(\App\Models\Interest::where('is_approved', true)->get());
     }
 
-    /**
-     * Propose un nouvel intérêt.
-     */
     public function suggestInterest(Request $request)
     {
         $request->validate(['label' => 'required|string|max:50|unique:interests,label']);
@@ -320,9 +379,6 @@ class UserController extends Controller
         return response()->json(['message' => 'Suggestion envoyée pour validation admin !']);
     }
 
-    /**
-     * Met à jour la position GPS de l'utilisateur.
-     */
     public function updateLocation(Request $request)
     {
         $request->validate([
@@ -338,9 +394,6 @@ class UserController extends Controller
         return response()->json(['message' => 'Position mise à jour.']);
     }
 
-    /**
-     * Active/Désactive le mode fantôme.
-     */
     public function toggleGhostMode(Request $request)
     {
         $user = Auth::user();
@@ -353,19 +406,11 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Supprime le compte de l'utilisateur.
-     */
     public function destroy()
     {
         $user = Auth::user();
-        
-        // Logout first
         Auth::guard('web')->logout();
-
-        // Delete user (cascade will handle related data if set up in DB, otherwise we might need to clean up manually)
         $user->delete();
-
         return redirect('/');
     }
 }

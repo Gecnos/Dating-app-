@@ -7,6 +7,7 @@ export default function EditProfile({ user }) {
     const [availableInterests, setAvailableInterests] = useState([]);
     const [suggestion, setSuggestion] = useState('');
     const [suggesting, setSuggesting] = useState(false);
+    const [visibleCount, setVisibleCount] = useState(10);
     const [suggestionSuccess, setSuggestionSuccess] = useState('');
 
     const { data, setData, post, processing, errors } = useForm({
@@ -63,14 +64,14 @@ export default function EditProfile({ user }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#F9F9FB] dark:bg-[#101322] text-[#111218] dark:text-white font-sans pb-32 overflow-x-hidden">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-sans pb-32 overflow-x-hidden transition-colors duration-500">
             <Head title={`Modifier le profil - ${data.name}`} />
 
-            <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#101322]/80 backdrop-blur-xl px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
+            <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#101322]/90 backdrop-blur-xl px-6 py-4 flex items-center justify-between border-b border-black/5 dark:border-white/5 transition-all duration-500">
                 <Link href={route('profile', 'me')} className="w-10 h-10 flex items-center justify-start">
-                    <span className="material-symbols-outlined text-gray-800 dark:text-white">arrow_back_ios</span>
+                    <span className="material-symbols-outlined text-[#101322] dark:text-white transition-colors duration-500">arrow_back_ios</span>
                 </Link>
-                <h1 className="text-lg font-bold">Modifier le profil</h1>
+                <h1 className="text-lg font-bold text-[#101322] dark:text-white transition-colors duration-500">Modifier le profil</h1>
                 <button
                     onClick={submit}
                     disabled={processing}
@@ -82,78 +83,104 @@ export default function EditProfile({ user }) {
 
             <main className="max-w-lg mx-auto pb-12">
                 {/* Photo Section - Hero Style */}
-                <div className="relative w-full h-80 bg-gray-200 dark:bg-gray-800">
+                <div className="relative w-full h-80 bg-gray-100 dark:bg-gray-800 transition-colors duration-500 overflow-hidden">
                     <div
                         className="w-full h-full bg-cover bg-center"
                         style={{ backgroundImage: `url(${previewUrl || 'https://via.placeholder.com/600'})` }}
                     />
                     <div className="absolute inset-0 bg-black/10" />
-                    <label className="absolute bottom-6 right-6 w-12 h-12 bg-white dark:bg-[#1a1f35] rounded-full flex items-center justify-center shadow-xl border-4 border-white/20 text-[#D4AF37] cursor-pointer active:scale-95 transition-transform">
-                        <span className="material-symbols-outlined">add_a_photo</span>
-                        <input type="file" className="hidden" accept="image/*" onChange={handlePhotoChange} />
-                    </label>
+                    <div className="absolute bottom-6 right-6 flex flex-col gap-3 items-end">
+                        <Link href={route('photos.manage')} className="bg-white/90 dark:bg-[#1a1f35]/90 backdrop-blur-md px-5 py-2.5 rounded-2xl flex items-center gap-2 shadow-xl border border-black/5 dark:border-white/10 text-[#D4AF37] active:scale-95 transition-all">
+                            <span className="material-symbols-outlined text-lg">collections</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">Gérer</span>
+                        </Link>
+                        <label className="w-12 h-12 bg-white dark:bg-[#1a1f35] rounded-full flex items-center justify-center shadow-xl border-4 border-white/20 dark:border-white/5 text-[#D4AF37] cursor-pointer active:scale-95 transition-transform transition-colors duration-500">
+                            <span className="material-symbols-outlined">add_a_photo</span>
+                            <input type="file" className="hidden" accept="image/*" onChange={handlePhotoChange} />
+                        </label>
+                    </div>
                 </div>
 
                 <div className="px-6 -mt-4 relative z-10">
                     <div className="space-y-6">
                         {/* Bio Section */}
-                        <div className="bg-white dark:bg-[#161b2e] p-5 rounded-2xl shadow-sm border border-gray-50 dark:border-gray-800">
-                            <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">À propos de moi</label>
+                        <div className="bg-white dark:bg-[#161b2e] p-5 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 transition-colors duration-500">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3 transition-colors duration-500">À propos de moi</label>
                             <textarea
                                 value={data.bio}
                                 onChange={e => setData('bio', e.target.value)}
-                                className="w-full border-none p-0 focus:ring-0 text-gray-800 dark:text-gray-100 bg-transparent resize-none min-h-[100px] text-sm leading-relaxed italic"
+                                className="w-full border-none p-0 focus:ring-0 text-[#101322] dark:text-gray-100 bg-transparent resize-none min-h-[100px] text-sm leading-relaxed italic transition-colors duration-500"
                                 placeholder="Dites-en plus sur vous..."
                             />
                         </div>
 
                         {/* Profession & Education */}
-                        <div className="bg-white dark:bg-[#161b2e] p-5 rounded-2xl shadow-sm border border-gray-50 dark:border-gray-800 space-y-4">
+                        <div className="bg-white dark:bg-[#161b2e] p-5 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 space-y-4 transition-colors duration-500">
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Profession / Job</label>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2 transition-colors duration-500">Profession / Job</label>
                                 <input
-                                    className="w-full border-none p-0 focus:ring-0 text-gray-800 dark:text-gray-100 bg-transparent text-sm font-bold"
+                                    className="w-full border-none p-0 focus:ring-0 text-[#101322] dark:text-gray-100 bg-transparent text-sm font-bold transition-colors duration-500"
                                     type="text"
                                     value={data.job}
                                     onChange={e => setData('job', e.target.value)}
                                 />
                             </div>
-                            <div className="h-px bg-gray-100 dark:bg-gray-800"></div>
+                            <div className="h-px bg-gray-50 dark:bg-white/5"></div>
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Éducation</label>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2 transition-colors duration-500">Éducation</label>
                                 <input
-                                    className="w-full border-none p-0 focus:ring-0 text-gray-800 dark:text-gray-100 bg-transparent text-sm font-bold"
+                                    className="w-full border-none p-0 focus:ring-0 text-[#101322] dark:text-gray-100 bg-transparent text-sm font-bold transition-colors duration-500"
                                     type="text"
                                     value={data.education}
                                     onChange={e => setData('education', e.target.value)}
                                 />
                             </div>
+                            <div className="h-px bg-gray-50 dark:bg-white/5"></div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2 transition-colors duration-500">Taille (cm)</label>
+                                <input
+                                    className="w-full border-none p-0 focus:ring-0 text-[#101322] dark:text-gray-100 bg-transparent text-sm font-bold transition-colors duration-500"
+                                    type="number"
+                                    value={data.height}
+                                    onChange={e => setData('height', e.target.value)}
+                                    placeholder="Ex: 175"
+                                />
+                            </div>
                         </div>
 
                         {/* Interests Grid */}
-                        <div className="bg-white dark:bg-[#161b2e] p-5 rounded-2xl shadow-sm border border-gray-50 dark:border-gray-800">
+                        <div className="bg-white dark:bg-[#161b2e] p-5 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 transition-colors duration-500">
                             <div className="flex justify-between items-center mb-4">
-                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400">Centres d'intérêt ({data.interests.length}/5)</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 transition-colors duration-500">Centres d'intérêt ({data.interests.length}/10)</label>
                             </div>
                             <div className="flex flex-wrap gap-2">
-                                {availableInterests.map((interest) => (
+                                {availableInterests.slice(0, visibleCount).map((interest) => (
                                     <button
                                         key={interest.id}
                                         type="button"
                                         onClick={() => {
                                             const newInterests = data.interests.includes(interest.label)
                                                 ? data.interests.filter(i => i !== interest.label)
-                                                : data.interests.length < 5 ? [...data.interests, interest.label] : data.interests;
+                                                : data.interests.length < 10 ? [...data.interests, interest.label] : data.interests;
                                             setData('interests', newInterests);
                                         }}
-                                        className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${data.interests.includes(interest.label)
+                                        className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border transition-colors duration-500 ${data.interests.includes(interest.label)
                                             ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/30'
-                                            : 'bg-gray-50 dark:bg-gray-800 text-gray-400 border-transparent'
+                                            : 'bg-gray-50 dark:bg-white/5 text-gray-400 dark:text-gray-500 border-black/5 dark:border-white/5'
                                             }`}
                                     >
                                         {interest.label}
                                     </button>
                                 ))}
+                                {visibleCount < availableInterests.length && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setVisibleCount(prev => prev + 10)}
+                                        className="px-4 py-1.5 rounded-full text-xs font-bold border border-[#D4AF37] text-[#D4AF37] italic hover:bg-[#D4AF37] hover:text-[#101322] transition-all"
+                                    >
+                                        + Afficher plus
+                                    </button>
+                                )}
                             </div>
                         </div>
 
