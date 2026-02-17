@@ -3,6 +3,9 @@ import { Link, usePage } from '@inertiajs/react';
 
 const NavigationBar = () => {
     const { url } = usePage();
+    const { auth } = usePage().props;
+    const unreadMessagesCount = auth?.user?.unread_messages_count || 0;
+    const unreadNotificationsCount = auth?.user?.unread_notifications_count || 0;
 
     const navItems = [
         {
@@ -21,13 +24,15 @@ const NavigationBar = () => {
             name: 'Likes',
             path: '/likes',
             icon: 'favorite',
-            filled: false
+            filled: false,
+            badge: unreadNotificationsCount
         },
         {
             name: 'Chat',
             path: '/chat',
             icon: 'chat_bubble',
-            filled: false
+            filled: false,
+            badge: unreadMessagesCount
         },
         {
             name: 'Profil',
@@ -45,22 +50,27 @@ const NavigationBar = () => {
                     <Link
                         key={item.name}
                         href={item.path}
-                        prefetch
+                        prefetch="hover"
                         onClick={(e) => {
                             if (url.startsWith(item.path)) {
                                 e.preventDefault();
                             }
                         }}
-                        className={`flex flex-1 flex-col items-center justify-end gap-1.5 transition-all ${isActive ? 'text-[#D4AF37]' : 'text-gray-500'
+                        className={`flex flex-1 flex-col items-center justify-end gap-1.5 transition-all relative ${isActive ? 'text-[#D4AF37]' : 'text-gray-500'
                             }`}
                     >
-                        <div className="flex h-7 items-center justify-center">
+                        <div className="flex h-7 items-center justify-center relative">
                             <span
                                 className="material-symbols-outlined text-[26px]"
                                 style={{ fontVariationSettings: `'FILL' ${isActive ? 1 : 0}` }}
                             >
                                 {item.icon}
                             </span>
+                            {item.badge > 0 && (
+                                <div className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-[#161b2e]">
+                                    {item.badge > 99 ? '99+' : item.badge}
+                                </div>
+                            )}
                         </div>
                         <p className={`text-[9px] tracking-[0.1em] uppercase font-black italic`}>
                             {item.name}

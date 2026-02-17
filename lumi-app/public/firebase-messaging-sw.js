@@ -22,7 +22,8 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: '/logo.png' // Adjust to project logo
+    icon: '/logo.png',
+    data: payload.data // Pass data so it's available in notificationclick
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);

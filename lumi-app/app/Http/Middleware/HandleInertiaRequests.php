@@ -42,8 +42,10 @@ class HandleInertiaRequests extends Middleware
                     'id' => $request->user()->id,
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
-                    'avatar' => $request->user()->avatar,
+                    'avatar' => $request->user()->avatar_url,
                     'is_verified' => $request->user()->is_verified,
+                    'unread_messages_count' => $request->user()->unread_messages_count,
+                    'unread_notifications_count' => $request->user()->unread_notifications_count,
                 ] : null,
             ],
             'flash' => [

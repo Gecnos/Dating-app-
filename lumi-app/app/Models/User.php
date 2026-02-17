@@ -62,6 +62,8 @@ class User extends Authenticatable
         'age',
         'masked_email',
         'avatar_url',
+        'unread_messages_count',
+        'unread_notifications_count',
     ];
 
     /**
@@ -194,9 +196,12 @@ class User extends Authenticatable
             return "https://ui-avatars.com/api/?name=" . urlencode($this->name) . "&color=D4AF37&background=101322";
         }
         
-        if (strpos($this->avatar, 'http') === 0 || strpos($this->avatar, '/') === 0) {
+        if (strpos($this->avatar, 'http') === 0) {
             return $this->avatar;
         }
+
+        // Ensure leading slash for relative paths
+        return '/' . ltrim($this->avatar, '/');
     }
 
     /**
@@ -227,5 +232,21 @@ class User extends Authenticatable
     public function getAgeAttribute()
     {
         return $this->date_of_birth ? \Carbon\Carbon::parse($this->date_of_birth)->age : null;
+    }
+
+    /**
+     * Nombre de messages non lus au total.
+     */
+    public function getUnreadMessagesCountAttribute()
+    {
+        return $this->receivedMessages()->where('is_read', false)->count();
+    }
+
+    /**
+     * Nombre de notifications non lues.
+     */
+    public function getUnreadNotificationsCountAttribute()
+    {
+        return $this->unreadNotifications()->count();
     }
 }

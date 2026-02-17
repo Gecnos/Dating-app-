@@ -16,15 +16,17 @@ class AppNotification extends Notification
     private $content;
     private $icon;
     private $color;
+    private $url;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($type, $title, $content, $icon = 'notifications', $color = '#D4AF37')
+    public function __construct($type, $title, $content, $url = '/', $icon = 'notifications', $color = '#D4AF37')
     {
         $this->type = $type;
         $this->title = $title;
         $this->content = $content;
+        $this->url = $url;
         $this->icon = $icon;
         $this->color = $color;
     }
@@ -50,6 +52,7 @@ class AppNotification extends Notification
             'type' => $this->type,
             'title' => $this->title,
             'content' => $this->content,
+            'url' => $this->url,
             'icon' => $this->icon,
             'color' => $this->color
         ];

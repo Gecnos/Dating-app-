@@ -53,6 +53,7 @@ class MatchController extends Controller
                     'match',
                     'Nouveau Match !',
                     "Vous avez matché avec {$currentUser->name}.",
+                    route('match.success', $currentUser->id, false),
                     'favorite',
                     '#D4AF37'
                 ));
@@ -61,6 +62,7 @@ class MatchController extends Controller
                     'match',
                     'Nouveau Match !',
                     "Vous avez matché avec {$targetUser->name}.",
+                    route('match.success', $targetUser->id, false),
                     'favorite',
                     '#D4AF37'
                 ));
@@ -69,11 +71,11 @@ class MatchController extends Controller
                 $pushService = app(\App\Services\PushNotificationService::class);
                 $pushService->sendToUser($targetUser, 'Lumi', "✨ Nouveau Match ! Vous et {$currentUser->name} vous plaisez.", [
                     'type' => 'match',
-                    'url' => route('match.success', $currentUser->id)
+                    'url' => route('match.success', $currentUser->id, false)
                 ]);
                 $pushService->sendToUser($currentUser, 'Lumi', "✨ Nouveau Match ! Vous et {$targetUser->name} vous plaisez.", [
                     'type' => 'match',
-                    'url' => route('match.success', $targetUser->id)
+                    'url' => route('match.success', $targetUser->id, false)
                 ]);
             } else {
                 broadcast(new \App\Events\LikeNotification(Auth::user(), $request->target_id))->toOthers();

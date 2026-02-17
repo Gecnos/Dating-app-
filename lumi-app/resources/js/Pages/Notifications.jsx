@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
@@ -83,47 +83,52 @@ export default function Notifications() {
 
                     <AnimatePresence>
                         {displayNotifications.map((notif, idx) => (
-                            <motion.div
+                            <Link
                                 key={notif.id}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: idx * 0.1 }}
-                                className={`p-6 border-b border-black/5 dark:border-white/5 flex gap-4 hover:bg-[#D4AF37]/5 transition-colors cursor-pointer group relative transition-colors duration-500 ${notif.is_unread ? 'bg-[#D4AF37]/5 dark:bg-[#D4AF37]/5' : 'bg-white dark:bg-[#101322]'}`}
+                                href={notif.url}
+                                className="block"
                             >
-                                <div className="relative flex-shrink-0">
-                                    <div
-                                        className="w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300"
-                                        style={{ backgroundColor: `${notif.color}20` }}
-                                    >
-                                        <span className="material-symbols-outlined text-2xl" style={{ color: notif.color, fontVariationSettings: "'FILL' 1" }}>
-                                            {notif.icon}
-                                        </span>
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: idx * 0.1 }}
+                                    className={`p-6 border-b border-black/5 dark:border-white/5 flex gap-4 hover:bg-[#D4AF37]/5 transition-colors cursor-pointer group relative transition-colors duration-500 ${notif.is_unread ? 'bg-[#D4AF37]/5 dark:bg-[#D4AF37]/5' : 'bg-white dark:bg-[#101322]'}`}
+                                >
+                                    <div className="relative flex-shrink-0">
+                                        <div
+                                            className="w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300"
+                                            style={{ backgroundColor: `${notif.color}20` }}
+                                        >
+                                            <span className="material-symbols-outlined text-2xl" style={{ color: notif.color, fontVariationSettings: "'FILL' 1" }}>
+                                                {notif.icon}
+                                            </span>
+                                        </div>
+                                        {notif.is_unread && (
+                                            <div className="absolute -bottom-1 -right-1 bg-white dark:bg-[#101322] p-0.5 rounded-full">
+                                                <div className="w-3.5 h-3.5 rounded-full bg-[#D4AF37] border-2 border-white dark:border-[#101322] animate-pulse"></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                        <div className="flex justify-between items-baseline mb-1">
+                                            <h3 className={`font-bold text-sm transition-colors duration-500 ${notif.is_unread ? 'text-[#101322] dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>
+                                                {notif.title}
+                                            </h3>
+                                            <span className={`text-[10px] font-bold ${notif.is_unread ? 'text-[#D4AF37]' : 'text-gray-400'}`}>
+                                                {notif.time}
+                                            </span>
+                                        </div>
+                                        <p className={`text-xs line-clamp-2 transition-colors duration-500 ${notif.is_unread ? 'text-gray-600 dark:text-gray-200 font-medium' : 'text-gray-400 dark:text-gray-500'}`}>
+                                            {notif.content}
+                                        </p>
                                     </div>
                                     {notif.is_unread && (
-                                        <div className="absolute -bottom-1 -right-1 bg-white dark:bg-[#101322] p-0.5 rounded-full">
-                                            <div className="w-3.5 h-3.5 rounded-full bg-[#D4AF37] border-2 border-white dark:border-[#101322] animate-pulse"></div>
+                                        <div className="flex items-center justify-center">
+                                            <div className="w-2 h-2 bg-[#D4AF37] rounded-full"></div>
                                         </div>
                                     )}
-                                </div>
-                                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                    <div className="flex justify-between items-baseline mb-1">
-                                        <h3 className={`font-bold text-sm transition-colors duration-500 ${notif.is_unread ? 'text-[#101322] dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>
-                                            {notif.title}
-                                        </h3>
-                                        <span className={`text-[10px] font-bold ${notif.is_unread ? 'text-[#D4AF37]' : 'text-gray-400'}`}>
-                                            {notif.time}
-                                        </span>
-                                    </div>
-                                    <p className={`text-xs line-clamp-2 transition-colors duration-500 ${notif.is_unread ? 'text-gray-600 dark:text-gray-200 font-medium' : 'text-gray-400 dark:text-gray-500'}`}>
-                                        {notif.content}
-                                    </p>
-                                </div>
-                                {notif.is_unread && (
-                                    <div className="flex items-center justify-center">
-                                        <div className="w-2 h-2 bg-[#D4AF37] rounded-full"></div>
-                                    </div>
-                                )}
-                            </motion.div>
+                                </motion.div>
+                            </Link>
                         ))}
                     </AnimatePresence>
                 </div>

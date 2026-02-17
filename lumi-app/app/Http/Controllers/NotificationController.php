@@ -22,7 +22,8 @@ class NotificationController extends Controller
                 'time' => $n->created_at->diffForHumans(),
                 'is_unread' => $n->unread(),
                 'icon' => $n->data['icon'] ?? 'notifications',
-                'color' => $n->data['color'] ?? '#D4AF37'
+                'color' => $n->data['color'] ?? '#D4AF37',
+                'url' => $n->data['url'] ?? '/'
             ];
         });
 

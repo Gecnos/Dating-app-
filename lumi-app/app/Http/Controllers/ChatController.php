@@ -165,7 +165,8 @@ class ChatController extends Controller
                 'message',
                 'Nouveau Message',
                 "{$sender->name} vous a envoyé un message.",
-                'mail',
+                route('chat.show', $sender->id, false),
+                'chat_bubble',
                 '#0f2cbd'
             ));
 
@@ -186,7 +187,7 @@ class ChatController extends Controller
                 [
                     'type' => 'message', 
                     'from_id' => (string)$sender->id,
-                    'url' => route('chat.show', $sender->id)
+                    'url' => route('chat.show', $sender->id, false)
                 ]
             );
         }
