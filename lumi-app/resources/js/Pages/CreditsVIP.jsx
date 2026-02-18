@@ -1,7 +1,13 @@
-import React from 'react';
-import { Head } from '@inertiajs/react';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function CreditsVIP() {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        document.title = "Lumi Premium & Crédits";
+    }, []);
+
     const plans = [
         { credits: '10 Crédits', price: '2 500 FCFA', badge: 'Standard' },
         { credits: '50 Crédits', price: '10 000 FCFA', badge: 'Populaire', featured: true },
@@ -9,11 +15,16 @@ export default function CreditsVIP() {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] flex flex-col font-sans mb-24 text-[#101322] dark:text-white transition-colors duration-500">
-            <Head title="Lumi Premium & Crédits" />
-
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] flex flex-col font-['Be_Vietnam_Pro'] mb-24 text-[#101322] dark:text-white transition-colors duration-500">
             {/* Header */}
             <div className="bg-white dark:bg-[#161b2e] p-8 pb-16 text-center space-y-6 rounded-b-[4rem] shadow-2xl border-b border-black/5 dark:border-white/10 relative overflow-hidden transition-colors duration-500">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="absolute top-6 left-6 z-30 w-10 h-10 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 backdrop-blur-md"
+                >
+                    <span className="material-symbols-outlined text-[#101322] dark:text-white">arrow_back</span>
+                </button>
+
                 <div className="relative z-10">
                     <h1 className="text-4xl font-black italic tracking-tighter uppercase text-[#101322] dark:text-white transition-colors duration-500">Lumi Premium</h1>
                     <p className="text-gray-400 dark:text-gray-500 text-[11px] font-black uppercase tracking-widest mt-2 transition-colors duration-500">Boostez vos rencontres avec style.</p>

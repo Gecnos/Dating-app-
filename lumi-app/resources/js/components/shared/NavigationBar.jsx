@@ -1,11 +1,14 @@
 import React from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthProvider';
 
 const NavigationBar = () => {
-    const { url } = usePage();
-    const { auth } = usePage().props;
-    const unreadMessagesCount = auth?.user?.unread_messages_count || 0;
-    const unreadNotificationsCount = auth?.user?.unread_notifications_count || 0;
+    const location = useLocation();
+    const { user } = useAuth();
+
+    // TODO: Get real counts from Context/WebSocket
+    const unreadMessagesCount = user?.unread_messages_count || 0;
+    const unreadNotificationsCount = user?.unread_notifications_count || 0;
 
     const navItems = [
         {
@@ -16,7 +19,7 @@ const NavigationBar = () => {
         },
         {
             name: 'Explorer',
-            path: '/explorer',
+            path: '/explorer', // This matches the route added
             icon: 'explore',
             filled: true
         },
@@ -25,7 +28,7 @@ const NavigationBar = () => {
             path: '/likes',
             icon: 'favorite',
             filled: false,
-            badge: unreadNotificationsCount
+            badge: unreadNotificationsCount // Note: Likes page usually shows likes, not notifications. But maybe design choice.
         },
         {
             name: 'Chat',
@@ -36,7 +39,7 @@ const NavigationBar = () => {
         },
         {
             name: 'Profil',
-            path: '/my-profile',
+            path: '/profile',
             icon: 'person',
             filled: false
         },
@@ -45,19 +48,12 @@ const NavigationBar = () => {
     return (
         <nav className="fixed bottom-0 left-0 right-0 border-t border-white/10 bg-[#161b2e] px-4 pb-8 pt-3 flex items-center justify-between z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.3)]">
             {navItems.map((item) => {
-                const isActive = url.startsWith(item.path);
+                const isActive = location.pathname.startsWith(item.path);
                 return (
                     <Link
                         key={item.name}
-                        href={item.path}
-                        prefetch="hover"
-                        onClick={(e) => {
-                            if (url.startsWith(item.path)) {
-                                e.preventDefault();
-                            }
-                        }}
-                        className={`flex flex-1 flex-col items-center justify-end gap-1.5 transition-all relative ${isActive ? 'text-[#D4AF37]' : 'text-gray-500'
-                            }`}
+                        to={item.path}
+                        className={`flex flex-1 flex-col items-center justify-end gap-1.5 transition-all relative ${isActive ? 'text-[#D4AF37]' : 'text-gray-500'}`}
                     >
                         <div className="flex h-7 items-center justify-center relative">
                             <span

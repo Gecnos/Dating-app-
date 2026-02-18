@@ -9,7 +9,6 @@ use App\Events\MessageSent;
 use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 
 class ChatController extends Controller
 {
@@ -22,6 +21,9 @@ class ChatController extends Controller
 
     /**
      * Liste tous les matches mutuels (Conversations).
+     */
+    /**
+     * Liste tous les matches mutuels (Conversations) - API.
      */
     public function list()
     {
@@ -37,7 +39,7 @@ class ChatController extends Controller
                 return $match->user_id === $me->id ? $match->target_id : $match->user_id;
             });
 
-        $users = Inertia::defer(fn() => User::whereIn('id', $matchIds)->with('intention')->get()->map(function($user) use ($me) {
+        $users = User::whereIn('id', $matchIds)->with('intention')->get()->map(function($user) use ($me) {
             // Get last message between me and this user
             $lastMessage = Message::where(function($q) use ($me, $user) {
                 $q->where('from_id', $me->id)->where('to_id', $user->id);
@@ -54,29 +56,24 @@ class ChatController extends Controller
             return [
                 'id' => $user->id,
                 'name' => $user->name,
-                'avatar' => $user->avatar_url, // Assuming avatar_url or similar exists
+                'avatar' => $user->avatar_url,
                 'last_message' => $lastMessage ? $lastMessage->content : ($user->gender === 'female' ? 'Elle vous attend...' : 'Il vous attend...'),
                 'last_message_time' => $lastMessage ? $lastMessage->created_at->diffForHumans() : null,
                 'last_message_timestamp' => $lastMessage ? $lastMessage->created_at->timestamp : 0,
                 'unread_count' => $unreadCount,
-                'is_online' => $user->isOnline(), // Assuming isOnline() exists or handle via session/cache
+                'is_online' => $user->isOnline(),
                 'type' => $lastMessage ? $lastMessage->type : 'text',
                 'duration' => $lastMessage ? $lastMessage->duration : null,
             ];
-        })->sortByDesc('last_message_timestamp')->values());
+        })->sortByDesc('last_message_timestamp')->values();
 
-        return Inertia::render('ChatList', [
-            'matches' => $users
-        ]);
+        return response()->json($users);
     }
 
     /**
-     * Récupère l'historique des messages entre deux utilisateurs.
+     * Récupère l'historique des messages entre deux utilisateurs - API.
      */
-    /**
-     * Récupère l'historique des messages entre deux utilisateurs.
-     */
-    public function index($user_id)
+    public function show($user_id)
     {
         $messages = Message::where(function($q) use ($user_id) {
             $q->where('from_id', Auth::id())->where('to_id', $user_id);
@@ -95,7 +92,7 @@ class ChatController extends Controller
             ->where('is_read', false)
             ->update(['is_read' => true]);
 
-        return Inertia::render('Chat', [
+        return response()->json([
             'chatWith' => User::findOrFail($user_id),
             'messages' => $messages
         ]);
@@ -131,17 +128,14 @@ class ChatController extends Controller
     {
         $mediaPath = null;
         
-        if ($request->has('media')) {
-            // Handle base64 media (voice notes, images)
-            $mediaData = $request->media;
-            
-            // Check if it's base64
-            if (strpos($mediaData, 'data:') === 0) {
-                // Extract base64 content
+        if ($request->hasFile('media')) {
+            // Regular file upload (FormData)
+            $mediaPath = $this->cloudinary->uploadImage($request->file('media'));
+        } elseif ($request->filled('media')) {
+            // Base64 string (Voice notes)
+            $mediaData = $request->input('media');
+            if (is_string($mediaData) && strpos($mediaData, 'data:') === 0) {
                 $mediaPath = $this->cloudinary->uploadBase64($mediaData);
-            } else {
-                // Regular file upload
-                $mediaPath = $this->cloudinary->uploadImage($request->media);
             }
         }
 
@@ -165,7 +159,7 @@ class ChatController extends Controller
                 'message',
                 'Nouveau Message',
                 "{$sender->name} vous a envoyé un message.",
-                route('chat.show', $sender->id, false),
+                '/chat/' . $sender->id,
                 'chat_bubble',
                 '#0f2cbd'
             ));
@@ -187,7 +181,7 @@ class ChatController extends Controller
                 [
                     'type' => 'message', 
                     'from_id' => (string)$sender->id,
-                    'url' => route('chat.show', $sender->id, false)
+                    'url' => '/chat/' . $sender->id
                 ]
             );
         }

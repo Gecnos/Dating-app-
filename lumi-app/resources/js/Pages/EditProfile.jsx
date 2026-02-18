@@ -1,76 +1,110 @@
 import React, { useState, useEffect } from 'react';
-import { Head, useForm, Link } from '@inertiajs/react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthProvider';
 
-export default function EditProfile({ user }) {
+export default function EditProfile() {
+    const navigate = useNavigate();
+    const { user: authUser, setUser: setAuthUser } = useAuth(); // Assuming setUser is available to update context
+
+    const [loading, setLoading] = useState(true);
+    const [processing, setProcessing] = useState(false);
     const [availableInterests, setAvailableInterests] = useState([]);
-    const [suggestion, setSuggestion] = useState('');
-    const [suggesting, setSuggesting] = useState(false);
     const [visibleCount, setVisibleCount] = useState(10);
-    const [suggestionSuccess, setSuggestionSuccess] = useState('');
 
-    const { data, setData, post, processing, errors } = useForm({
-        name: user.name || '',
-        bio: user.bio || '',
-        job: user.job || '',
-        education: user.education || '',
-        height: user.height || '',
-        city: user.city || '',
-        interests: user.interests || [],
-        languages: user.languages || [],
+    const [formData, setFormData] = useState({
+        name: '',
+        bio: '',
+        job: '',
+        education: '',
+        height: '',
+        city: '',
+        interests: [],
+        languages: [],
         avatar_data: null,
     });
 
-    const [previewUrl, setPreviewUrl] = useState(user.avatar);
+    const [previewUrl, setPreviewUrl] = useState(null);
+
+    useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            try {
+                const [userRes, interestsRes] = await Promise.all([
+                    axios.get('/api/profile/edit'),
+                    axios.get('/api/interests')
+                ]);
+
+                const user = userRes.data.user;
+                setFormData({
+                    name: user.name || '',
+                    bio: user.bio || '',
+                    job: user.job || '',
+                    education: user.education || '',
+                    height: user.height || '',
+                    city: user.city || '',
+                    interests: user.interests || [],
+                    languages: user.languages || [],
+                    avatar_data: null
+                });
+                setPreviewUrl(user.avatar);
+                setAvailableInterests(interestsRes.data);
+            } catch (error) {
+                console.error("Error loading edit profile data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadData();
+    }, []);
+
 
     const handlePhotoChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setData('avatar_data', reader.result);
+                setFormData(prev => ({ ...prev, avatar_data: reader.result }));
                 setPreviewUrl(reader.result);
             };
             reader.readAsDataURL(file);
         }
     };
 
-    useEffect(() => {
-        axios.get('/api/interests').then(res => {
-            setAvailableInterests(res.data);
-        });
-    }, []);
-
-    const submit = (e) => {
+    const submit = async (e) => {
         e.preventDefault();
-        post(route('profile.update'));
-    };
-
-    const handleSuggest = async (e) => {
-        e.preventDefault();
-        if (!suggestion) return;
-        setSuggesting(true);
+        setProcessing(true);
         try {
-            await axios.post('/api/interests/suggest', { label: suggestion });
-            setSuggestionSuccess('Tag suggéré avec succès !');
-            setSuggestion('');
-            setTimeout(() => setSuggestionSuccess(''), 3000);
-        } catch (err) {
-            console.error(err);
+            const response = await axios.post('/api/profile/update', formData);
+            // Update auth context if name/avatar changed
+            if (setAuthUser) {
+                // Fetch fresh user or merge response
+                // Ideally response.data.user is the updated user
+                setAuthUser(response.data.user);
+            }
+            navigate('/profile');
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            alert("Erreur lors de la mise à jour du profil.");
         } finally {
-            setSuggesting(false);
+            setProcessing(false);
         }
     };
 
-    return (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-sans pb-32 overflow-x-hidden transition-colors duration-500">
-            <Head title={`Modifier le profil - ${data.name}`} />
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#101322]">
+                <div className="size-10 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-['Be_Vietnam_Pro'] pb-32 overflow-x-hidden transition-colors duration-500">
             <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#101322]/90 backdrop-blur-xl px-6 py-4 flex items-center justify-between border-b border-black/5 dark:border-white/5 transition-all duration-500">
-                <Link href={route('profile', 'me')} className="w-10 h-10 flex items-center justify-start">
+                <button onClick={() => navigate('/profile')} className="w-10 h-10 flex items-center justify-start">
                     <span className="material-symbols-outlined text-[#101322] dark:text-white transition-colors duration-500">arrow_back_ios</span>
-                </Link>
+                </button>
                 <h1 className="text-lg font-bold text-[#101322] dark:text-white transition-colors duration-500">Modifier le profil</h1>
                 <button
                     onClick={submit}
@@ -90,7 +124,7 @@ export default function EditProfile({ user }) {
                     />
                     <div className="absolute inset-0 bg-black/10" />
                     <div className="absolute bottom-6 right-6 flex flex-col gap-3 items-end">
-                        <Link href={route('photos.manage')} className="bg-white/90 dark:bg-[#1a1f35]/90 backdrop-blur-md px-5 py-2.5 rounded-2xl flex items-center gap-2 shadow-xl border border-black/5 dark:border-white/10 text-[#D4AF37] active:scale-95 transition-all">
+                        <Link to="/photos/manage" className="bg-white/90 dark:bg-[#1a1f35]/90 backdrop-blur-md px-5 py-2.5 rounded-2xl flex items-center gap-2 shadow-xl border border-black/5 dark:border-white/10 text-[#D4AF37] active:scale-95 transition-all">
                             <span className="material-symbols-outlined text-lg">collections</span>
                             <span className="text-[10px] font-black uppercase tracking-widest">Gérer</span>
                         </Link>
@@ -107,8 +141,8 @@ export default function EditProfile({ user }) {
                         <div className="bg-white dark:bg-[#161b2e] p-5 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 transition-colors duration-500">
                             <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3 transition-colors duration-500">À propos de moi</label>
                             <textarea
-                                value={data.bio}
-                                onChange={e => setData('bio', e.target.value)}
+                                value={formData.bio}
+                                onChange={e => setFormData({ ...formData, bio: e.target.value })}
                                 className="w-full border-none p-0 focus:ring-0 text-[#101322] dark:text-gray-100 bg-transparent resize-none min-h-[100px] text-sm leading-relaxed italic transition-colors duration-500"
                                 placeholder="Dites-en plus sur vous..."
                             />
@@ -121,8 +155,8 @@ export default function EditProfile({ user }) {
                                 <input
                                     className="w-full border-none p-0 focus:ring-0 text-[#101322] dark:text-gray-100 bg-transparent text-sm font-bold transition-colors duration-500"
                                     type="text"
-                                    value={data.job}
-                                    onChange={e => setData('job', e.target.value)}
+                                    value={formData.job}
+                                    onChange={e => setFormData({ ...formData, job: e.target.value })}
                                 />
                             </div>
                             <div className="h-px bg-gray-50 dark:bg-white/5"></div>
@@ -131,8 +165,8 @@ export default function EditProfile({ user }) {
                                 <input
                                     className="w-full border-none p-0 focus:ring-0 text-[#101322] dark:text-gray-100 bg-transparent text-sm font-bold transition-colors duration-500"
                                     type="text"
-                                    value={data.education}
-                                    onChange={e => setData('education', e.target.value)}
+                                    value={formData.education}
+                                    onChange={e => setFormData({ ...formData, education: e.target.value })}
                                 />
                             </div>
                             <div className="h-px bg-gray-50 dark:bg-white/5"></div>
@@ -141,8 +175,8 @@ export default function EditProfile({ user }) {
                                 <input
                                     className="w-full border-none p-0 focus:ring-0 text-[#101322] dark:text-gray-100 bg-transparent text-sm font-bold transition-colors duration-500"
                                     type="number"
-                                    value={data.height}
-                                    onChange={e => setData('height', e.target.value)}
+                                    value={formData.height}
+                                    onChange={e => setFormData({ ...formData, height: e.target.value })}
                                     placeholder="Ex: 175"
                                 />
                             </div>
@@ -151,7 +185,7 @@ export default function EditProfile({ user }) {
                         {/* Interests Grid */}
                         <div className="bg-white dark:bg-[#161b2e] p-5 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 transition-colors duration-500">
                             <div className="flex justify-between items-center mb-4">
-                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 transition-colors duration-500">Centres d'intérêt ({data.interests.length}/10)</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 transition-colors duration-500">Centres d'intérêt ({formData.interests.length}/10)</label>
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {availableInterests.slice(0, visibleCount).map((interest) => (
@@ -159,12 +193,12 @@ export default function EditProfile({ user }) {
                                         key={interest.id}
                                         type="button"
                                         onClick={() => {
-                                            const newInterests = data.interests.includes(interest.label)
-                                                ? data.interests.filter(i => i !== interest.label)
-                                                : data.interests.length < 10 ? [...data.interests, interest.label] : data.interests;
-                                            setData('interests', newInterests);
+                                            const newInterests = formData.interests.includes(interest.label)
+                                                ? formData.interests.filter(i => i !== interest.label)
+                                                : formData.interests.length < 10 ? [...formData.interests, interest.label] : formData.interests;
+                                            setFormData({ ...formData, interests: newInterests });
                                         }}
-                                        className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border transition-colors duration-500 ${data.interests.includes(interest.label)
+                                        className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border transition-colors duration-500 ${formData.interests.includes(interest.label)
                                             ? 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/30'
                                             : 'bg-gray-50 dark:bg-white/5 text-gray-400 dark:text-gray-500 border-black/5 dark:border-white/5'
                                             }`}

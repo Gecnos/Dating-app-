@@ -1,21 +1,56 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from '../contexts/AuthProvider';
 
-export default function Profile({ user }) {
+export default function Profile() {
+    const { logout, user: authUser } = useAuth();
+    const navigate = useNavigate();
+    const [user, setUser] = useState(authUser || {});
+    const [loading, setLoading] = useState(true);
+
     const menuItems = [
-        { label: 'Modifier mon profil', icon: 'edit', route: 'profile.edit' },
-        { label: 'Gérer mes photos', icon: 'photo_library', route: 'photos.manage' },
-        { label: 'Paramètres', icon: 'settings', route: 'settings' },
-        { label: 'Aide & Sécurité', icon: 'security', route: 'help' },
+        { label: 'Modifier mon profil', icon: 'edit', route: '/profile/edit' },
+        { label: 'Gérer mes photos', icon: 'photo_library', route: '/photos/manage' },
+        { label: 'Paramètres', icon: 'settings', route: '/settings' },
+        { label: 'Aide & Sécurité', icon: 'security', route: '/help' },
     ];
+
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    const fetchProfile = async () => {
+        setLoading(true);
+        try {
+            // Using /api/profile/edit to get full user details including photos
+            const response = await axios.get('/api/profile/edit');
+            setUser(response.data.user || authUser);
+        } catch (error) {
+            console.error("Error fetching profile:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        await logout();
+        navigate('/login');
+    };
 
     // Utiliser la première photo comme couverture, sinon l'avatar
     const coverImage = user.photos?.length > 0 ? user.photos[0].url : user.avatar;
 
-    return (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-sans pb-32 overflow-x-hidden transition-colors duration-500">
-            <Head title={`Profil - ${user.name}`} />
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#101322]">
+                <div className="size-10 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-['Be_Vietnam_Pro'] pb-32 overflow-x-hidden transition-colors duration-500">
             <main className="relative mx-auto max-w-md w-full bg-white dark:bg-[#161b2e] min-h-screen shadow-2xl overflow-hidden transition-colors duration-500">
 
                 {/* Cover Image Section */}
@@ -33,7 +68,7 @@ export default function Profile({ user }) {
                     <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/40 to-transparent" />
 
                     {/* Settings Button (Top Right) */}
-                    <Link href={route('settings')} className="absolute top-6 right-6 p-2.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-white shadow-lg active:scale-95 transition-all hover:bg-white/20">
+                    <Link to="/settings" className="absolute top-6 right-6 p-2.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-white shadow-lg active:scale-95 transition-all hover:bg-white/20">
                         <span className="material-symbols-outlined text-2xl">settings</span>
                     </Link>
 
@@ -68,7 +103,7 @@ export default function Profile({ user }) {
                         </div>
 
                         <Link
-                            href={route('credits')}
+                            to="/credits"
                             className="block w-full py-3.5 bg-white text-[#E5B80B] font-bold text-center rounded-xl shadow-sm hover:bg-gray-50 active:scale-[0.98] transition-all text-sm"
                         >
                             Recharger
@@ -77,7 +112,7 @@ export default function Profile({ user }) {
 
                     {/* Premium Card */}
                     <div className="mb-8">
-                        <Link href={route('credits')} className="block relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#101322] to-[#2c3e50] shadow-xl group active:scale-[0.98] transition-all">
+                        <Link to="/credits" className="block relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#101322] to-[#2c3e50] shadow-xl group active:scale-[0.98] transition-all">
                             <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16" />
 
                             <div className="relative p-6 flex items-center justify-between">
@@ -100,7 +135,7 @@ export default function Profile({ user }) {
                         {menuItems.map((item, idx) => (
                             <Link
                                 key={idx}
-                                href={route(item.route)}
+                                to={item.route}
                                 className="flex items-center justify-between p-2 group"
                             >
                                 <div className="flex items-center gap-4">
@@ -117,7 +152,7 @@ export default function Profile({ user }) {
                     {/* Logout */}
                     <div className="text-center pb-8">
                         <button
-                            onClick={() => router.post(route('logout'))}
+                            onClick={handleLogout}
                             className="inline-flex items-center gap-2 text-red-500/80 hover:text-red-500 font-bold uppercase text-[10px] tracking-widest transition-colors px-6 py-3 rounded-full hover:bg-red-500/10"
                         >
                             <span className="material-symbols-outlined text-base">logout</span>

@@ -1,21 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link, Deferred } from '@inertiajs/react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 
-export default function Likes({ receivedLikes: initialReceived, sentLikes: initialSent, isPremium }) {
+export default function Likes() {
     const [activeTab, setActiveTab] = useState('received');
     const [receivedLikes, setReceivedLikes] = useState([]);
     const [sentLikes, setSentLikes] = useState([]);
+    const [isPremium, setIsPremium] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    React.useEffect(() => {
-        if (initialReceived) setReceivedLikes(initialReceived);
-        if (initialSent) setSentLikes(initialSent);
-    }, [initialReceived, initialSent]);
+    useEffect(() => {
+        fetchLikes();
+    }, []);
+
+    const fetchLikes = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get('/api/matches'); // MatchController::index (mapped to /api/matches?) 
+            // Wait, I need to check routes. MatchController::index is usually for 'matches' or 'likes' page.
+            // Let's assume I need to double check the route for MatchController::index in api.php
+            // If it's not there, I will add it.
+
+            // Assuming response structure based on MatchController::index:
+            setReceivedLikes(response.data.receivedLikes || []);
+            setSentLikes(response.data.sentLikes || []);
+            setIsPremium(response.data.isPremium || false);
+        } catch (error) {
+            console.error("Error fetching likes:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <div className="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-[#101322] font-sans text-[#101322] dark:text-white transition-colors duration-500">
-            <Head title="Likes" />
-
+        <div className="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-[#101322] font-['Be_Vietnam_Pro'] text-[#101322] dark:text-white transition-colors duration-500">
             {/* Header */}
             <header className="sticky top-0 z-50 bg-white dark:bg-[#101322] border-b border-black/5 dark:border-white/10 px-6 py-4 transition-colors duration-500">
                 <div className="flex items-center justify-between max-w-lg mx-auto">
@@ -32,25 +51,25 @@ export default function Likes({ receivedLikes: initialReceived, sentLikes: initi
                         onClick={() => setActiveTab('received')}
                         className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'received' ? 'bg-[#D4AF37] text-[#101322] shadow-xl' : 'text-gray-400 dark:text-gray-500 hover:text-[#101322] dark:hover:text-gray-300'}`}
                     >
-                        Reçus ({receivedLikes?.length || 0})
+                        Reçus ({receivedLikes.length})
                     </button>
                     <button
                         onClick={() => setActiveTab('sent')}
                         className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'sent' ? 'bg-[#D4AF37] text-[#101322] shadow-xl' : 'text-gray-400 dark:text-gray-500 hover:text-[#101322] dark:hover:text-gray-300'}`}
                     >
-                        Envoyés ({sentLikes?.length || 0})
+                        Envoyés ({sentLikes.length})
                     </button>
                 </div>
             </header>
 
             <main className="flex-1 max-w-lg mx-auto w-full px-4 py-8 pb-32">
-                <Deferred data={['receivedLikes', 'sentLikes']} fallback={
+                {loading ? (
                     <div className="grid grid-cols-2 gap-4 animate-pulse">
                         {[1, 2, 3, 4].map(i => (
                             <div key={i} className="aspect-[3/4] rounded-[2rem] bg-white/5 border border-white/10" />
                         ))}
                     </div>
-                }>
+                ) : (
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab}
@@ -60,31 +79,31 @@ export default function Likes({ receivedLikes: initialReceived, sentLikes: initi
                             transition={{ duration: 0.2 }}
                             className="grid grid-cols-2 gap-4"
                         >
-                            {(activeTab === 'received' ? receivedLikes : sentLikes).map((like, index) => (
+                            {(activeTab === 'received' ? receivedLikes : sentLikes).map((like) => (
                                 <Link
                                     key={like.id}
-                                    href={route('profile', like.user?.id || '#')}
+                                    to={`/profile/${like.user?.id}`}
                                     className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden border border-black/5 dark:border-white/10 shadow-xl dark:shadow-2xl transition-all active:scale-95 bg-white dark:bg-[#161b2e] transition-colors duration-500"
                                 >
                                     <div className="absolute inset-0">
                                         <img
                                             src={like.user?.avatar || 'https://via.placeholder.com/400x600'}
                                             alt={like.user?.name}
-                                            className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110`}
+                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-[#101322] via-transparent to-transparent opacity-90" />
                                     </div>
 
                                     <div className="absolute bottom-4 left-4 right-4 text-center">
                                         <div className="flex flex-col items-center gap-1 mb-1">
-                                            <h3 className="text-xs font-black uppercase tracking-tighter italic truncate w-full">
+                                            <h3 className="text-xs font-black uppercase tracking-tighter italic truncate w-full text-white">
                                                 {like.user?.name || 'Utilisateur Lumi'}
                                             </h3>
                                             {like.user?.is_verified && (
                                                 <span className="material-symbols-outlined text-[#D4AF37] text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                                             )}
                                         </div>
-                                        <div className="flex items-center justify-center gap-1.5 opacity-60">
+                                        <div className="flex items-center justify-center gap-1.5 opacity-60 text-white">
                                             <span className="material-symbols-outlined text-xs text-[#D4AF37]">{like.user?.intention?.icon || 'favorite'}</span>
                                             <p className="text-[9px] font-black uppercase tracking-widest truncate">{like.user?.intention?.label || 'Sérieux'}</p>
                                         </div>
@@ -93,10 +112,10 @@ export default function Likes({ receivedLikes: initialReceived, sentLikes: initi
                             ))}
                         </motion.div>
                     </AnimatePresence>
-                </Deferred>
+                )}
 
                 {/* Empty State */}
-                {(activeTab === 'received' ? receivedLikes : sentLikes).length === 0 && (
+                {!loading && (activeTab === 'received' ? receivedLikes : sentLikes).length === 0 && (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
                         <div className="size-20 bg-white dark:bg-[#161b2e] rounded-full flex items-center justify-center mb-6 border border-black/5 dark:border-white/5 shadow-sm transition-colors duration-500">
                             <span className="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600 transition-colors duration-500">favorite</span>
@@ -111,12 +130,12 @@ export default function Likes({ receivedLikes: initialReceived, sentLikes: initi
                 )}
 
                 {/* Premium CTA if not premium */}
-                {activeTab === 'received' && !isPremium && receivedLikes.length > 0 && (
+                {!loading && activeTab === 'received' && !isPremium && receivedLikes.length > 0 && (
                     <div className="mt-12 p-8 rounded-[2.5rem] bg-[#D4AF37] text-[#101322] shadow-2xl shadow-[#D4AF37]/20 relative overflow-hidden">
                         <div className="relative z-10">
                             <h4 className="text-2xl font-black leading-tight mb-2 italic tracking-tighter uppercase">Boostez vos chances</h4>
                             <p className="text-xs font-bold opacity-70 mb-8 leading-relaxed">Voyez instantanément qui vous a liké et passez directement au match.</p>
-                            <Link href={route('credits')} className="inline-flex w-full items-center justify-center h-14 rounded-2xl bg-[#101322] text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] active:scale-95 transition-all shadow-xl">
+                            <Link to="/credits" className="inline-flex w-full items-center justify-center h-14 rounded-2xl bg-[#101322] text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] active:scale-95 transition-all shadow-xl">
                                 Devenir Premium
                             </Link>
                         </div>

@@ -64,8 +64,15 @@ class CloudinaryService
             mkdir($dir, 0755, true);
         }
 
-        // Si c'est du base64 (Data URI)
-        if (strpos($data, 'data:') === 0) {
+        // Handle UploadedFile instance
+        if ($data instanceof \Illuminate\Http\UploadedFile) {
+            $filename = uniqid() . '.' . $data->getClientOriginalExtension();
+            $data->move($dir, $filename);
+            return '/uploads/media/' . $filename;
+        }
+
+        // Handle Base64
+        if (is_string($data) && strpos($data, 'data:') === 0) {
             // Extraction du format et de l'extension
             preg_match('/data:([^;]+);base64,(.*)/', $data, $matches);
             
@@ -87,6 +94,8 @@ class CloudinaryService
                 return '/uploads/media/' . $filename;
             }
         }
+
+        return null;
     }
 
     /**

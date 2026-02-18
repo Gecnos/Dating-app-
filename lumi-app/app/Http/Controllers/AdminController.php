@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class AdminController extends Controller
 {
@@ -17,7 +16,7 @@ class AdminController extends Controller
             ->where('is_verified', false)
             ->get();
 
-        return Inertia::render('Admin/Verify', [
+        return response()->json([
             'users' => $users
         ]);
     }
@@ -31,13 +30,27 @@ class AdminController extends Controller
         
         if ($request->action === 'approve') {
             $user->update(['is_verified' => true]);
-            // TODO: Envoyer notif succès
+            $user->notify(new \App\Notifications\AppNotification(
+                'verification',
+                'Compte Vérifié !',
+                "Votre demande de vérification a été approuvée.",
+                '',
+                'verified',
+                '#4CAF50'
+            ));
         } else {
             $user->update(['verification_selfie' => null]);
-            // TODO: Envoyer notif échec/demande de refaire
+            $user->notify(new \App\Notifications\AppNotification(
+                'verification',
+                'Vérification Refusée',
+                "Votre photo de vérification n'était pas conforme. Veuillez réessayer.",
+                '',
+                'error',
+                '#F44336'
+            ));
         }
 
-        return redirect()->back();
+        return response()->json(['message' => 'Action effectuée']);
     }
 
     /**
@@ -45,7 +58,7 @@ class AdminController extends Controller
      */
     public function stats()
     {
-        return Inertia::render('Admin/Dashboard', [
+        return response()->json([
             'stats' => [
                 'total_users' => User::count(),
                 'verified_users' => User::where('is_verified', true)->count(),

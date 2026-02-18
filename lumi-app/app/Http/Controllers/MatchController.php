@@ -6,7 +6,6 @@ use App\Models\MatchModel;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 
 class MatchController extends Controller
 {
@@ -53,7 +52,7 @@ class MatchController extends Controller
                     'match',
                     'Nouveau Match !',
                     "Vous avez matché avec {$currentUser->name}.",
-                    route('match.success', $currentUser->id, false),
+                    '/match/success/' . $currentUser->id,
                     'favorite',
                     '#D4AF37'
                 ));
@@ -62,7 +61,7 @@ class MatchController extends Controller
                     'match',
                     'Nouveau Match !',
                     "Vous avez matché avec {$targetUser->name}.",
-                    route('match.success', $targetUser->id, false),
+                    '/match/success/' . $targetUser->id,
                     'favorite',
                     '#D4AF37'
                 ));
@@ -71,11 +70,11 @@ class MatchController extends Controller
                 $pushService = app(\App\Services\PushNotificationService::class);
                 $pushService->sendToUser($targetUser, 'Lumi', "✨ Nouveau Match ! Vous et {$currentUser->name} vous plaisez.", [
                     'type' => 'match',
-                    'url' => route('match.success', $currentUser->id, false)
+                    'url' => '/match/success/' . $currentUser->id
                 ]);
                 $pushService->sendToUser($currentUser, 'Lumi', "✨ Nouveau Match ! Vous et {$targetUser->name} vous plaisez.", [
                     'type' => 'match',
-                    'url' => route('match.success', $targetUser->id, false)
+                    'url' => '/match/success/' . $targetUser->id
                 ]);
             } else {
                 broadcast(new \App\Events\LikeNotification(Auth::user(), $request->target_id))->toOthers();
@@ -96,7 +95,7 @@ class MatchController extends Controller
         $me = Auth::user();
 
         // Likes reçus (ceux qui m'ont liké mais pas encore de match mutuel)
-        $receivedLikes = Inertia::defer(fn() => MatchModel::where('target_id', $me->id)
+        $receivedLikes = MatchModel::where('target_id', $me->id)
             ->where('status', 'liked')
             ->where('is_mutual', false)
             ->whereHas('user') // Sécurité: seulement si le user existe
@@ -108,10 +107,10 @@ class MatchController extends Controller
                     'user' => $match->user,
                     'created_at' => $match->created_at,
                 ];
-            }));
+            });
 
         // Likes envoyés
-        $sentLikes = Inertia::defer(fn() => MatchModel::where('user_id', $me->id)
+        $sentLikes = MatchModel::where('user_id', $me->id)
             ->where('status', 'liked')
             ->whereHas('target') // Sécurité
             ->with(['target.intention'])
@@ -122,9 +121,9 @@ class MatchController extends Controller
                     'user' => $match->target,
                     'created_at' => $match->created_at,
                 ];
-            }));
+            });
 
-        return Inertia::render('Likes', [
+        return response()->json([
             'receivedLikes' => $receivedLikes,
             'sentLikes' => $sentLikes,
             'isPremium' => $me->credits > 0

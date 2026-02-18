@@ -1,12 +1,44 @@
-import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../contexts/AuthProvider';
+import axios from 'axios';
 
-export default function MatchSuccess({ user1, user2 }) {
+export default function MatchSuccess() {
+    const { id } = useParams();
+    const { user: user1 } = useAuth();
+    const [user2, setUser2] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (id) {
+            fetchMatchProfile();
+        }
+    }, [id]);
+
+    const fetchMatchProfile = async () => {
+        try {
+            const response = await axios.get(`/api/user/${id}`);
+            // response.data could be { profile: ... } or just user object depending on Controller
+            // UserController::show returns { profile: ..., isMutual: ..., isMe: ... }
+            setUser2(response.data.profile || response.data);
+        } catch (error) {
+            console.error("Error fetching match profile:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading || !user2) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#101322]">
+                <div className="size-10 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
     return (
-        <div className="flex min-h-screen w-full flex-col items-center justify-center bg-white dark:bg-[#101322] font-sans text-[#101322] dark:text-white p-8 overflow-hidden transition-colors duration-500">
-            <Head title="C'est un Match !" />
-
+        <div className="flex min-h-screen w-full flex-col items-center justify-center bg-white dark:bg-[#101322] font-['Be_Vietnam_Pro'] text-[#101322] dark:text-white p-8 overflow-hidden transition-colors duration-500">
             {/* Background elements (Animated) */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <motion.div
@@ -78,13 +110,13 @@ export default function MatchSuccess({ user1, user2 }) {
                 {/* Actions */}
                 <div className="flex flex-col gap-4 w-full max-w-xs mx-auto">
                     <Link
-                        href={route('chat.show', user2?.id || 1)}
+                        to={`/chat/${user2?.id}`}
                         className="flex h-16 items-center justify-center rounded-2xl bg-[#D4AF37] dark:bg-white text-white dark:text-[#101322] font-black uppercase tracking-widest text-xs shadow-xl shadow-[#D4AF37]/20 dark:shadow-white/5 active:scale-95 transition-all transition-colors duration-500"
                     >
                         Envoyer un message
                     </Link>
                     <Link
-                        href={route('discovery')}
+                        to="/discovery"
                         className="flex h-16 items-center justify-center rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 text-gray-400 dark:text-white font-black uppercase tracking-widest text-xs active:scale-95 transition-all transition-colors duration-500"
                     >
                         Continuer à swiper

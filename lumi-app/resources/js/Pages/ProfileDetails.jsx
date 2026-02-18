@@ -1,11 +1,18 @@
-import { useState, useMemo } from 'react';
-import { Head, Link, usePage, router } from '@inertiajs/react'; // Added usePage, router
+import React, { useState, useEffect, useMemo } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthProvider';
 
-export default function ProfileDetails({ profile, isMutual }) {
-    const { auth } = usePage().props;
-    const isOwnProfile = auth.user && auth.user.id === profile.id;
+export default function ProfileDetails() {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { user: authUser } = useAuth();
+
+    const [profile, setProfile] = useState(null);
+    const [isMutual, setIsMutual] = useState(false);
+    const [loading, setLoading] = useState(true);
+
     const [showPhotoPopup, setShowPhotoPopup] = useState(false);
     const [showOptions, setShowOptions] = useState(false);
     const [reportModal, setReportModal] = useState(false);
@@ -14,26 +21,50 @@ export default function ProfileDetails({ profile, isMutual }) {
     const [reportReason, setReportReason] = useState('');
     const [reportDescription, setReportDescription] = useState('');
 
-    const photos = profile.photos && profile.photos.length > 0
+    useEffect(() => {
+        fetchProfile();
+    }, [id]);
+
+    const fetchProfile = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`/api/user/${id}`);
+            if (response.data.isMe) {
+                navigate('/profile');
+                return;
+            }
+            setProfile(response.data.profile);
+            setIsMutual(response.data.isMutual);
+        } catch (error) {
+            console.error("Error fetching profile:", error);
+            if (error.response && error.response.status === 404) {
+                navigate('/discovery'); // Or generic 404 page
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const photos = profile?.photos && profile.photos.length > 0
         ? profile.photos
-        : [{ url: profile.avatar || 'https://via.placeholder.com/600x800' }];
+        : [{ url: profile?.avatar || 'https://via.placeholder.com/600x800' }];
 
     const age = useMemo(() => {
-        if (!profile.date_of_birth) return 24;
+        if (!profile?.date_of_birth) return 24;
         const birthDate = new Date(profile.date_of_birth);
         const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
         const m = today.getMonth() - birthDate.getMonth();
         if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
         return age;
-    }, [profile.date_of_birth]);
+    }, [profile?.date_of_birth]);
 
-    const attributes = [
+    const attributes = profile ? [
         { label: 'Métier', value: profile.job || 'Non renseigné', icon: 'work' },
         { label: 'Taille', value: profile.height ? `${profile.height} cm` : 'Non renseigné', icon: 'height' },
         { label: 'Ville', value: profile.city || 'Cotonou', icon: 'location_city' },
         { label: 'Études', value: profile.education || 'Plus d\'infos', icon: 'school' },
-    ];
+    ] : [];
 
     const reportReasons = [
         "Contenu inapproprié",
@@ -54,7 +85,7 @@ export default function ProfileDetails({ profile, isMutual }) {
             setShowOptions(false);
             setReportModal(false);
             alert("Signalement envoyé. Le profil a été masqué.");
-            router.visit(route('discovery'));
+            navigate('/discovery');
         } catch (err) {
             console.error(err);
         }
@@ -66,16 +97,24 @@ export default function ProfileDetails({ profile, isMutual }) {
             setShowOptions(false);
             setBlockConfirm(false);
             alert("Utilisateur bloqué.");
-            router.visit(route('discovery'));
+            navigate('/discovery');
         } catch (err) {
             console.error(err);
         }
     };
 
-    return (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-sans pb-32 overflow-x-hidden transition-colors duration-500">
-            <Head title={`${profile.name} - Profil`} />
+    const isOwnProfile = authUser && profile && authUser.id === profile.id;
 
+    if (loading || !profile) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#101322]">
+                <div className="size-10 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-['Be_Vietnam_Pro'] pb-32 overflow-x-hidden transition-colors duration-500">
             {/* Photo Enlargement Popup */}
             <AnimatePresence>
                 {showPhotoPopup && (
@@ -195,7 +234,7 @@ export default function ProfileDetails({ profile, isMutual }) {
 
             {/* Sticky Header */}
             <header className="fixed top-0 inset-x-0 h-16 bg-white/90 dark:bg-[#101322]/90 backdrop-blur-xl z-50 flex items-center justify-between px-6 border-b border-black/5 dark:border-white/10 transition-all duration-500">
-                <button onClick={() => window.history.back()} className="size-10 flex items-center justify-center rounded-xl bg-gray-50 dark:bg-[#1a1f35] border border-black/5 dark:border-white/10 active:scale-90 transition-all transition-colors duration-500">
+                <button onClick={() => navigate(-1)} className="size-10 flex items-center justify-center rounded-xl bg-gray-50 dark:bg-[#1a1f35] border border-black/5 dark:border-white/10 active:scale-90 transition-all transition-colors duration-500">
                     <span className="material-symbols-outlined text-gray-500 dark:text-gray-400">arrow_back</span>
                 </button>
                 <div className="flex items-center gap-2 bg-[#D4AF37]/10 dark:bg-[#D4AF37]/20 px-3 py-1.5 rounded-full border border-[#D4AF37]/20 dark:border-[#D4AF37]/30 transition-colors duration-500">
@@ -272,7 +311,6 @@ export default function ProfileDetails({ profile, isMutual }) {
                             <span className="text-xs font-bold uppercase tracking-widest">{profile.city || 'Cotonou'} • {profile.distance_km ? `${profile.distance_km}km` : 'À proximité'}</span>
                         </div>
                     </div>
-                    {/* Compatibility percentage removed as per user request */}
                 </div>
 
                 {/* Stats/Attributes Grid */}
@@ -320,20 +358,20 @@ export default function ProfileDetails({ profile, isMutual }) {
             <footer className="fixed bottom-8 inset-x-6 z-50">
                 {isOwnProfile ? (
                     <div className="bg-[#101322]/80 backdrop-blur-2xl border border-white/10 p-3 rounded-[2.5rem] flex items-center gap-3 shadow-2xl">
-                        <Link href={route('profile.edit')} className="flex-1 h-16 rounded-3xl bg-[#D4AF37] text-[#101322] flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all">
+                        <Link to="/profile/edit" className="flex-1 h-16 rounded-3xl bg-[#D4AF37] text-[#101322] flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all">
                             <span className="material-symbols-outlined text-2xl">edit</span>
                             <span className="text-[11px] font-black uppercase tracking-widest">Modifier</span>
                         </Link>
-                        <Link href={'/settings'} className="size-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-white active:scale-90 transition-all hover:bg-white/10">
+                        <Link to="/settings" className="size-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-white active:scale-90 transition-all hover:bg-white/10">
                             <span className="material-symbols-outlined text-3xl">settings</span>
                         </Link>
                     </div>
                 ) : (
                     <div className="bg-[#101322]/80 backdrop-blur-2xl border border-white/10 p-3 rounded-[2.5rem] flex items-center gap-3 shadow-2xl">
-                        <button className="size-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-red-500 active:scale-90 transition-all hover:bg-red-500/10 hover:border-red-500/20">
+                        <button onClick={() => navigate(-1)} className="size-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-red-500 active:scale-90 transition-all hover:bg-red-500/10 hover:border-red-500/20">
                             <span className="material-symbols-outlined text-3xl">close</span>
                         </button>
-                        <button onClick={() => router.visit(`/chat/${profile.id}`)} className="flex-1 h-16 rounded-3xl bg-[#D4AF37] text-[#101322] flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all text-white">
+                        <button onClick={() => navigate(`/chat/${profile.id}`)} className="flex-1 h-16 rounded-3xl bg-[#D4AF37] text-[#101322] flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all text-white">
                             <span className="material-symbols-outlined text-2xl">chat</span>
                             <span className="text-[11px] font-black uppercase tracking-widest">Message</span>
                         </button>

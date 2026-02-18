@@ -44,8 +44,9 @@ class HandleInertiaRequests extends Middleware
                     'email' => $request->user()->email,
                     'avatar' => $request->user()->avatar_url,
                     'is_verified' => $request->user()->is_verified,
-                    'unread_messages_count' => $request->user()->unread_messages_count,
-                    'unread_notifications_count' => $request->user()->unread_notifications_count,
+                    // Lazy evaluation for performance
+                    'unread_messages_count' => fn() => $request->user()->unread_messages_count,
+                    'unread_notifications_count' => fn() => $request->user()->unread_notifications_count,
                 ] : null,
             ],
             'flash' => [

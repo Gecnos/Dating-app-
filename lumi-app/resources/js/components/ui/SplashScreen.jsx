@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { useNavigate } from 'react-router-dom';
 
 export default function SplashScreen() {
     const [progress, setProgress] = useState(0);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        document.title = "Lumi - Premium Dating Benin";
+    }, []);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -21,7 +26,7 @@ export default function SplashScreen() {
     useEffect(() => {
         if (progress === 100) {
             const timer = setTimeout(() => {
-                router.visit('/login');
+                navigate('/login');
             }, 800);
             return () => clearTimeout(timer);
         }
@@ -29,11 +34,6 @@ export default function SplashScreen() {
 
     return (
         <div className="min-h-screen bg-white dark:bg-[#0a0c1a] font-['Be_Vietnam_Pro'] antialiased overflow-hidden flex flex-col items-center justify-between relative px-8 pb-16 transition-colors duration-500">
-            <Head>
-                <title>Lumi - Premium Dating Benin</title>
-                <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@100;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-                <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-            </Head>
 
             {/* Cultural Pattern Overlays */}
             <div className="absolute inset-0 pointer-events-none opacity-5"

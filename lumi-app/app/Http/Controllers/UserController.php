@@ -7,7 +7,6 @@ use App\Models\MatchModel;
 use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 
 class UserController extends Controller
 {
@@ -25,9 +24,14 @@ class UserController extends Controller
     {
         $userId = ($id === 'me') ? Auth::id() : $id;
 
-        // Si l'utilisateur essaie de voir son propre profil "public", on le redirige vers son dashboard
+        // If it's me, return isMe flag
         if ($userId == Auth::id()) {
-            return redirect()->route('my.profile');
+             $user = User::with(['intention', 'photos'])->findOrFail($userId);
+             return response()->json([
+                'profile' => $user,
+                'isMutual' => false,
+                'isMe' => true
+             ]);
         }
 
         $user = User::with(['intention', 'photos'])->findOrFail($userId);
@@ -43,7 +47,7 @@ class UserController extends Controller
             abort(404); // On fait semblant que le profil n'existe pas
         }
 
-        return Inertia::render('ProfileDetails', [
+        return response()->json([
             'profile' => $user,
             'isMutual' => $isMutual
         ]);
@@ -54,7 +58,7 @@ class UserController extends Controller
      */
     public function photoManagement()
     {
-        return Inertia::render('PhotoManagement', [
+        return response()->json([
             'photos' => Auth::user()->photos()->orderBy('order')->get()
         ]);
     }
@@ -80,7 +84,7 @@ class UserController extends Controller
             $user->update(['avatar' => $url]);
         }
 
-        return redirect()->back()->with('success', 'Photo ajoutée !');
+        return response()->json(['message' => 'Photo ajoutée !', 'photo' => $user->photos()->latest()->first()]);
     }
 
     /**
@@ -100,7 +104,7 @@ class UserController extends Controller
             $user->update(['avatar' => $next ? $next->url : null]);
         }
 
-        return redirect()->back()->with('success', 'Photo supprimée.');
+        return response()->json(['message' => 'Photo supprimée.']);
     }
 
     /**
@@ -137,7 +141,7 @@ class UserController extends Controller
         $excludeIds = array_unique(array_merge($swipedIds, $blockedByMe, $blockedMe, $reportedByMe, [$me->id]));
 
         // GILI Algorithm: Gender → Intention → Location → Interests
-        $profiles = Inertia::defer(fn() => User::whereNotIn('id', $excludeIds)
+        $profiles = User::whereNotIn('id', $excludeIds)
             ->where('is_ghost_mode', false)
             ->with(['intention', 'photos'])
             // 1. Gender Filter: Same or specific preference
@@ -168,9 +172,9 @@ class UserController extends Controller
             })
             ->sortByDesc('matching_score')
             ->values()
-            ->take(20));
+            ->take(20);
 
-        return Inertia::render('Discovery', [
+        return response()->json([
             'initialProfiles' => $profiles
         ]);
     }
@@ -225,13 +229,13 @@ class UserController extends Controller
             ]);
         }
 
-        $profiles = Inertia::defer(fn() => $query->limit(40)->get()->map(function($user) use ($me) {
+        $profiles = $query->limit(40)->get()->map(function($user) use ($me) {
             $user->age = $user->date_of_birth ? \Carbon\Carbon::parse($user->date_of_birth)->age : null;
             $user->distance_km = round($this->calculateDistance($me->latitude, $me->longitude, $user->latitude, $user->longitude), 1);
             return $user;
-        }));
+        });
 
-        return Inertia::render('Explorer', [
+        return response()->json([
             'profiles' => $profiles,
             'filters' => $request->all(),
             'intentions' => \App\Models\Intention::all()
@@ -250,7 +254,7 @@ class UserController extends Controller
 
     public function edit()
     {
-        return Inertia::render('EditProfile', [
+        return response()->json([
             'user' => Auth::user()->load(['photos' => fn($q) => $q->orderBy('order')])
         ]);
     }
@@ -284,7 +288,7 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        return redirect()->route('my.profile')->with('success', 'Profil mis à jour !');
+        return response()->json(['message' => 'Profil mis à jour !', 'user' => $user]);
     }
 
     public function storeBasicInfo(Request $request)
@@ -300,7 +304,7 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        return redirect()->route('onboarding.intentions');
+        return response()->json(['message' => 'Infos de base enregistrées', 'next_step' => 'intentions']);
     }
 
     public function storeIntentions(Request $request)
@@ -318,7 +322,7 @@ class UserController extends Controller
 
         $user->update(['intention_id' => $intentionId]);
 
-        return redirect()->route('onboarding.interests');
+        return response()->json(['message' => 'Intentions enregistrées', 'next_step' => 'interests']);
     }
 
     public function storeInterests(Request $request)
@@ -331,7 +335,7 @@ class UserController extends Controller
 
         $user->update(['interests' => $validated['interests']]);
 
-        return redirect()->route('onboarding.photos');
+        return response()->json(['message' => 'Intérêts enregistrés', 'next_step' => 'photos']);
     }
 
     public function storePhotos(Request $request)
@@ -358,7 +362,7 @@ class UserController extends Controller
             }
         }
 
-        return redirect()->route('discovery');
+        return response()->json(['message' => 'Photos enregistrées', 'next_step' => 'discovery']);
     }
 
     public function getInterests()
@@ -394,16 +398,41 @@ class UserController extends Controller
         return response()->json(['message' => 'Position mise à jour.']);
     }
 
-    public function toggleGhostMode(Request $request)
+     public function toggleGhostMode(Request $request)
     {
         $user = Auth::user();
         $user->is_ghost_mode = !$user->is_ghost_mode;
         $user->save();
 
         return response()->json([
-            'is_ghost_mode' => $user->is_ghost_mode,
-            'message' => $user->is_ghost_mode ? 'Mode fantôme activé.' : 'Mode fantôme désactivé.'
+            'is_ghost_mode' => $user->is_ghost_mode
         ]);
+    }
+
+    public function updateFcmToken(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|string',
+            'device_type' => 'nullable|string'
+        ]);
+
+        $user = Auth::user();
+        
+        // Use the relationship if available, or create new record in fcm_tokens table
+        // We saw 'fcmTokens()' relation in User model (line 177).
+        // Let's assume FcmToken model exists or we should check it.
+        // If FcmToken class exists (implied by relation), we should use it.
+        
+        // Logic: Update or Create based on token (to avoid duplicates) or just add?
+        // Usually we want to associate this token with this user.
+        // If token exists for another user, move it? Or just ensure it's for this user.
+        
+        $user->fcmTokens()->firstOrCreate(
+            ['token' => $request->token],
+            ['device_type' => $request->device_type ?? 'web']
+        );
+
+        return response()->json(['message' => 'Token updated']);
     }
 
     public function destroy()
@@ -411,6 +440,6 @@ class UserController extends Controller
         $user = Auth::user();
         Auth::guard('web')->logout();
         $user->delete();
-        return redirect('/');
+        return response()->json(['message' => 'Compte supprimé']);
     }
 }

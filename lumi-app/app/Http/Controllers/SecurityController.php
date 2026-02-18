@@ -20,7 +20,10 @@ class SecurityController extends Controller
         // Règle des 90 jours
         if ($user->password_changed_at && $user->password_changed_at->gt(Carbon::now()->subDays(90))) {
             $daysLeft = 90 - $user->password_changed_at->diffInDays(Carbon::now());
-            return back()->withErrors(['password' => "Vous avez déjà changé votre mot de passe récemment. Veuillez patienter encore {$daysLeft} jours."]);
+            return response()->json([
+                'message' => "Vous avez déjà changé votre mot de passe récemment. Veuillez patienter encore {$daysLeft} jours.",
+                'errors' => ['password' => ["Vous avez déjà changé votre mot de passe récemment."]]
+            ], 422);
         }
 
         $request->validate([
@@ -33,7 +36,7 @@ class SecurityController extends Controller
             'password_changed_at' => Carbon::now(),
         ]);
 
-        return back()->with('success', 'Votre mot de passe a été mis à jour avec succès.');
+        return response()->json(['message' => 'Votre mot de passe a été mis à jour avec succès.']);
     }
 
     /**

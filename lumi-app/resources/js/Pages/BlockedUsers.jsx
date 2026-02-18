@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function BlockedUsers() {
+    const navigate = useNavigate();
     const [blockedList, setBlockedList] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -12,6 +13,7 @@ export default function BlockedUsers() {
     }, []);
 
     const fetchBlockedUsers = async () => {
+        setLoading(true);
         try {
             const response = await axios.get('/api/blocks');
             setBlockedList(response.data);
@@ -23,9 +25,16 @@ export default function BlockedUsers() {
     };
 
     const unblockUser = async (user) => {
+        if (!window.confirm(`Débloquer ${user.name} ?`)) return;
         try {
+            // Using DELETE /api/blocks/{user_id}
+            // BlockController::destroy expects a User model. 
+            // Route is /blocks/{user}. 
+            // So we pass user.id.
             await axios.delete(`/api/blocks/${user.id}`);
-            setBlockedList(blockedList.filter(item => item.blocked.id !== user.id));
+
+            // Optimistically remove from list
+            setBlockedList(prev => prev.filter(item => item.blocked.id !== user.id));
         } catch (err) {
             console.error("Erreur lors du déblocage:", err);
             alert("Erreur lors du déblocage.");
@@ -33,11 +42,9 @@ export default function BlockedUsers() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-sans pb-32 transition-colors duration-500">
-            <Head title="Utilisateurs bloqués - Lumi" />
-
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-['Be_Vietnam_Pro'] pb-32 transition-colors duration-500">
             <header className="sticky top-0 z-50 px-6 py-4 flex items-center justify-between border-b border-black/5 dark:border-white/10 bg-white/80 dark:bg-[#101322]/80 backdrop-blur-xl transition-all duration-500">
-                <Link href={'/settings'} className="w-10 h-10 flex items-center justify-start text-[#101322] dark:text-white transition-colors duration-500">
+                <Link to="/settings" className="w-10 h-10 flex items-center justify-start text-[#101322] dark:text-white transition-colors duration-500">
                     <span className="material-symbols-outlined">arrow_back_ios</span>
                 </Link>
                 <h1 className="text-lg font-bold text-[#101322] dark:text-white transition-colors duration-500">Utilisateurs bloqués</h1>
@@ -56,13 +63,14 @@ export default function BlockedUsers() {
                 ) : (
                     <div className="space-y-3">
                         <AnimatePresence>
-                            {blockedList.length > 0 ? (
+                            {blockedList && blockedList.length > 0 ? (
                                 blockedList.map((block) => (
                                     <motion.div
                                         key={block.id}
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, scale: 0.9 }}
+                                        layout
                                         className="bg-white dark:bg-[#161b2e] border border-black/5 dark:border-white/5 p-4 rounded-3xl flex items-center justify-between shadow-sm dark:shadow-none transition-colors duration-500"
                                     >
                                         <div className="flex items-center gap-4">
@@ -86,8 +94,8 @@ export default function BlockedUsers() {
                                 ))
                             ) : (
                                 <div className="text-center py-20 opacity-40">
-                                    <span className="material-symbols-outlined text-6xl mb-4">group_off</span>
-                                    <p className="text-sm italic">Aucun utilisateur bloqué.</p>
+                                    <span className="material-symbols-outlined text-6xl mb-4 text-[#101322] dark:text-white transition-colors duration-500">group_off</span>
+                                    <p className="text-sm italic text-[#101322] dark:text-white transition-colors duration-500">Aucun utilisateur bloqué.</p>
                                 </div>
                             )}
                         </AnimatePresence>

@@ -1,25 +1,49 @@
-import React from 'react';
-import { Head, useForm, Link } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthProvider';
+import axios from 'axios';
 
 export default function Register() {
-    const { data, setData, post, processing, errors } = useForm({
+    const { login } = useAuth();
+    const navigate = useNavigate();
+
+    const [data, setData] = useState({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
     });
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState({});
 
-    const submit = (e) => {
+    const handleRegister = async (e) => {
         e.preventDefault();
-        post('/register');
+        setProcessing(true);
+        setErrors({});
+
+        try {
+            const response = await axios.post('/api/register', data);
+            const { token, user, onboarding_step } = response.data;
+
+            login(token, user);
+            navigate(`/onboarding/${onboarding_step}`);
+        } catch (err) {
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors);
+            } else {
+                alert(err.response?.data?.message || 'Une erreur est survenue.');
+            }
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const updateData = (key, value) => {
+        setData(prev => ({ ...prev, [key]: value }));
     };
 
     return (
         <div className="min-h-screen bg-[#101322] font-['Be_Vietnam_Pro'] antialiased overflow-x-hidden text-white flex flex-col relative">
-            <Head>
-                <title>Lumi - Créer un compte</title>
-            </Head>
-
             {/* Benin Pattern Background */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
                 style={{
@@ -31,7 +55,7 @@ export default function Register() {
             {/* Top Navigation Bar */}
             <div className="flex items-center bg-transparent p-4 justify-between z-10">
                 <Link
-                    href="/login"
+                    to="/login"
                     className="flex items-center justify-center h-10 w-10 rounded-full bg-white/10 shadow-sm backdrop-blur-sm hover:bg-white/20 transition-all"
                 >
                     <span className="material-symbols-outlined text-white">arrow_back</span>
@@ -46,13 +70,13 @@ export default function Register() {
                     <p className="text-white/40 text-sm">Créez votre compte premium en quelques secondes.</p>
                 </div>
 
-                <form onSubmit={submit} className="space-y-4">
+                <form onSubmit={handleRegister} className="space-y-4">
                     <div className="space-y-1">
                         <label className="text-[10px] font-bold text-[#E1AD01] uppercase tracking-[0.2em] ml-1">Nom complet</label>
                         <input
                             type="text"
                             value={data.name}
-                            onChange={e => setData('name', e.target.value)}
+                            onChange={e => updateData('name', e.target.value)}
                             className={`w-full h-14 bg-white/5 border ${errors.name ? 'border-red-500/50' : 'border-white/10'} rounded-2xl px-5 text-white placeholder:text-white/10 focus:outline-none focus:border-[#E1AD01]/50 transition-all font-medium`}
                             placeholder="Ex: Koffi Bénin"
                             required
@@ -65,7 +89,7 @@ export default function Register() {
                         <input
                             type="email"
                             value={data.email}
-                            onChange={e => setData('email', e.target.value)}
+                            onChange={e => updateData('email', e.target.value)}
                             className={`w-full h-14 bg-white/5 border ${errors.email ? 'border-red-500/50' : 'border-white/10'} rounded-2xl px-5 text-white placeholder:text-white/10 focus:outline-none focus:border-[#E1AD01]/50 transition-all font-medium`}
                             placeholder="votre@email.com"
                             required
@@ -78,7 +102,7 @@ export default function Register() {
                         <input
                             type="password"
                             value={data.password}
-                            onChange={e => setData('password', e.target.value)}
+                            onChange={e => updateData('password', e.target.value)}
                             className={`w-full h-14 bg-white/5 border ${errors.password ? 'border-red-500/50' : 'border-white/10'} rounded-2xl px-5 text-white placeholder:text-white/10 focus:outline-none focus:border-[#E1AD01]/50 transition-all font-medium`}
                             placeholder="Min. 8 caractères"
                             required
@@ -91,7 +115,7 @@ export default function Register() {
                         <input
                             type="password"
                             value={data.password_confirmation}
-                            onChange={e => setData('password_confirmation', e.target.value)}
+                            onChange={e => updateData('password_confirmation', e.target.value)}
                             className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-5 text-white placeholder:text-white/10 focus:outline-none focus:border-[#E1AD01]/50 transition-all font-medium"
                             placeholder="••••••••"
                             required
@@ -117,7 +141,7 @@ export default function Register() {
                 <div className="mt-8 text-center pb-10">
                     <p className="text-white/40 text-sm">
                         Déjà inscrit ?{' '}
-                        <Link href="/login" className="text-[#E1AD01] font-bold hover:underline">
+                        <Link to="/login" className="text-[#E1AD01] font-bold hover:underline">
                             Se connecter
                         </Link>
                     </p>

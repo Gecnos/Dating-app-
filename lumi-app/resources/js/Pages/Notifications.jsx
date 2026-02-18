@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
 export default function Notifications() {
+    const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
     const [filter, setFilter] = useState('tout');
     const [loading, setLoading] = useState(true);
@@ -38,12 +39,19 @@ export default function Notifications() {
         { id: 'nonlu', label: 'Non lu' },
         { id: 'matchs', label: 'Matchs' }
     ];
-    return (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-sans pb-32 overflow-x-hidden transition-colors duration-500">
-            <Head title="Notifications - Lumi" />
 
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#101322]">
+                <div className="size-10 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-['Be_Vietnam_Pro'] pb-32 overflow-x-hidden transition-colors duration-500">
             <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#101322]/90 backdrop-blur-xl px-6 py-4 flex items-center justify-between border-b border-black/5 dark:border-white/10 transition-all duration-500">
-                <button onClick={() => window.history.back()} className="w-10 h-10 flex items-center justify-start rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                <button onClick={() => navigate(-1)} className="w-10 h-10 flex items-center justify-start rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                     <span className="material-symbols-outlined text-[#101322] dark:text-white transition-colors duration-500">chevron_left</span>
                 </button>
                 <h1 className="text-lg font-bold">Notifications</h1>
@@ -78,14 +86,14 @@ export default function Notifications() {
                 {/* Notifications List */}
                 <div className="flex flex-col">
                     <div className="px-6 py-3">
-                        <h2 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] transition-colors duration-500">Aujourd'hui</h2>
+                        <h2 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] transition-colors duration-500">Activités</h2>
                     </div>
 
                     <AnimatePresence>
                         {displayNotifications.map((notif, idx) => (
                             <Link
                                 key={notif.id}
-                                href={notif.url}
+                                to={notif.url} // Ensure URLs from backend are compatible with React Router, or parse them
                                 className="block"
                             >
                                 <motion.div
@@ -133,7 +141,7 @@ export default function Notifications() {
                     </AnimatePresence>
                 </div>
 
-                {/* Empty State Illustration Placeholder (Optional) */}
+                {/* Empty State */}
                 {displayNotifications.length === 0 && (
                     <div className="flex flex-col items-center justify-center pt-20 px-10 text-center">
                         <div className="w-20 h-20 bg-gray-200 dark:bg-[#161b2e] rounded-full flex items-center justify-center mb-6 transition-colors duration-500">

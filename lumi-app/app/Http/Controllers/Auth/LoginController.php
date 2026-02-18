@@ -7,20 +7,11 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Inertia\Inertia;
 
 class LoginController extends Controller
 {
     /**
-     * Affiche la page de connexion (déjà gérée par une route statique mais on peut centraliser).
-     */
-    public function showLink()
-    {
-        return Inertia::render('Login');
-    }
-
-    /**
-     * Gère la connexion par email.
+     * Gère la connexion par email via API.
      */
     public function login(Request $request)
     {
@@ -29,47 +20,34 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, $request->remember)) {
-            $request->session()->regenerate();
-
+        if (Auth::attempt($credentials)) {
             $user = Auth::user();
-            
-            // Logique de redirection intelligente vers l'étape d'onboarding manquante
-            if (!$user->gender || !$user->date_of_birth) {
-                return redirect()->route('onboarding.basic');
-            }
-            
-            if (!$user->intention_id) {
-                return redirect()->route('onboarding.intentions');
-            }
+            $token = $user->createToken('auth-token')->plainTextToken;
 
-            if (empty($user->interests) || count($user->interests) < 3) {
-                return redirect()->route('onboarding.interests');
-            }
-
-            if (!$user->avatar) {
-                return redirect()->route('onboarding.photos');
-            }
-
-            // Tout est bon, on va au deck de découverte
-            return redirect()->intended(route('discovery'));
+            return response()->json([
+                'user' => $user,
+                'token' => $token,
+                'message' => 'Connexion réussie',
+                'onboarding_step' => $this->getOnboardingStep($user)
+            ]);
         }
 
-        return back()->withErrors([
-            'email' => 'Les identifiants ne correspondent pas à nos enregistrements.',
-        ])->onlyInput('email');
+        return response()->json([
+            'message' => 'Les identifiants ne correspondent pas à nos enregistrements.',
+            'errors' => ['email' => ['Identifiants incorrects']]
+        ], 422);
+    }
+
+    private function getOnboardingStep($user) {
+        if (!$user->gender || !$user->date_of_birth) return 'basic';
+        if (!$user->intention_id) return 'intentions';
+        if (empty($user->interests) || count($user->interests) < 3) return 'interests';
+        if (!$user->avatar) return 'photos';
+        return 'completed';
     }
 
     /**
-     * Affiche la page d'inscription.
-     */
-    public function showRegister()
-    {
-        return Inertia::render('Auth/Register');
-    }
-
-    /**
-     * Gère l'inscription.
+     * Gère l'inscription via API.
      */
     public function register(Request $request)
     {
@@ -86,20 +64,24 @@ class LoginController extends Controller
         ]);
 
         Auth::login($user);
+        $token = $user->createToken('auth-token')->plainTextToken;
 
-        return redirect()->route('onboarding.basic');
+        return response()->json([
+            'user' => $user,
+            'token' => $token,
+            'message' => 'Inscription réussie',
+            'onboarding_step' => 'basic'
+        ], 201);
     }
 
     /**
-     * Déconnexion.
+     * Déconnexion API.
      */
     public function logout(Request $request)
     {
-        Auth::logout();
+        // Revoke current token
+        $request->user()->currentAccessToken()->delete();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/');
+        return response()->json(['message' => 'Déconnexion réussie']);
     }
 }

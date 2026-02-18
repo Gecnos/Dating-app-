@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Head, useForm, router } from '@inertiajs/react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from '../../contexts/AuthProvider';
 
 const intentions = [
     {
@@ -37,19 +39,40 @@ const intentions = [
 ];
 
 export default function MatchingIntentions() {
-    const { data, setData, post, processing } = useForm({
+    const navigate = useNavigate();
+    const { login } = useAuth();
+    const [data, setData] = useState({
         intention: '',
     });
+    const [processing, setProcessing] = useState(false);
 
-    const handleSubmit = (e) => {
+    const updateData = (key, value) => {
+        setData(prev => ({ ...prev, [key]: value }));
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        post('/onboarding/intentions');
+        setProcessing(true);
+
+        try {
+            const response = await axios.post('/api/onboarding/intentions', data);
+
+            if (response.data.user) {
+                const token = localStorage.getItem('auth_token');
+                login(token, response.data.user);
+            }
+
+            const nextStep = response.data.next_step || 'interests';
+            navigate(`/onboarding/${nextStep}`);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-[#101322] flex flex-col p-6 text-[#101322] dark:text-white font-['Be_Vietnam_Pro'] relative overflow-hidden transition-colors duration-500">
-            <Head title="Votre Intention" />
-
             {/* Benin Pattern Background */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
                 style={{
@@ -60,7 +83,7 @@ export default function MatchingIntentions() {
 
             {/* Header / Progress bar */}
             <div className="w-full pt-6 pb-10 flex items-center justify-between z-10 transition-all duration-500">
-                <button onClick={() => window.history.back()} className="size-10 flex items-center justify-center rounded-xl bg-white dark:bg-[#161b2e] border border-black/5 dark:border-white/10 active:scale-90 transition-all transition-colors duration-500 shadow-sm dark:shadow-none">
+                <button onClick={() => navigate(-1)} className="size-10 flex items-center justify-center rounded-xl bg-white dark:bg-[#161b2e] border border-black/5 dark:border-white/10 active:scale-90 transition-all transition-colors duration-500 shadow-sm dark:shadow-none">
                     <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-sm">arrow_back_ios</span>
                 </button>
                 <div className="flex-1 mx-8 h-1.5 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden border border-black/5 dark:border-white/5 transition-colors duration-500">
@@ -81,7 +104,7 @@ export default function MatchingIntentions() {
                     {intentions.map((intent) => (
                         <button
                             key={intent.id}
-                            onClick={() => setData('intention', intent.id)}
+                            onClick={() => updateData('intention', intent.id)}
                             className={`w-full text-left p-6 bg-white dark:bg-[#161b2e] border-2 rounded-[2rem] transition-all relative transition-colors duration-500 shadow-sm dark:shadow-none ${data.intention === intent.id
                                 ? `border-[#D4AF37] bg-[#D4AF37]/5 shadow-2xl shadow-[#D4AF37]/5 scale-[1.02]`
                                 : 'border-black/5 dark:border-white/5 hover:border-[#D4AF37]/30'
@@ -116,14 +139,18 @@ export default function MatchingIntentions() {
 
                 <div className="pb-10">
                     <button
-                        disabled={!data.intention}
+                        disabled={!data.intention || processing}
                         onClick={handleSubmit}
-                        className={`w-full py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl transition-all active:scale-95 transition-colors duration-500 ${!data.intention
+                        className={`w-full py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl transition-all active:scale-95 transition-colors duration-500 ${!data.intention || processing
                             ? 'bg-gray-200 dark:bg-white/5 text-gray-400 dark:text-white/20 cursor-not-allowed border border-black/5 dark:border-white/5 shadow-none'
                             : 'bg-[#D4AF37] text-white dark:text-[#101322] border border-[#D4AF37] hover:brightness-110 shadow-[#D4AF37]/20 uppercase italic font-black shadow-[#D4AF37]/30'
                             }`}
                     >
-                        Suivant
+                        {processing ? (
+                            <div className="w-6 h-6 border-2 border-[#101322]/30 border-t-[#101322] rounded-full animate-spin mx-auto"></div>
+                        ) : (
+                            'Suivant'
+                        )}
                     </button>
                 </div>
             </div>

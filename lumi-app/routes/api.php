@@ -13,17 +13,57 @@ use App\Http\Controllers\ChatController;
 |
 */
 
-Route::middleware('auth')->group(function () {
+// Auth
+Route::post('/login', [App\Http\Controllers\Auth\LoginController::class, 'login']);
+Route::post('/register', [App\Http\Controllers\Auth\LoginController::class, 'register']);
+Route::middleware('auth:sanctum')->post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout']); // Fixing logout here as well to use Sanctum middleware if not already present, though "auth:sanctum" is correct.
+
+Route::get('/auth/google/url', [App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle']);
+Route::get('/auth/callback', [App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback']); // We might need this for the callback processing if we want API to handle it, but for SPA we usually handle token via frontend query param from the controller redirect.
+// Wait, the GoogleController::handleGoogleCallback redirects to /auth/callback?token=... 
+// So the backend route for the callback from Google (e.g. /auth/google/callback defined in services.php) needs to point to the controller.
+// In web.php we had: Route::get('auth/google/callback', ...); 
+// We should probably keep that in web.php or api.php but ensuring it uses sessions if Socialite needs it, OR stateless.
+// My GoogleController uses ->stateless(), so it should be fine in api.php or web.php.
+// Let's add it here to be safe and clean.
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Illuminate\Http\Request $request) {
+        return $request->user();
+    });
+
+    // Chat List
+    Route::get('/chat', [ChatController::class, 'list']);
+    
     // User API
     Route::post('/user/location', [App\Http\Controllers\UserController::class, 'updateLocation']);
     Route::post('/user/ghost-mode', [App\Http\Controllers\UserController::class, 'toggleGhostMode']);
+    Route::post('/fcm-token', [App\Http\Controllers\UserController::class, 'updateFcmToken']);
+    Route::get('/discovery', [App\Http\Controllers\UserController::class, 'discovery']);
+    Route::get('/explorer', [App\Http\Controllers\UserController::class, 'explorer']);
+    Route::get('/profile/edit', [App\Http\Controllers\UserController::class, 'edit']);
+    Route::post('/profile/update', [App\Http\Controllers\UserController::class, 'update']);
+    Route::get('/user/{id}', [App\Http\Controllers\UserController::class, 'show']);
+
+    // Photo Management
+    Route::get('/photos/manage', [App\Http\Controllers\UserController::class, 'photoManagement']);
+    Route::post('/photos/add', [App\Http\Controllers\UserController::class, 'addPhoto'])->name('photos.add');
+    Route::delete('/photos/{id}', [App\Http\Controllers\UserController::class, 'deletePhoto'])->name('photos.delete');
+    Route::post('/photos/reorder', [App\Http\Controllers\UserController::class, 'reorderPhotos'])->name('photos.reorder');
     
     // Interests
     Route::get('/interests', [App\Http\Controllers\UserController::class, 'getInterests']);
     Route::post('/interests/suggest', [App\Http\Controllers\UserController::class, 'suggestInterest']);
     
-    // Swipe
+    // Security
+    Route::get('/security/info', [App\Http\Controllers\SecurityController::class, 'getSecurityInfo']);
+    Route::post('/security/password', [App\Http\Controllers\SecurityController::class, 'updatePassword'])->name('security.password.update');
+    Route::delete('/user/delete', [App\Http\Controllers\UserController::class, 'destroy'])->name('user.destroy');
+
+    // Swipe & Matches
     Route::post('/swipe', [App\Http\Controllers\MatchController::class, 'swipe'])->name('api.swipe');
+    Route::get('/matches', [App\Http\Controllers\MatchController::class, 'index']); // Added this
+
     
     // Reports & Blocks
     Route::get('/reports', [App\Http\Controllers\ReportController::class, 'index']);
@@ -32,21 +72,22 @@ Route::middleware('auth')->group(function () {
     Route::post('/blocks', [App\Http\Controllers\BlockController::class, 'store']);
     Route::delete('/blocks/{user}', [App\Http\Controllers\BlockController::class, 'destroy']);
     
-    // Messages
+    // Messaging
+    Route::get('/chat', [ChatController::class, 'list']);
+    Route::get('/chat/{user}', [ChatController::class, 'show']);
+    Route::get('/messages/{user}', [ChatController::class, 'fetchMessages']);
     Route::post('/messages', [ChatController::class, 'store']);
-    
-    // Récupération des messages
-    Route::get('/messages/history/{user_id}', [ChatController::class, 'getMessages']);
+    Route::get('/messages/unread/count', [ChatController::class, 'getUnreadCount']); // Check if this exists
     
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index']);
     Route::post('/notifications/read', [App\Http\Controllers\NotificationController::class, 'markAsRead']);
     Route::delete('/notifications/{id}', [App\Http\Controllers\NotificationController::class, 'destroy']);
-    
-    // Récupération des notifications récentes
     Route::get('/notifications/latest', [App\Http\Controllers\NotificationController::class, 'getLatest']);
-    
-    // Nombre de messages non lus (initial load)
-    Route::get('/messages/unread-count', [ChatController::class, 'getUnreadCount']);
+
+    // Broadcasting Auth
+    Route::post('/broadcasting/auth', function (Illuminate\Http\Request $request) {
+        return Broadcast::auth($request);
+    });
 });
 

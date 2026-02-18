@@ -17,10 +17,13 @@ class GoogleController extends Controller
      */
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')
+        $url = Socialite::driver('google')
             ->redirectUrl(config('services.google.redirect'))
             ->stateless()
-            ->redirect();
+            ->redirect()
+            ->getTargetUrl();
+
+        return response()->json(['url' => $url]);
     }
 
     /**
@@ -43,30 +46,27 @@ class GoogleController extends Controller
             ], [
                 'name' => $googleUser->name,
                 'google_id' => $googleUser->id,
-                'avatar' => $googleUser->avatar, // On peut ajouter ce champ plus tard ou l'utiliser tel quel
+                'avatar' => $googleUser->avatar,
                 'password' => encrypt('lumi-dummy-password') // Mot de passe bidon car OAuth
             ]);
 
             Auth::login($user);
+            $token = $user->createToken('auth-token')->plainTextToken;
             
             \Log::info('Google Auth Success for User: ' . $user->email);
 
-            // Vérifier si le profil est complet
-            $isProfileComplete = $user->intention_id && $user->interests && $user->bio;
-            
-            if ($isProfileComplete) {
-                // Utilisateur existant avec profil complet → Discovery
-                \Log::info('Profile complete, redirecting to: ' . route('discovery'));
-                return redirect()->route('discovery');
-            } else {
-                // Nouvel utilisateur ou profil incomplet → Onboarding
-                \Log::info('Profile incomplete, redirecting to: ' . route('onboarding.basic'));
-                return redirect()->route('onboarding.basic');
-            }
+            // Redirection vers le frontend avec le token
+            $query = http_build_query([
+                'token' => $token,
+                'user_id' => $user->id,
+                'new_user' => $user->wasRecentlyCreated ? '1' : '0'
+            ]);
+
+            return redirect('/auth/callback?' . $query);
             
         } catch (Exception $e) {
             \Log::error('Google Auth Error: ' . $e->getMessage());
-            return redirect('/login')->with('error', 'Erreur lors de la connexion avec Google: ' . $e->getMessage());
+            return redirect('/login?error=google_auth_failed');
         }
     }
 }

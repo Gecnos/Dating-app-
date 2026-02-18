@@ -1,7 +1,13 @@
-import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Help() {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        document.title = "Aide & Support - Lumi";
+    }, []);
+
     const faqs = [
         {
             q: "Comment changer ma photo de profil ?",
@@ -22,11 +28,9 @@ export default function Help() {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-sans pb-10 transition-colors duration-500">
-            <Head title="Aide & Support - Lumi" />
-
+        <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-['Be_Vietnam_Pro'] pb-10 transition-colors duration-500">
             <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#101322]/80 backdrop-blur-xl px-6 py-4 flex items-center justify-between border-b border-black/5 dark:border-white/10 transition-all duration-500">
-                <Link href={route('settings')} className="w-10 h-10 flex items-center justify-start">
+                <Link to="/settings" className="w-10 h-10 flex items-center justify-start">
                     <span className="material-symbols-outlined text-[#101322] dark:text-white transition-colors duration-500">arrow_back_ios</span>
                 </Link>
                 <h1 className="text-lg font-bold text-[#101322] dark:text-white transition-colors duration-500">Centre d'aide</h1>

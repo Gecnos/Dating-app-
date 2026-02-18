@@ -1,17 +1,22 @@
 import { useEffect } from 'react';
-import { router, usePage } from '@inertiajs/react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthProvider';
+import { useWebSocket } from '../contexts/WebSocketProvider';
 
 export default function useGlobalNotifications() {
-    const { auth } = usePage().props;
-    const { url } = usePage();
+    const { user } = useAuth();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const currentPath = location.pathname;
+    const { echo } = useWebSocket();
 
     useEffect(() => {
-        if (!auth.user || !window.Echo) return;
+        if (!user || !echo) return;
 
-        console.log("Global Notifications: Init for user", auth.user.id);
+        console.log("Global Notifications: Init for user", user.id);
 
         // 1. Private User Channel (Matches, Likes)
-        const userChannel = window.Echo.private(`user.${auth.user.id}`);
+        const userChannel = echo.private(`user.${user.id}`);
         
         userChannel.subscribed(() => {
             console.log("Global Notifications: Subscribed to user channel");
@@ -20,51 +25,37 @@ export default function useGlobalNotifications() {
         userChannel.listen('.match.created', (event) => {
             console.log("Global Notifications: Match Received!", event);
             
-            // 1. If on the Matches/Likes page, refresh the list
-            if (url && url.includes('/likes')) {
-                router.reload({ only: ['receivedLikes', 'sentLikes'] });
-            }
-
             // 2. Redirect to success if not already there
-            if (url && !url.includes('/match-success')) {
-                router.visit(route('match.success', event.matched_user.id));
+            if (!currentPath.includes('/match/success')) {
+                navigate(`/match/success/${event.matched_user.id}`);
             }
         });
 
         userChannel.listen('.like.received', (event) => {
             console.log("Global Notifications: Like Received!", event);
-            // Update badge (via state or Inertia reload if needed)
-            // For now, simple console alert or toast can be added later
+            // Optional: Show toast or update badge count context
         });
 
         // 2. Private Chat Channel (Messages)
-        // This is only for the "Global" part. 
-        // If we are ALREADY in Chat.jsx, it has its own listener.
-        const chatChannel = window.Echo.private(`chat.${auth.user.id}`);
+        const chatChannel = echo.private(`chat.${user.id}`);
 
         chatChannel.listen('.message.sent', (data) => {
             console.log("Global Notifications: Message Received!", data);
             
-            // 1. If on the Chat List page, refresh the list of matches/conversations
-            if (url && (url === '/chat' || url === '/chat/')) {
-                router.reload({ only: ['matches'] });
-            }
-
-            // 2. If NOT on the chat page with this person, show a notification
-            const isCurrentChatPage = url && (url.includes(`/chat/${data.from_id}`) || url === `/chat?id=${data.from_id}`);
+            // 1. If on the Chat List page, we might want to refresh list (handled by ChatList component usually)
+            
+            // 2. If NOT on the chat page with this person, show a notification/toast
+            const isCurrentChatPage = currentPath.includes(`/chat/${data.from_id}`);
             
             if (!isCurrentChatPage) {
-                // Here we could trigger a global state update or toast
                 console.log(`Nouveau message de ${data.from_id}`);
-                
-                // Refresh top-level props (like unread counts in navbar if we add them later)
-                router.reload({ only: ['auth'] }); 
+                // Trigger toast here
             }
         });
 
         return () => {
-            window.Echo.leave(`user.${auth.user.id}`);
-            window.Echo.leave(`chat.${auth.user.id}`);
+            echo.leave(`user.${user.id}`);
+            echo.leave(`chat.${user.id}`);
         };
-    }, [auth.user, url]);
+    }, [user, currentPath, echo]);
 }
