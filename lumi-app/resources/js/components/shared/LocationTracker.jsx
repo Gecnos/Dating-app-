@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../api/axios';
 import { useAuth } from '../../contexts/AuthProvider';
 
 export default function LocationTracker() {
@@ -8,39 +8,45 @@ export default function LocationTracker() {
     useEffect(() => {
         if (!user) return;
 
-        const updateLocation = (position) => {
-            const { latitude, longitude } = position.coords;
-            
-            axios.post('/api/user/location', {
-                latitude,
-                longitude
-            }).catch(error => {
-                console.error("Failed to sync location:", error);
-            });
+        const sendLocation = (latitude, longitude) => {
+            // Check if we already sent this location recently (simple session storage optimization)
+            const lastLoc = sessionStorage.getItem('last_known_location');
+            if (lastLoc) {
+                const { lat, lng, time } = JSON.parse(lastLoc);
+                const distance = Math.sqrt(Math.pow(lat - latitude, 2) + Math.pow(lng - longitude, 2));
+                // If moved less than ~100m (approx 0.001 deg) and updated < 5 mins ago, skip
+                if (distance < 0.001 && (Date.now() - time) < 300000) return;
+            }
+
+            axios.post('/user/location', { latitude, longitude })
+                .then(() => {
+                    sessionStorage.setItem('last_known_location', JSON.stringify({
+                        lat: latitude, 
+                        lng: longitude, 
+                        time: Date.now() 
+                    }));
+                })
+                .catch(err => console.error("Location sync failed", err));
         };
 
-        const handleError = (error) => {
-            console.warn("Geolocation error:", error.message);
+        const update = () => {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => sendLocation(pos.coords.latitude, pos.coords.longitude),
+                    (err) => console.warn("Geo error:", err.message),
+                    { enableHighAccuracy: false, timeout: 5000 }
+                );
+            }
         };
 
-        if ("geolocation" in navigator) {
-            // Request once on mount
-            navigator.geolocation.getCurrentPosition(updateLocation, handleError, {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0
-            });
+        // Update on mount
+        update();
 
-            // Watch position for updates
-            const watchId = navigator.geolocation.watchPosition(updateLocation, handleError, {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 60000
-            });
+        // And every 5 minutes
+        const interval = setInterval(update, 300000); 
 
-            return () => navigator.geolocation.clearWatch(watchId);
-        }
-    }, [user]);
+        return () => clearInterval(interval);
+    }, [user?.id]); // Only re-run if user ID changes, not the whole user object
 
-    return null; // This component doesn't render anything
+    return null;
 }

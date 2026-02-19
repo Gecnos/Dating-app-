@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
+import { useCache } from '../contexts/CacheContext';
 
 export default function Discovery() {
     const navigate = useNavigate();
@@ -10,21 +11,46 @@ export default function Discovery() {
     const [loading, setLoading] = useState(true);
     const [dragDirection, setDragDirection] = useState(null);
 
+    const { getCachedData, setCachedData } = useCache();
+
     useEffect(() => {
-        fetchProfiles();
+        const controller = new AbortController();
+        fetchProfiles(controller.signal);
+        return () => controller.abort();
     }, []);
 
-    const fetchProfiles = async () => {
+    const fetchProfiles = async (signal) => {
+        const cacheKey = 'discovery_profiles';
+        
+        // Check cache
+        const cached = getCachedData(cacheKey);
+        if (cached) {
+            console.log("Serving Discovery from cache");
+            setProfiles(cached);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
-            const response = await axios.get('/api/discovery');
-            // Assuming API returns array of profiles
-            // Check if response.data is array or wrapped
-            setProfiles(Array.isArray(response.data) ? response.data : response.data.data || []);
+            const response = await axios.get('/discovery', { signal });
+            const data = Array.isArray(response.data) ? response.data : response.data.data || [];
+            
+            setProfiles(data);
+            
+            // Cache for 10 minutes (Discovery changes less often per session)
+            setCachedData(cacheKey, data, 600);
+
         } catch (error) {
-            console.error("Error fetching profiles:", error);
+            if (axios.isCancel(error)) {
+                console.log('Request canceled');
+            } else {
+                console.error("Error fetching profiles:", error);
+            }
         } finally {
-            setLoading(false);
+            if (!signal?.aborted) {
+                setLoading(false);
+            }
         }
     };
 
@@ -54,7 +80,7 @@ export default function Discovery() {
         setCurrentIndex((prev) => prev + 1);
 
         try {
-            const response = await axios.post('/api/swipe', {
+            const response = await axios.post('/swipe', {
                 target_id: target.id,
                 status: status === 'liked' ? 'liked' : 'passed'
             });

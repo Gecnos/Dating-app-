@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
+import { useCache } from '../contexts/CacheContext';
 
 export default function Explorer() {
     const navigate = useNavigate();
@@ -22,35 +23,60 @@ export default function Explorer() {
         intention_id: searchParams.get('intention_id') || ''
     });
 
-    const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
+    // const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(filters.search);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [filters.search]);
+    const { getCachedData, setCachedData } = useCache();
 
+    // Unified Effect: Handles Debounce AND Fetching
     useEffect(() => {
-        const fetchExplorerData = async () => {
+        const fetchExplorerData = async (searchTerm) => {
+            // Create a unique cache key based on filters using the provided search term
+            const currentParams = {
+                s: searchTerm,
+                amin: filters.age_min,
+                amax: filters.age_max,
+                d: filters.distance,
+                g: filters.gender,
+                i: filters.intention_id
+            };
+            
+            const cacheKey = `explorer_${JSON.stringify(currentParams)}`;
+
+            // Check Cache first
+            const cached = getCachedData(cacheKey);
+            if (cached) {
+                console.log("Serving from cache:", cacheKey);
+                setProfiles(cached.profiles);
+                setIntentions(cached.intentions || []);
+                setLoading(false);
+                return;
+            }
+
             setLoading(true);
             try {
                 const params = new URLSearchParams();
-                if (debouncedSearch) params.append('search', debouncedSearch);
+                if (searchTerm) params.append('search', searchTerm);
                 if (filters.age_min !== 18) params.append('age_min', filters.age_min);
                 if (filters.age_max !== 60) params.append('age_max', filters.age_max);
                 if (filters.distance !== 50) params.append('distance', filters.distance);
                 if (filters.gender) params.append('gender', filters.gender);
                 if (filters.intention_id) params.append('intention_id', filters.intention_id);
 
-                // Update URL without reload
-                setSearchParams(params);
+                setSearchParams(params, { replace: true });
 
-                const response = await axios.get(`/api/explorer?${params.toString()}`);
-                setProfiles(response.data.profiles || []);
-                if (response.data.intentions) {
-                    setIntentions(response.data.intentions);
+                const response = await axios.get(`/explorer?${params.toString()}`);
+                const data = response.data;
+
+                setProfiles(data.profiles || []);
+                if (data.intentions) {
+                    setIntentions(data.intentions);
                 }
+
+                setCachedData(cacheKey, {
+                    profiles: data.profiles || [],
+                    intentions: data.intentions || []
+                }, 300);
+
             } catch (error) {
                 console.error("Error fetching explorer data:", error);
             } finally {
@@ -58,8 +84,13 @@ export default function Explorer() {
             }
         };
 
-        fetchExplorerData();
-    }, [debouncedSearch, filters.age_min, filters.age_max, filters.distance, filters.gender, filters.intention_id]);
+        // If search changed, debounce it
+        const timer = setTimeout(() => {
+            fetchExplorerData(filters.search);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [filters.search, filters.age_min, filters.age_max, filters.distance, filters.gender, filters.intention_id, getCachedData, setCachedData, setSearchParams]);
 
     const handleSearchChange = (e) => {
         setFilters(prev => ({ ...prev, search: e.target.value }));
@@ -139,7 +170,7 @@ export default function Explorer() {
                 <section>
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-black uppercase tracking-tighter italic">
-                            {debouncedSearch ? `Résultats pour "${debouncedSearch}"` : 'Profils à proximité'}
+                            {filters.search ? `Résultats pour "${filters.search}"` : 'Profils à proximité'}
                         </h3>
                         {profiles.length > 0 && (
                             <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{profiles.length} Profils</span>

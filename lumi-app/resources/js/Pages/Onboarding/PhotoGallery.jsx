@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../../api/axios';
 import { useAuth } from '../../contexts/AuthProvider';
 
 export default function PhotoGallery() {
@@ -53,7 +53,7 @@ export default function PhotoGallery() {
         });
 
         try {
-            const response = await axios.post('/api/onboarding/photos', formData, {
+            const response = await axios.post('/onboarding/photos', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useAuth } from '../contexts/AuthProvider';
+import { useCache } from '../contexts/CacheContext';
+import { useToast } from '../contexts/ToastContext';
+import { useConfirm } from '../contexts/ConfirmContext';
 
 export default function Settings() {
     const navigate = useNavigate();
@@ -35,8 +38,13 @@ export default function Settings() {
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState({});
 
+    const { getCachedData, setCachedData, clearCache } = useCache();
+    const CACHE_KEY = 'settings_security_info';
+
     useEffect(() => {
-        fetchSecurityInfo();
+        const controller = new AbortController();
+        fetchSecurityInfo(controller.signal);
+        return () => controller.abort();
     }, []);
 
     useEffect(() => {
@@ -49,12 +57,22 @@ export default function Settings() {
         }
     }, [darkMode]);
 
-    const fetchSecurityInfo = async () => {
+    const fetchSecurityInfo = async (signal) => {
+        const cached = getCachedData(CACHE_KEY);
+        if (cached) {
+            setSecurityInfo(cached);
+            // We might want to fetch fresh data in background to ensure "password_last_changed" is accurate
+            // but for security info, typically it doesn't change *that* often during a session.
+        }
+
         try {
-            const res = await axios.get('/api/security/info');
+            const res = await axios.get('/security/info', { signal });
             setSecurityInfo(res.data);
+            setCachedData(CACHE_KEY, res.data, 300);
         } catch (error) {
-            console.error("Error fetching security info:", error);
+            if (!axios.isCancel(error)) {
+                console.error("Error fetching security info:", error);
+            }
         }
     };
 
@@ -64,7 +82,7 @@ export default function Settings() {
         const newValue = !ghostMode;
         setGhostMode(newValue);
         try {
-            await axios.post('/api/user/ghost-mode');
+            await axios.post('/user/ghost-mode');
             // Update auth context
             if (setAuthUser && authUser) {
                 setAuthUser({ ...authUser, is_ghost_mode: newValue });
@@ -75,16 +93,20 @@ export default function Settings() {
         }
     };
 
+    const { success, error } = useToast();
+    const { confirm } = useConfirm();
+
     const handlePasswordUpdate = async (e) => {
         e.preventDefault();
         setProcessing(true);
         setErrors({});
 
         try {
-            await axios.post('/api/security/password', passwordData);
+            await axios.post('/security/password', passwordData);
             setShowPasswordForm(false);
             setPasswordData({ current_password: '', password: '', password_confirmation: '' });
-            alert('Mot de passe mis à jour !');
+            success('Mot de passe mis à jour !');
+            clearCache(CACHE_KEY); // Force refresh
             fetchSecurityInfo();
         } catch (err) {
             if (err.response?.data?.errors) {
@@ -97,16 +119,22 @@ export default function Settings() {
         }
     };
 
-    const handleDeleteAccount = async () => {
-        if (window.confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
-            try {
-                await axios.delete('/api/user/delete');
-                logout(); // Logout will redirect to login
-            } catch (error) {
-                console.error("Error deleting account:", error);
-                alert("Erreur lors de la suppression du compte.");
+    const handleDeleteAccount = () => {
+        confirm({
+            title: "Supprimer mon compte",
+            message: "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.",
+            isDangerous: true,
+            confirmText: "Supprimer définitivement",
+            onConfirm: async () => {
+                try {
+                    await axios.delete('/user/delete');
+                    logout(); // Logout will redirect to login
+                } catch (err) {
+                    console.error("Error deleting account:", err);
+                    error("Erreur lors de la suppression du compte.");
+                }
             }
-        }
+        });
     };
 
     if (!authUser) return null;

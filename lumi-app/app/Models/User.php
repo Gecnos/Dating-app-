@@ -64,8 +64,6 @@ class User extends Authenticatable
         'age',
         'masked_email',
         'avatar_url',
-        'unread_messages_count',
-        'unread_notifications_count',
     ];
 
     /**

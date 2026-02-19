@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../../api/axios';
 import { useAuth } from '../../contexts/AuthProvider';
 
 export default function InterestsSelection() {
@@ -17,7 +17,7 @@ export default function InterestsSelection() {
     const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
-        axios.get('/api/interests').then(res => {
+        axios.get('/interests').then(res => {
             setAvailableInterests(res.data);
         }).catch(err => console.error("Could not fetch interests", err));
     }, []);
@@ -34,7 +34,7 @@ export default function InterestsSelection() {
         if (!suggestion) return;
         setSuggesting(true);
         try {
-            await axios.post('/api/interests/suggest', { label: suggestion });
+            await axios.post('/interests/suggest', { label: suggestion });
             setSuggestionSuccess('Suggestion envoyée !');
             setSuggestion('');
             setTimeout(() => setSuggestionSuccess(''), 3000);
@@ -49,7 +49,7 @@ export default function InterestsSelection() {
         e.preventDefault();
         setProcessing(true);
         try {
-            const response = await axios.post('/api/onboarding/interests', { interests });
+            const response = await axios.post('/onboarding/interests', { interests });
 
             if (response.data.user) {
                 const token = localStorage.getItem('auth_token');

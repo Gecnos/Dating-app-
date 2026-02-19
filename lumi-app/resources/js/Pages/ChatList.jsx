@@ -1,27 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
+import { useCache } from '../contexts/CacheContext';
+import { useConfirm } from '../contexts/ConfirmContext';
 
 export default function ChatList() {
     const navigate = useNavigate();
     const [matches, setMatches] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
+    const { confirm } = useConfirm();
+
+    const { getCachedData, setCachedData } = useCache();
+    // Cache for 30s as chats update frequently
+    const CACHE_KEY = 'chat_list';
 
     useEffect(() => {
-        fetchChats();
+        const controller = new AbortController();
+        fetchChats(controller.signal);
+        return () => controller.abort();
     }, []);
 
-    const fetchChats = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get('/api/chat');
-            setMatches(response.data || []);
-        } catch (error) {
-            console.error("Error fetching chats:", error);
-        } finally {
+    const fetchChats = async (signal) => {
+        const cached = getCachedData(CACHE_KEY);
+        if (cached) {
+            console.log("Serving Chats from cache");
+            setMatches(cached);
             setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const response = await axios.get('/chat', { signal });
+            const data = response.data || [];
+            if (JSON.stringify(data) !== JSON.stringify(cached)) {
+                 setMatches(data);
+                 setCachedData(CACHE_KEY, data, 60); // 1 minute TTL
+            }
+        } catch (error) {
+            if (!axios.isCancel(error)) {
+                console.error("Error fetching chats:", error);
+            }
+        } finally {
+            if (!signal?.aborted) {
+                setLoading(false);
+            }
         }
     };
 
@@ -127,13 +153,17 @@ export default function ChatList() {
                                             dragElastic={0.1}
                                             onDragEnd={(e, { offset, velocity }) => {
                                                 if (offset.x < -60) {
-                                                    // Trigger delete/block confirm
-                                                    if (confirm(`Supprimer la conversation avec ${match.name} ?`)) {
-                                                        // Call delete API
-                                                        // axios.delete(...)
-                                                        // For now just hide or mock
-                                                        setMatches(prev => prev.filter(m => m.id !== match.id));
-                                                    }
+                                                    confirm({
+                                                        title: "Supprimer la conversation",
+                                                        message: `Voulez-vous vraiment supprimer la conversation avec ${match.name} ?`,
+                                                        confirmText: "Supprimer",
+                                                        isDangerous: true,
+                                                        onConfirm: () => {
+                                                            // Call delete API
+                                                            // For now just hide or mock
+                                                            setMatches(prev => prev.filter(m => m.id !== match.id));
+                                                        }
+                                                    });
                                                 }
                                             }}
                                             className="relative z-10 bg-gray-50 dark:bg-[#101322] w-full"

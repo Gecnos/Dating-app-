@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthProvider';
-import axios from 'axios';
+import axios from '../../api/axios';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function Register() {
     const { login } = useAuth();
     const navigate = useNavigate();
+    const { error } = useToast();
 
     const [data, setData] = useState({
         name: '',
@@ -22,7 +24,7 @@ export default function Register() {
         setErrors({});
 
         try {
-            const response = await axios.post('/api/register', data);
+            const response = await axios.post('/register', data);
             const { token, user, onboarding_step } = response.data;
 
             login(token, user);
@@ -31,7 +33,7 @@ export default function Register() {
             if (err.response?.status === 422) {
                 setErrors(err.response.data.errors);
             } else {
-                alert(err.response?.data?.message || 'Une erreur est survenue.');
+                error(err.response?.data?.message || 'Une erreur est survenue.');
             }
         } finally {
             setProcessing(false);

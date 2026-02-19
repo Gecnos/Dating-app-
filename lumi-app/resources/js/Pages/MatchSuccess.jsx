@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthProvider';
-import axios from 'axios';
+import axios from '../api/axios';
 
 export default function MatchSuccess() {
     const { id } = useParams();

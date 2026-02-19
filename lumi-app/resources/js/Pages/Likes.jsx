@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
+import { useCache } from '../contexts/CacheContext';
 
 export default function Likes() {
     const [activeTab, setActiveTab] = useState('received');
@@ -10,26 +11,48 @@ export default function Likes() {
     const [isPremium, setIsPremium] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    const { getCachedData, setCachedData } = useCache();
+    const CACHE_KEY = 'user_likes';
+
     useEffect(() => {
-        fetchLikes();
+        const controller = new AbortController();
+        fetchLikes(controller.signal);
+        return () => controller.abort();
     }, []);
 
-    const fetchLikes = async () => {
+    const fetchLikes = async (signal) => {
+        const cached = getCachedData(CACHE_KEY);
+        if (cached) {
+            console.log("Serving Likes from cache");
+            setReceivedLikes(cached.receivedLikes);
+            setSentLikes(cached.sentLikes);
+            setIsPremium(cached.isPremium);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
-            const response = await axios.get('/api/matches'); // MatchController::index (mapped to /api/matches?) 
-            // Wait, I need to check routes. MatchController::index is usually for 'matches' or 'likes' page.
-            // Let's assume I need to double check the route for MatchController::index in api.php
-            // If it's not there, I will add it.
+            // Using /matches based on controller
+            const response = await axios.get('/matches', { signal }); 
+            const data = response.data;
 
-            // Assuming response structure based on MatchController::index:
-            setReceivedLikes(response.data.receivedLikes || []);
-            setSentLikes(response.data.sentLikes || []);
-            setIsPremium(response.data.isPremium || false);
+            setReceivedLikes(data.receivedLikes || []);
+            setSentLikes(data.sentLikes || []);
+            setIsPremium(data.isPremium || false);
+
+            setCachedData(CACHE_KEY, data, 300); // 5 mins
         } catch (error) {
-            console.error("Error fetching likes:", error);
+            if (axios.isCancel(error)) {
+                console.log('Request canceled', error.message);
+            } else {
+                console.error("Error fetching likes:", error);
+            }
         } finally {
-            setLoading(false);
+            // Only set loading false if not canceled (component might be unmounted)
+            if (!signal?.aborted) {
+                setLoading(false);
+            }
         }
     };
 

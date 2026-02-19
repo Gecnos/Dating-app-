@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation, Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import useGlobalNotifications from '../hooks/useGlobalNotifications';
 import { requestForToken } from '../hooks/useFcm';
 import LocationTracker from '../components/shared/LocationTracker';
 import { useAuth } from '../contexts/AuthProvider';
@@ -13,7 +12,6 @@ export default function AppLayout() {
     const url = location.pathname;
 
     // Initialize global events listener
-    // useGlobalNotifications(); // TODO: Refactor hook to use WebSocket Context
 
     useEffect(() => {
         // Initialize FCM

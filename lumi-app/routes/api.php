@@ -31,15 +31,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Illuminate\Http\Request $request) {
         return $request->user();
     });
+    
+    // Bootstrap (Combo Init) - Private Cache 1 min
+    Route::middleware('cache.control:private,60')->get('/bootstrap', App\Http\Controllers\BootstrapController::class);
 
-    // Chat List
-    Route::get('/chat', [ChatController::class, 'list']);
+    // Chat List - No Cache (Realtime)
+    Route::middleware('cache.control:private,0')->get('/chat', [ChatController::class, 'list']);
     
     // User API
     Route::post('/user/location', [App\Http\Controllers\UserController::class, 'updateLocation']);
     Route::post('/user/ghost-mode', [App\Http\Controllers\UserController::class, 'toggleGhostMode']);
+    // Counts - Private Cache 30s
+    Route::middleware('cache.control:private,30')->get('/user/counts', [App\Http\Controllers\UserController::class, 'counts']);
     Route::post('/fcm-token', [App\Http\Controllers\UserController::class, 'updateFcmToken']);
-    Route::get('/discovery', [App\Http\Controllers\UserController::class, 'discovery']);
+    // Discovery - Private Cache 10 mins (600s)
+    Route::middleware('cache.control:private,600')->get('/discovery', [App\Http\Controllers\UserController::class, 'discovery']);
     Route::get('/explorer', [App\Http\Controllers\UserController::class, 'explorer']);
     Route::get('/profile/edit', [App\Http\Controllers\UserController::class, 'edit']);
     Route::post('/profile/update', [App\Http\Controllers\UserController::class, 'update']);
@@ -51,8 +57,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/photos/{id}', [App\Http\Controllers\UserController::class, 'deletePhoto'])->name('photos.delete');
     Route::post('/photos/reorder', [App\Http\Controllers\UserController::class, 'reorderPhotos'])->name('photos.reorder');
     
-    // Interests
-    Route::get('/interests', [App\Http\Controllers\UserController::class, 'getInterests']);
+    // Onboarding
+    Route::post('/onboarding/basic', [App\Http\Controllers\UserController::class, 'storeBasicInfo']);
+    Route::post('/onboarding/intentions', [App\Http\Controllers\UserController::class, 'storeIntentions']);
+    Route::post('/onboarding/interests', [App\Http\Controllers\UserController::class, 'storeInterests']);
+    Route::post('/onboarding/photos', [App\Http\Controllers\UserController::class, 'storePhotos']);
+
+    // Interests - Public Cache 1 day (86400s)
+    Route::middleware('cache.control:public,86400')->get('/interests', [App\Http\Controllers\UserController::class, 'getInterests']);
     Route::post('/interests/suggest', [App\Http\Controllers\UserController::class, 'suggestInterest']);
     
     // Security

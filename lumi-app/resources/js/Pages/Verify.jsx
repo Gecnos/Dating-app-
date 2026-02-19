@@ -1,17 +1,28 @@
-import React from 'react';
-import { Head, useForm } from '@inertiajs/react';
+import React, { useState } from 'react';
+import axios from '../api/axios';
 
-export default function Verify({ users }) {
-    const { post } = useForm();
+import { useToast } from '../contexts/ToastContext';
 
-    const handleAction = (id, action) => {
-        post(route('admin.verify.action', { id, action }));
+export default function Verify({ users: initialUsers }) {
+    const [users, setUsers] = useState(initialUsers || []);
+    const { success, error } = useToast();
+
+    const handleAction = async (id, action) => {
+        try {
+            await axios.post(`/admin/verify/${id}/${action}`);
+            // Remove user from list locally on success
+            setUsers(prev => prev.filter(u => u.id !== id));
+            success(action === 'approve' ? "Utilisateur approuvé." : "Utilisateur rejeté.");
+        } catch (err) {
+            console.error("Verification action failed", err);
+            error("Une erreur est survenue.");
+        }
     };
 
     return (
         <div className="min-h-screen bg-gray-100 p-8 font-sans">
-            <Head title="Modération - Vérification" />
-
+            {/* Title managed by layout or effect */}
+            
             <div className="max-w-6xl mx-auto space-y-8">
                 <div className="flex items-center justify-between">
                     <div>

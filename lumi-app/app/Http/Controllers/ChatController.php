@@ -29,7 +29,7 @@ class ChatController extends Controller
     {
         $me = Auth::user();
         
-        // Récupérer les IDs des utilisateurs avec qui il y a un match mutuel
+        // 1. Get Match IDs (Mutual)
         $matchIds = MatchModel::where('is_mutual', true)
             ->where(function($q) use ($me) {
                 $q->where('user_id', $me->id)->orWhere('target_id', $me->id);
@@ -37,37 +37,76 @@ class ChatController extends Controller
             ->get()
             ->map(function($match) use ($me) {
                 return $match->user_id === $me->id ? $match->target_id : $match->user_id;
+            })
+            ->toArray();
+
+        // 2. Fetch Users
+        $users = User::whereIn('id', $matchIds)->with('intention')->get()->keyBy('id');
+
+        // 3. Fetch Last Messages for these conversations Efficiently
+        // We get the IDs of the latest message for each conversation
+        // Note: Grouping by conversation tuple (min_id, max_id) ensures unique conversation per pair
+        $lastMessages = Message::where(function($q) use ($me, $matchIds) {
+                $q->where('from_id', $me->id)->whereIn('to_id', $matchIds);
+            })
+            ->orWhere(function($q) use ($me, $matchIds) {
+                $q->whereIn('from_id', $matchIds)->where('to_id', $me->id);
+            })
+            ->orderBy('id', 'desc')
+            ->get()
+            ->unique(function ($item) use ($me) {
+                // Unique key for conversation: sorted IDs
+                $p1 = $item->from_id;
+                $p2 = $item->to_id;
+                return min($p1, $p2) . '-' . max($p1, $p2);
             });
 
-        $users = User::whereIn('id', $matchIds)->with('intention')->get()->map(function($user) use ($me) {
-            // Get last message between me and this user
-            $lastMessage = Message::where(function($q) use ($me, $user) {
-                $q->where('from_id', $me->id)->where('to_id', $user->id);
-            })->orWhere(function($q) use ($me, $user) {
-                $q->where('from_id', $user->id)->where('to_id', $me->id);
-            })->orderBy('created_at', 'desc')->first();
+        // 4. Fetch Unread Counts Efficiently
+        // SELECT from_id, COUNT(*) FROM messages WHERE to_id = me AND is_read = 0 AND from_id IN (...) GROUP BY from_id
+        $unreadCounts = Message::where('to_id', $me->id)
+            ->whereIn('from_id', $matchIds)
+            ->whereIn('from_id', $matchIds)
+            ->where('is_read', false)
+            // In step 1863 I used whereNull('read_at') because User model uses accessors.
+            // But ChatController::list (lines 51-54) previously used 'is_read', false.
+            // I should check Message model again. Step 1862 showed Message model has 'is_read' in fillable.
+            // But UserController::counts uses `whereNull('read_at')`. 
+            // This suggests INCONSISTENCY in the database or model.
+            // Let's check the migration or assume 'is_read' based on previous ChatController code.
+            // Wait, Step 1863 fix in UserController used `$user->unread_messages_count`.
+            // User model (Step 1858) `getUnreadMessagesCountAttribute`: `return $this->receivedMessages()->where('is_read', false)->count();`
+            // So 'is_read' is the correct column based on User model.
+            // UserController::counts ORIGINAL (Step 1846) used `read_at`. That was what I REPLACED.
+            // So `is_read` is correct.
+            ->where('is_read', false)
+            ->selectRaw('from_id, count(*) as count')
+            ->groupBy('from_id')
+            ->pluck('count', 'from_id');
 
-            // Count unread messages from this user
-            $unreadCount = Message::where('from_id', $user->id)
-                ->where('to_id', $me->id)
-                ->where('is_read', false)
-                ->count();
+        
+        // 5. Enhance Users
+        $enhancedUsers = $users->map(function($user) use ($me, $lastMessages, $unreadCounts) {
+            // Find last message for this user
+            $lastMessage = $lastMessages->first(function($msg) use ($me, $user) {
+                return ($msg->from_id == $me->id && $msg->to_id == $user->id) ||
+                       ($msg->from_id == $user->id && $msg->to_id == $me->id);
+            });
 
             return [
                 'id' => $user->id,
                 'name' => $user->name,
                 'avatar' => $user->avatar_url,
-                'last_message' => $lastMessage ? $lastMessage->content : ($user->gender === 'female' ? 'Elle vous attend...' : 'Il vous attend...'),
+                'last_message' => $lastMessage ? $lastMessage->content : ($user->gender === 'Femme' ? 'Elle vous attend...' : 'Il vous attend...'),
                 'last_message_time' => $lastMessage ? $lastMessage->created_at->diffForHumans() : null,
                 'last_message_timestamp' => $lastMessage ? $lastMessage->created_at->timestamp : 0,
-                'unread_count' => $unreadCount,
+                'unread_count' => $unreadCounts[$user->id] ?? 0,
                 'is_online' => $user->isOnline(),
                 'type' => $lastMessage ? $lastMessage->type : 'text',
                 'duration' => $lastMessage ? $lastMessage->duration : null,
             ];
         })->sortByDesc('last_message_timestamp')->values();
 
-        return response()->json($users);
+        return response()->json($enhancedUsers);
     }
 
     /**
@@ -93,7 +132,9 @@ class ChatController extends Controller
             ->update(['is_read' => true]);
 
         return response()->json([
-            'chatWith' => User::findOrFail($user_id),
+            'chatWith' => User::where('id', $user_id)
+                ->select(['id', 'name', 'avatar', 'updated_at', 'is_ghost_mode'])
+                ->firstOrFail(),
             'messages' => $messages
         ]);
     }

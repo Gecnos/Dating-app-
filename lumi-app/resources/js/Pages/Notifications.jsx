@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
+import { useCache } from '../contexts/CacheContext';
 
 export default function Notifications() {
     const navigate = useNavigate();
@@ -9,10 +10,28 @@ export default function Notifications() {
     const [filter, setFilter] = useState('tout');
     const [loading, setLoading] = useState(true);
 
+    const { getCachedData, setCachedData, clearCache } = useCache();
+    const CACHE_KEY = 'notifications_list';
+
     useEffect(() => {
-        axios.get('/api/notifications')
+        const cached = getCachedData(CACHE_KEY);
+        if (cached) {
+            setNotifications(cached);
+            setLoading(false);
+            
+            // Background update check? 
+            // For notifs, we want to know if there are new ones. 
+            // The context usually handles badge counts, but this list needs detail.
+            // Let's rely on cache for 60s.
+        }
+
+        axios.get('/notifications')
             .then(res => {
-                setNotifications(res.data);
+                // If different, update
+                if (JSON.stringify(res.data) !== JSON.stringify(cached)) {
+                    setNotifications(res.data);
+                    setCachedData(CACHE_KEY, res.data, 60);
+                }
                 setLoading(false);
             })
             .catch(err => {
@@ -29,8 +48,10 @@ export default function Notifications() {
     });
 
     const markAsRead = () => {
-        axios.post('/api/notifications/read').then(() => {
-            setNotifications(notifications.map(n => ({ ...n, is_unread: false })));
+        axios.post('/notifications/read').then(() => {
+            const updated = notifications.map(n => ({ ...n, is_unread: false }));
+            setNotifications(updated);
+            setCachedData(CACHE_KEY, updated, 60);
         });
     };
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../../api/axios';
 import { useAuth } from '../../contexts/AuthProvider';
 
 const intentions = [
@@ -55,7 +55,7 @@ export default function MatchingIntentions() {
         setProcessing(true);
 
         try {
-            const response = await axios.post('/api/onboarding/intentions', data);
+            const response = await axios.post('/onboarding/intentions', data);
 
             if (response.data.user) {
                 const token = localStorage.getItem('auth_token');

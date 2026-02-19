@@ -3,34 +3,41 @@ import React, { useState, useRef, useEffect } from 'react';
 const VoicePlayer = ({ src, duration, isMine }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
-    const audioRef = useRef(new Audio(src));
+    const audioRef = useRef(null);
     const intervalRef = useRef(null);
 
     useEffect(() => {
-        const audio = audioRef.current;
+        const audio = new Audio(src);
+        audioRef.current = audio;
 
         const handleEnded = () => {
             setIsPlaying(false);
             setProgress(0);
-            clearInterval(intervalRef.current);
+            if (intervalRef.current) clearInterval(intervalRef.current);
         };
 
         audio.addEventListener('ended', handleEnded);
+        
         return () => {
             audio.removeEventListener('ended', handleEnded);
             audio.pause();
-            clearInterval(intervalRef.current);
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            audioRef.current = null;
         };
-    }, []);
+    }, [src]);
 
     const togglePlay = () => {
+        if (!audioRef.current) return;
+
         if (isPlaying) {
             audioRef.current.pause();
-            clearInterval(intervalRef.current);
+            if (intervalRef.current) clearInterval(intervalRef.current);
         } else {
-            audioRef.current.play();
+            audioRef.current.play().catch(e => console.error("Playback failed", e));
             intervalRef.current = setInterval(() => {
-                setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+                if (audioRef.current && audioRef.current.duration) {
+                     setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+                }
             }, 100);
         }
         setIsPlaying(!isPlaying);
@@ -54,7 +61,7 @@ const VoicePlayer = ({ src, duration, isMine }) => {
                     />
                 </div>
                 <div className="flex justify-between text-[9px] mt-1 font-bold opacity-60">
-                    <span>{isPlaying ? 'Listening...' : (duration || 'Voice Note')}</span>
+                    <span>{isPlaying ? 'Listening...' : (duration || '0:00')}</span>
                 </div>
             </div>
         </div>

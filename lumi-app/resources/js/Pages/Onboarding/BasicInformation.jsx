@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthProvider';
-import axios from 'axios';
+import axios from '../../api/axios';
 
 export default function BasicInformation() {
     const { user, login } = useAuth();
@@ -33,7 +33,7 @@ export default function BasicInformation() {
         setProcessing(true);
 
         try {
-            const response = await axios.post('/api/onboarding/basic', data);
+            const response = await axios.post('/onboarding/basic', data);
 
             // Update local user context if API returns updated user
             if (response.data.user) {

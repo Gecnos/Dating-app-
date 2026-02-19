@@ -1,105 +1,103 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useAuth } from '../contexts/AuthProvider';
+import { useCache } from '../contexts/CacheContext';
+import { useToast } from '../contexts/ToastContext';
 
 export default function ProfileDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user: authUser } = useAuth();
+    const { success, error } = useToast();
+    const { getCachedData, setCachedData } = useCache();
 
     const [profile, setProfile] = useState(null);
-    const [isMutual, setIsMutual] = useState(false);
     const [loading, setLoading] = useState(true);
-
+    const [activePhoto, setActivePhoto] = useState(0);
     const [showPhotoPopup, setShowPhotoPopup] = useState(false);
     const [showOptions, setShowOptions] = useState(false);
+    
+    // Options actions
     const [reportModal, setReportModal] = useState(false);
-    const [blockConfirm, setBlockConfirm] = useState(false);
-    const [activePhoto, setActivePhoto] = useState(0);
-    const [reportReason, setReportReason] = useState('');
+    const [reportReason, setReportReason] = useState(null);
     const [reportDescription, setReportDescription] = useState('');
-
-    useEffect(() => {
-        fetchProfile();
-    }, [id]);
-
-    const fetchProfile = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(`/api/user/${id}`);
-            if (response.data.isMe) {
-                navigate('/profile');
-                return;
-            }
-            setProfile(response.data.profile);
-            setIsMutual(response.data.isMutual);
-        } catch (error) {
-            console.error("Error fetching profile:", error);
-            if (error.response && error.response.status === 404) {
-                navigate('/discovery'); // Or generic 404 page
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const photos = profile?.photos && profile.photos.length > 0
-        ? profile.photos
-        : [{ url: profile?.avatar || 'https://via.placeholder.com/600x800' }];
-
-    const age = useMemo(() => {
-        if (!profile?.date_of_birth) return 24;
-        const birthDate = new Date(profile.date_of_birth);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-        return age;
-    }, [profile?.date_of_birth]);
-
-    const attributes = profile ? [
-        { label: 'Métier', value: profile.job || 'Non renseigné', icon: 'work' },
-        { label: 'Taille', value: profile.height ? `${profile.height} cm` : 'Non renseigné', icon: 'height' },
-        { label: 'Ville', value: profile.city || 'Cotonou', icon: 'location_city' },
-        { label: 'Études', value: profile.education || 'Plus d\'infos', icon: 'school' },
-    ] : [];
+    const [blockConfirm, setBlockConfirm] = useState(false);
 
     const reportReasons = [
+        "Faux profil / Spam",
+        "Harcèlement / Insultes",
         "Contenu inapproprié",
-        "Harcèlement",
-        "Faux profil",
-        "Comportement suspect",
         "Autre"
     ];
+
+    const CACHE_KEY = `profile_details_${id}`;
+
+    useEffect(() => {
+        const controller = new AbortController();
+        fetchProfile(controller.signal);
+        return () => controller.abort();
+    }, [id]);
+
+    const fetchProfile = async (signal) => {
+        const cached = getCachedData(CACHE_KEY);
+        if (cached) {
+            console.log(`Serving Profile ${id} from cache`);
+            setProfile(cached);
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const response = await axios.get(`/user/${id}`, { signal });
+            const data = response.data.user || response.data; // Handle wrapped or direct response
+            setProfile(data);
+            setCachedData(CACHE_KEY, data, 300); // 5 mins cache
+        } catch (err) {
+            if (axios.isCancel(err)) {
+                 console.log('Request canceled');
+            } else {
+                 console.error(err);
+                 error("Impossible de charger le profil.");
+                 navigate('/discovery');
+            }
+        } finally {
+             if (!signal?.aborted) {
+                 setLoading(false);
+             }
+        }
+    };
 
     const handleReport = async () => {
         if (!reportReason) return;
         try {
-            await axios.post('/api/reports', {
+            await axios.post('/reports', {
                 reported_id: profile.id,
                 reason: reportReason,
                 description: reportDescription
             });
             setShowOptions(false);
             setReportModal(false);
-            alert("Signalement envoyé. Le profil a été masqué.");
+            success("Signalement envoyé. Le profil a été masqué.");
             navigate('/discovery');
         } catch (err) {
             console.error(err);
+            error("Erreur lors du signalement.");
         }
     };
 
     const handleBlock = async () => {
         try {
-            await axios.post('/api/blocks', { blocked_id: profile.id });
+            await axios.post('/blocks', { blocked_id: profile.id });
             setShowOptions(false);
             setBlockConfirm(false);
-            alert("Utilisateur bloqué.");
+            success("Utilisateur bloqué.");
             navigate('/discovery');
         } catch (err) {
             console.error(err);
+            error("Erreur lors du blocage.");
         }
     };
 
@@ -112,6 +110,19 @@ export default function ProfileDetails() {
             </div>
         );
     }
+
+    // Derived logic
+    const age = profile.age || (profile.date_of_birth ? new Date().getFullYear() - new Date(profile.date_of_birth).getFullYear() : 25);
+    const photos = profile.photos && profile.photos.length > 0 
+        ? profile.photos 
+        : [{ url: profile.avatar, id: 'avatar' }];
+
+    const attributes = [
+        { icon: 'business_center', label: 'Profession', value: profile.job || 'Non renseigné' },
+        { icon: 'school', label: 'Études', value: profile.education || 'Non renseigné' },
+        { icon: 'height', label: 'Taille', value: profile.height ? `${profile.height} cm` : 'Non renseigné' },
+        { icon: 'translate', label: 'Langues', value: Array.isArray(profile.languages) ? profile.languages.join(', ') : (profile.languages || 'Français') },
+    ];
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-[#101322] dark:text-white font-['Be_Vietnam_Pro'] pb-32 overflow-x-hidden transition-colors duration-500">

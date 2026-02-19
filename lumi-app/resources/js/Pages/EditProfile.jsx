@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useAuth } from '../contexts/AuthProvider';
+import { useCache } from '../contexts/CacheContext';
+import { useToast } from '../contexts/ToastContext';
 
 export default function EditProfile() {
     const navigate = useNavigate();
@@ -26,37 +28,67 @@ export default function EditProfile() {
 
     const [previewUrl, setPreviewUrl] = useState(null);
 
-    useEffect(() => {
-        const loadData = async () => {
-            setLoading(true);
-            try {
-                const [userRes, interestsRes] = await Promise.all([
-                    axios.get('/api/profile/edit'),
-                    axios.get('/api/interests')
-                ]);
+    const { success, error } = useToast();
+    const { getCachedData, setCachedData, clearCache } = useCache();
+    const CACHE_KEY = 'edit_profile_data';
 
-                const user = userRes.data.user;
-                setFormData({
-                    name: user.name || '',
-                    bio: user.bio || '',
-                    job: user.job || '',
-                    education: user.education || '',
-                    height: user.height || '',
-                    city: user.city || '',
-                    interests: user.interests || [],
-                    languages: user.languages || [],
-                    avatar_data: null
-                });
-                setPreviewUrl(user.avatar);
-                setAvailableInterests(interestsRes.data);
-            } catch (error) {
-                console.error("Error loading edit profile data:", error);
-            } finally {
+    useEffect(() => {
+        const controller = new AbortController();
+        loadData(controller.signal);
+        return () => controller.abort();
+    }, []);
+
+    const loadData = async (signal) => {
+        const cached = getCachedData(CACHE_KEY);
+        if (cached) {
+            console.log("Serving Edit Profile data from cache");
+            populateForm(cached.user, cached.interests);
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // Optimized: Single request gets user AND interests
+            const response = await axios.get('/profile/edit', { signal });
+            const { user, interests } = response.data;
+            
+            populateForm(user, interests);
+            
+            setCachedData(CACHE_KEY, {
+                user: user,
+                interests: interests
+            }, 120); // 2 mins
+
+        } catch (err) {
+            if (axios.isCancel(err)) {
+                console.log('Request canceled');
+            } else {
+                console.error("Error loading edit profile data:", err);
+                error("Impossible de charger le profil.");
+            }
+        } finally {
+            if (!signal?.aborted) {
                 setLoading(false);
             }
-        };
-        loadData();
-    }, []);
+        }
+    };
+
+    const populateForm = (user, interests) => {
+        setFormData({
+            name: user.name || '',
+            bio: user.bio || '',
+            job: user.job || '',
+            education: user.education || '',
+            height: user.height || '',
+            city: user.city || '',
+            interests: user.interests || [],
+            languages: user.languages || [],
+            avatar_data: null
+        });
+        setPreviewUrl(user.avatar);
+        setAvailableInterests(interests);
+    };
 
 
     const handlePhotoChange = (e) => {
@@ -75,17 +107,21 @@ export default function EditProfile() {
         e.preventDefault();
         setProcessing(true);
         try {
-            const response = await axios.post('/api/profile/update', formData);
+            const response = await axios.post('/profile/update', formData);
             // Update auth context if name/avatar changed
             if (setAuthUser) {
-                // Fetch fresh user or merge response
-                // Ideally response.data.user is the updated user
                 setAuthUser(response.data.user);
             }
+            
+            // Clear caches that contain stale user data
+            clearCache('edit_profile_data');
+            clearCache('my_profile_dashboard');
+            // could also clear 'profile_{my_id}' but usually we don't view own profile there often
+            
             navigate('/profile');
-        } catch (error) {
-            console.error("Error updating profile:", error);
-            alert("Erreur lors de la mise à jour du profil.");
+        } catch (err) {
+            console.error("Error updating profile:", err);
+            error("Erreur lors de la mise à jour du profil.");
         } finally {
             setProcessing(false);
         }

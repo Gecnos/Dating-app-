@@ -1,10 +1,10 @@
 import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Link } from 'react-router-dom';
 
 export default function MatchesList({ matches }) {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-[#101322] flex flex-col font-sans mb-24 text-[#101322] dark:text-white transition-colors duration-500">
-            <Head title="Mes Messages" />
+            {/* <Head title="Mes Messages" /> replaced by generic title logic or ignored */}
 
             {/* Header */}
             <div className="bg-white dark:bg-[#161b2e] px-6 py-8 border-b border-black/5 dark:border-white/10 flex items-center justify-between sticky top-0 z-20 shadow-xl dark:shadow-2xl transition-colors duration-500">
@@ -17,7 +17,7 @@ export default function MatchesList({ matches }) {
                     <h2 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] px-2 mb-5 transition-colors duration-500">Nouveaux Matches</h2>
                     <div className="flex space-x-6 px-2">
                         {matches.length > 0 ? matches.map((match) => (
-                            <Link key={match.id} href={`/chat/${match.id}`} className="flex flex-col items-center space-y-3 min-w-[80px] group">
+                            <Link key={match.id} to={`/chat/${match.id}`} className="flex flex-col items-center space-y-3 min-w-[80px] group">
                                 <div className="relative">
                                     <div className="size-20 rounded-[1.8rem] bg-gradient-to-br from-[#D4AF37] to-[#E1AD01] p-[3px] shadow-2xl transition-transform group-active:scale-95">
                                         <img src={match.avatar || 'https://via.placeholder.com/100'} className="w-full h-full rounded-[1.6rem] object-cover border-4 border-white dark:border-[#101322] transition-colors duration-500" alt={match.name} />
@@ -38,7 +38,7 @@ export default function MatchesList({ matches }) {
                     {matches.length > 0 ? matches.map((match, index) => (
                         <Link
                             key={match.id}
-                            href={`/chat/${match.id}`}
+                            to={`/chat/${match.id}`}
                             className={`flex items-center space-x-5 p-6 hover:bg-gray-50 dark:hover:bg-[#1a1f35] transition-all group ${index !== matches.length - 1 ? 'border-b border-black/5 dark:border-white/5' : ''}`}
                         >
                             <img src={match.avatar || 'https://via.placeholder.com/100'} className="size-16 rounded-2xl object-cover border border-black/5 dark:border-white/10 shadow-lg group-hover:border-[#D4AF37]/50 transition-colors" alt={match.name} />

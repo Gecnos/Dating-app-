@@ -1,44 +1,68 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCache } from '../contexts/CacheContext';
+import { useConfirm } from '../contexts/ConfirmContext';
+
+import { useToast } from '../contexts/ToastContext';
 
 export default function BlockedUsers() {
     const navigate = useNavigate();
     const [blockedList, setBlockedList] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const { success, error } = useToast();
+    const { confirm } = useConfirm();
+    const { getCachedData, setCachedData } = useCache();
+    const CACHE_KEY = 'blocked_users_list';
+
     useEffect(() => {
         fetchBlockedUsers();
     }, []);
 
     const fetchBlockedUsers = async () => {
+        const cached = getCachedData(CACHE_KEY);
+        if (cached) {
+            setBlockedList(cached);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
-            const response = await axios.get('/api/blocks');
+            const response = await axios.get('/blocks');
             setBlockedList(response.data);
+            setCachedData(CACHE_KEY, response.data, 300);
         } catch (err) {
             console.error("Erreur lors de la récupération des bloqués:", err);
+            error("Impossible de charger la liste.");
         } finally {
             setLoading(false);
         }
     };
 
-    const unblockUser = async (user) => {
-        if (!window.confirm(`Débloquer ${user.name} ?`)) return;
-        try {
-            // Using DELETE /api/blocks/{user_id}
-            // BlockController::destroy expects a User model. 
-            // Route is /blocks/{user}. 
-            // So we pass user.id.
-            await axios.delete(`/api/blocks/${user.id}`);
+    const unblockUser = (user) => {
+        confirm({
+            title: "Débloquer l'utilisateur",
+            message: `Voulez-vous vraiment débloquer ${user.name} ?`,
+            confirmText: "Débloquer",
+            onConfirm: async () => {
+                try {
+                    // Using DELETE /api/blocks/{user_id}
+                    await axios.delete(`/api/blocks/${user.id}`);
 
-            // Optimistically remove from list
-            setBlockedList(prev => prev.filter(item => item.blocked.id !== user.id));
-        } catch (err) {
-            console.error("Erreur lors du déblocage:", err);
-            alert("Erreur lors du déblocage.");
-        }
+                    // Optimistically remove from list
+                    const newList = blockedList.filter(item => item.blocked.id !== user.id);
+                    setBlockedList(newList);
+                    setCachedData(CACHE_KEY, newList, 300); // Update cache directly
+                    success("Utilisateur débloqué.");
+                } catch (err) {
+                    console.error("Erreur lors du déblocage:", err);
+                    error("Erreur lors du déblocage.");
+                }
+            }
+        });
     };
 
     return (

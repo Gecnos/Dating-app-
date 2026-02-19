@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthProvider';
-import axios from 'axios';
+import axios from '../../api/axios';
 
 export default function Login() {
     const { login } = useAuth();
@@ -21,7 +21,7 @@ export default function Login() {
         setError('');
 
         try {
-            const response = await axios.post('/api/login', data);
+            const response = await axios.post('/login', data);
             const { token, user, onboarding_step } = response.data;
 
             login(token, user);
@@ -42,7 +42,7 @@ export default function Login() {
     const handleGoogleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.get('/api/auth/google/url');
+            const res = await axios.get('/auth/google/url');
             window.location.href = res.data.url;
         } catch (err) {
             setError("Impossible d'initier la connexion Google.");

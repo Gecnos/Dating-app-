@@ -1,5 +1,4 @@
 import React from 'react';
-import { Head } from '@inertiajs/react';
 
 export default function Dashboard({ stats }) {
     const cards = [
@@ -11,7 +10,6 @@ export default function Dashboard({ stats }) {
 
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
-            <Head title="Admin Dashboard" />
 
             <div className="max-w-7xl mx-auto space-y-8">
                 <div className="flex items-center justify-between">

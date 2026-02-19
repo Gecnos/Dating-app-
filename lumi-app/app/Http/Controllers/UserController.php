@@ -7,6 +7,7 @@ use App\Models\MatchModel;
 use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
@@ -128,56 +129,60 @@ class UserController extends Controller
         return response()->json(['message' => 'Ordre mis à jour.']);
     }
 
+
     public function discovery()
     {
         $me = Auth::user();
         
-        // IDs à exclure : déjà swipé, soi-même, bloqués, signalés
-        $swipedIds = MatchModel::where('user_id', $me->id)->pluck('target_id')->toArray();
-        $blockedByMe = \App\Models\Block::where('blocker_id', $me->id)->pluck('blocked_id')->toArray();
-        $blockedMe = \App\Models\Block::where('blocked_id', $me->id)->pluck('blocker_id')->toArray();
-        $reportedByMe = \App\Models\Report::where('reporter_id', $me->id)->pluck('reported_id')->toArray();
-
-        $excludeIds = array_unique(array_merge($swipedIds, $blockedByMe, $blockedMe, $reportedByMe, [$me->id]));
-
-        // GILI Algorithm: Gender → Intention → Location → Interests
-        $profiles = User::whereNotIn('id', $excludeIds)
-            ->where('is_ghost_mode', false)
-            ->with(['intention', 'photos'])
-            // 1. Gender Filter: Same or specific preference
-            ->where('gender', $me->gender === 'Homme' ? 'Femme' : 'Homme') 
-            ->get()
-            ->map(function($user) use ($me) {
-                // Calculate score
-                $score = 0;
-                
-                // Intention Match (Weight: 100)
-                if ($user->intention_id === $me->intention_id) {
-                    $score += 100;
-                }
-
-                // Distance (Haversine)
-                $distance = $this->calculateDistance($me->latitude, $me->longitude, $user->latitude, $user->longitude);
-                $user->distance_km = round($distance, 1);
-                
-                // Proximity Score (Weight: inverse of distance, max 100)
-                $score += max(0, 100 - ($distance * 2)); 
-
-                // Interests Intersection (Weight: 20 per matching interest)
-                $common = array_intersect($user->interests ?? [], $me->interests ?? []);
-                $score += count($common) * 20;
-
-                $user->matching_score = $score;
-                return $user;
-            })
-            ->sortByDesc('matching_score')
-            ->values()
-            ->take(20);
+        $initialProfiles = Cache::remember("discovery_user_{$me->id}", 600, function() use ($me) {
+            // IDs à exclure : déjà swipé, soi-même, bloqués, signalés
+            $swipedIds = MatchModel::where('user_id', $me->id)->pluck('target_id')->toArray();
+            $blockedByMe = \App\Models\Block::where('blocker_id', $me->id)->pluck('blocked_id')->toArray();
+            $blockedMe = \App\Models\Block::where('blocked_id', $me->id)->pluck('blocker_id')->toArray();
+            $reportedByMe = \App\Models\Report::where('reporter_id', $me->id)->pluck('reported_id')->toArray();
+    
+            $excludeIds = array_unique(array_merge($swipedIds, $blockedByMe, $blockedMe, $reportedByMe, [$me->id]));
+    
+            // GILI Algorithm: Gender → Intention → Location → Interests
+            return User::whereNotIn('id', $excludeIds)
+                ->where('is_ghost_mode', false)
+                ->with(['intention', 'photos'])
+                // 1. Gender Filter: Same or specific preference
+                ->where('gender', $me->gender === 'Homme' ? 'Femme' : 'Homme') 
+                ->get()
+                ->map(function($user) use ($me) {
+                    // Calculate score
+                    $score = 0;
+                    
+                    // Intention Match (Weight: 100)
+                    if ($user->intention_id === $me->intention_id) {
+                        $score += 100;
+                    }
+    
+                    // Distance (Haversine)
+                    $distance = $this->calculateDistance($me->latitude, $me->longitude, $user->latitude, $user->longitude);
+                    $user->distance_km = round($distance, 1);
+                    
+                    // Proximity Score (Weight: inverse of distance, max 100)
+                    $score += max(0, 100 - ($distance * 2)); 
+    
+                    // Interests Intersection (Weight: 20 per matching interest)
+                    $common = array_intersect($user->interests ?? [], $me->interests ?? []);
+                    $score += count($common) * 20;
+    
+                    $user->matching_score = $score;
+                    return $user;
+                })
+                ->sortByDesc('matching_score')
+                ->values()
+                ->take(20);
+        });
 
         return response()->json([
-            'initialProfiles' => $profiles
+            'initialProfiles' => $initialProfiles
         ]);
     }
+
 
     public function explorer(Request $request)
     {
@@ -254,8 +259,13 @@ class UserController extends Controller
 
     public function edit()
     {
+        $interests = \Illuminate\Support\Facades\Cache::remember('interests_list', 86400, function() {
+            return \App\Models\Interest::where('is_approved', true)->get();
+        });
+
         return response()->json([
-            'user' => Auth::user()->load(['photos' => fn($q) => $q->orderBy('order')])
+            'user' => Auth::user()->load(['photos' => fn($q) => $q->orderBy('order')]),
+            'interests' => $interests
         ]);
     }
 
@@ -367,7 +377,11 @@ class UserController extends Controller
 
     public function getInterests()
     {
-        return response()->json(\App\Models\Interest::where('is_approved', true)->get());
+        $interests = Cache::remember('interests_list', 86400, function() {
+            return \App\Models\Interest::where('is_approved', true)->get();
+        });
+
+        return response()->json($interests);
     }
 
     public function suggestInterest(Request $request)
@@ -418,21 +432,22 @@ class UserController extends Controller
 
         $user = Auth::user();
         
-        // Use the relationship if available, or create new record in fcm_tokens table
-        // We saw 'fcmTokens()' relation in User model (line 177).
-        // Let's assume FcmToken model exists or we should check it.
-        // If FcmToken class exists (implied by relation), we should use it.
-        
-        // Logic: Update or Create based on token (to avoid duplicates) or just add?
-        // Usually we want to associate this token with this user.
-        // If token exists for another user, move it? Or just ensure it's for this user.
-        
         $user->fcmTokens()->firstOrCreate(
             ['token' => $request->token],
             ['device_type' => $request->device_type ?? 'web']
         );
 
         return response()->json(['message' => 'Token updated']);
+    }
+
+    public function counts()
+    {
+        $user = Auth::user();
+        
+        return response()->json([
+            'unread_messages_count' => $user->unread_messages_count,
+            'unread_notifications_count' => $user->unread_notifications_count
+        ]);
     }
 
     public function destroy()

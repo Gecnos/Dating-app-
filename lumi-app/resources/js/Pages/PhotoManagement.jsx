@@ -1,23 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axios from '../api/axios';
+import { useCache } from '../contexts/CacheContext';
+import { useConfirm } from '../contexts/ConfirmContext';
+import { useToast } from '../contexts/ToastContext';
 
 export default function PhotoManagement() {
     const navigate = useNavigate();
     const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
+    const { success, error } = useToast();
+    const { confirm } = useConfirm();
+
+    const { getCachedData, setCachedData, clearCache } = useCache();
+    const CACHE_KEY = 'my_photos_manage';
 
     useEffect(() => {
         fetchPhotos();
     }, []);
 
     const fetchPhotos = async () => {
+        const cached = getCachedData(CACHE_KEY);
+        if (cached) {
+            setPhotos(cached);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
-            const response = await axios.get('/api/photos/manage');
-            setPhotos(response.data.photos || []);
+            const response = await axios.get('/photos/manage');
+            const data = response.data.photos || [];
+            setPhotos(data);
+            setCachedData(CACHE_KEY, data, 300);
         } catch (error) {
             console.error("Error fetching photos:", error);
         } finally {
@@ -34,32 +51,49 @@ export default function PhotoManagement() {
         reader.readAsDataURL(file);
         reader.onloadend = async () => {
             try {
-                const response = await axios.post('/api/photos/add', { photo: reader.result });
+                const response = await axios.post('/photos/add', { photo: reader.result });
                 // Add new photo locally or refresh
-                setPhotos(prev => [...prev, response.data.photo]);
+                setPhotos(prev => {
+                    const updated = [...prev, response.data.photo];
+                    clearCache(CACHE_KEY); // Or update cached data
+                    clearCache('my_profile_dashboard'); // Dashboard cover might change
+                    return updated;
+                });
             } catch (err) {
                 console.error(err);
-                alert("Erreur lors de l'ajout de la photo");
+                error("Erreur lors de l'ajout de la photo");
             } finally {
                 setUploading(false);
             }
         };
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Supprimer cette photo ?")) return;
-        try {
-            await axios.delete(`/api/photos/${id}`);
-            setPhotos(photos.filter(p => p.id !== id));
-        } catch (err) {
-            console.error(err);
-        }
+    const handleDelete = (id) => {
+        confirm({
+            title: "Supprimer la photo",
+            message: "Êtes-vous sûr de vouloir supprimer cette photo ?",
+            isDangerous: true,
+            confirmText: "Supprimer",
+            onConfirm: async () => {
+                try {
+                    await axios.delete(`/api/photos/${id}`);
+                    const updated = photos.filter(p => p.id !== id);
+                    setPhotos(updated);
+                    clearCache(CACHE_KEY);
+                    clearCache('my_profile_dashboard');
+                    success("Photo supprimée.");
+                } catch (err) {
+                    console.error(err);
+                    error("Erreur lors de la suppression.");
+                }
+            }
+        });
     };
 
     const handleReorder = async (newPhotos) => {
         setPhotos(newPhotos);
         try {
-            await axios.post('/api/photos/reorder', {
+            await axios.post('/photos/reorder', {
                 photo_ids: newPhotos.map(p => p.id)
             });
         } catch (err) {

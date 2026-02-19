@@ -12,7 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         channels: __DIR__.'/../routes/channels.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'cache.control' => \App\Http\Middleware\SetCacheHeaders::class,
+        ]);
+
         $middleware->trustProxies(at: '*');
         $middleware->api(prepend: [
             \App\Http\Middleware\ForceJsonResponse::class,

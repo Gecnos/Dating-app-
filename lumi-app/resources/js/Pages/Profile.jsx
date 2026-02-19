@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useAuth } from '../contexts/AuthProvider';
+import { useCache } from '../contexts/CacheContext';
 
 export default function Profile() {
     const { logout, user: authUser } = useAuth();
@@ -16,16 +17,30 @@ export default function Profile() {
         { label: 'Aide & Sécurité', icon: 'security', route: '/help' },
     ];
 
+    const { getCachedData, setCachedData } = useCache();
+    // Cache for 2 mins (Profile changes when user edits, but navigation back/forth should be instant)
+    const CACHE_KEY = 'my_profile_dashboard';
+
     useEffect(() => {
         fetchProfile();
     }, []);
 
     const fetchProfile = async () => {
+        const cached = getCachedData(CACHE_KEY);
+        if (cached) {
+            console.log("Serving Dashboard Profile from cache");
+            setUser(cached);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
             // Using /api/profile/edit to get full user details including photos
-            const response = await axios.get('/api/profile/edit');
-            setUser(response.data.user || authUser);
+            const response = await axios.get('/profile/edit');
+            const data = response.data.user || authUser;
+            setUser(data);
+            setCachedData(CACHE_KEY, data, 120);
         } catch (error) {
             console.error("Error fetching profile:", error);
         } finally {

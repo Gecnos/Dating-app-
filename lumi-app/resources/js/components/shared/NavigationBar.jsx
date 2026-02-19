@@ -1,14 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+
 import { useAuth } from '../../contexts/AuthProvider';
 
 const NavigationBar = () => {
     const location = useLocation();
     const { user } = useAuth();
 
-    // TODO: Get real counts from Context/WebSocket
-    const unreadMessagesCount = user?.unread_messages_count || 0;
-    const unreadNotificationsCount = user?.unread_notifications_count || 0;
 
     const navItems = [
         {
@@ -19,7 +17,7 @@ const NavigationBar = () => {
         },
         {
             name: 'Explorer',
-            path: '/explorer', // This matches the route added
+            path: '/explorer', 
             icon: 'explore',
             filled: true
         },
@@ -28,14 +26,14 @@ const NavigationBar = () => {
             path: '/likes',
             icon: 'favorite',
             filled: false,
-            badge: unreadNotificationsCount // Note: Likes page usually shows likes, not notifications. But maybe design choice.
+
         },
         {
             name: 'Chat',
             path: '/chat',
             icon: 'chat_bubble',
             filled: false,
-            badge: unreadMessagesCount
+
         },
         {
             name: 'Profil',
@@ -62,11 +60,6 @@ const NavigationBar = () => {
                             >
                                 {item.icon}
                             </span>
-                            {item.badge > 0 && (
-                                <div className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-[#161b2e]">
-                                    {item.badge > 99 ? '99+' : item.badge}
-                                </div>
-                            )}
                         </div>
                         <p className={`text-[9px] tracking-[0.1em] uppercase font-black italic`}>
                             {item.name}

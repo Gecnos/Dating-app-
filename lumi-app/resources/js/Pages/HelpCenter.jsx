@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function HelpCenter() {
@@ -20,7 +20,6 @@ export default function HelpCenter() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-[#101322] text-slate-900 dark:text-white font-sans flex justify-center overflow-x-hidden transition-colors duration-500">
-            <Head title="Centre d'Aide & Sécurité - Lumi" />
 
             <div className="w-full max-w-md bg-white dark:bg-[#101322] flex flex-col h-full min-h-screen relative overflow-hidden shadow-2xl transition-colors duration-500">
                 {/* Header Section */}

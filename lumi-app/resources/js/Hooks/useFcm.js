@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
-import axios from "../api/axios";
+import axios from '../api/axios';
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -32,23 +32,49 @@ export const requestForToken = async () => {
             return null;
         }
 
-        console.log("FCM: Requesting token...");
-        const currentToken = await getToken(messaging, {
-            vapidKey: vapidKey,
-        });
+        // Ensure service worker is registered before requesting token
+        if ("serviceWorker" in navigator) {
+            try {
+                const registration = await navigator.serviceWorker.register(
+                    "/firebase-messaging-sw.js",
+                    {
+                        scope: "/firebase-cloud-messaging-push-scope",
+                    },
+                );
+                console.log(
+                    "FCM: Service Worker registered with scope:",
+                    registration.scope,
+                );
 
-        if (currentToken) {
-            console.log("FCM: Token generated:", currentToken);
-            // Sync with server
-            await axios.post("/fcm-token", {
-                token: currentToken,
-                device_type: "web",
-            });
-            console.log("FCM: Token synced with server.");
-            return currentToken;
+                console.log("FCM: Requesting token...");
+                const currentToken = await getToken(messaging, {
+                    vapidKey: vapidKey,
+                    serviceWorkerRegistration: registration,
+                });
+
+                if (currentToken) {
+                    console.log("FCM: Token generated:", currentToken);
+                    // Sync with server using authenticated axios (prefix/api is base url)
+                    await axios.post("/fcm-token", {
+                        token: currentToken,
+                        device_type: "web",
+                    });
+                    console.log("FCM: Token synced with server.");
+                    return currentToken;
+                } else {
+                    console.warn("FCM: No registration token available.");
+                    return null;
+                }
+            } catch (swError) {
+                console.error(
+                    "FCM: Service Worker registration failed:",
+                    swError,
+                );
+                return null;
+            }
         } else {
             console.warn(
-                "FCM: No registration token available. Request permission to generate one.",
+                "FCM: Service workers are not supported in this browser.",
             );
             return null;
         }
