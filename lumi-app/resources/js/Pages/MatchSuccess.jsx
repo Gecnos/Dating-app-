@@ -1,0 +1,128 @@
+import React, { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useAuth } from '../contexts/AuthProvider';
+import axios from '../api/axios';
+
+export default function MatchSuccess() {
+    const { id } = useParams();
+    const { user: user1 } = useAuth();
+    const [user2, setUser2] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (id) {
+            fetchMatchProfile();
+        }
+    }, [id]);
+
+    const fetchMatchProfile = async () => {
+        try {
+            const response = await axios.get(`/api/user/${id}`);
+            // response.data could be { profile: ... } or just user object depending on Controller
+            // UserController::show returns { profile: ..., isMutual: ..., isMe: ... }
+            setUser2(response.data.profile || response.data);
+        } catch (error) {
+            console.error("Error fetching match profile:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading || !user2) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#101322]">
+                <div className="size-10 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex min-h-screen w-full flex-col items-center justify-center bg-white dark:bg-[#101322] font-['Be_Vietnam_Pro'] text-[#101322] dark:text-white p-8 overflow-hidden transition-colors duration-500">
+            {/* Background elements (Animated) */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <motion.div
+                    animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
+                    transition={{ duration: 10, repeat: Infinity }}
+                    className="absolute -top-20 -left-20 size-80 bg-[#D4AF37]/10 rounded-full blur-3xl"
+                />
+                <motion.div
+                    animate={{ scale: [1.2, 1, 1.2], rotate: [0, -90, 0] }}
+                    transition={{ duration: 12, repeat: Infinity }}
+                    className="absolute -bottom-20 -right-20 size-80 bg-[#0f2cbd]/10 rounded-full blur-3xl"
+                />
+            </div>
+
+            {/* Celebration Content */}
+            <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="relative z-10 text-center"
+            >
+                <motion.span
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-[#D4AF37] font-black uppercase tracking-[0.3em] text-sm mb-4 block"
+                >
+                    Félicitations !
+                </motion.span>
+
+                <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter leading-none mb-12 text-[#101322] dark:text-white transition-colors duration-500">
+                    C'EST UN <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#E1AD01] to-[#D4AF37] dark:from-white dark:via-[#D4AF37] dark:to-white">MATCH !</span>
+                </h1>
+
+                {/* Avatars with matching animation */}
+                <div className="flex items-center justify-center -space-x-8 mb-16 px-10">
+                    <motion.div
+                        initial={{ x: -100, rotate: -20, opacity: 0 }}
+                        animate={{ x: 0, rotate: -10, opacity: 1 }}
+                        transition={{ type: 'spring', damping: 12 }}
+                        className="relative z-10 size-32 md:size-40 rounded-[2.5rem] border-4 border-white dark:border-[#101322] shadow-2xl overflow-hidden transition-colors duration-500"
+                    >
+                        <img src={user1?.avatar || 'https://via.placeholder.com/400'} alt="Vous" className="w-full h-full object-cover" />
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.5, type: 'spring' }}
+                        className="relative z-20 size-16 bg-[#D4AF37] rounded-full flex items-center justify-center shadow-2xl shadow-[#D4AF37]/40"
+                    >
+                        <span className="material-symbols-outlined text-white dark:text-[#101322] text-3xl transition-colors duration-500" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ x: 100, rotate: 20, opacity: 0 }}
+                        animate={{ x: 0, rotate: 10, opacity: 1 }}
+                        transition={{ type: 'spring', damping: 12 }}
+                        className="relative z-10 size-32 md:size-40 rounded-[2.5rem] border-4 border-white dark:border-[#101322] shadow-2xl overflow-hidden transition-colors duration-500"
+                    >
+                        <img src={user2?.avatar || 'https://via.placeholder.com/400'} alt="Match" className="w-full h-full object-cover" />
+                    </motion.div>
+                </div>
+
+                <p className="text-gray-400 dark:text-gray-500 text-sm font-medium mb-12 max-w-xs mx-auto transition-colors duration-500">
+                    Vous et <strong>{user2?.name || 'votre match'}</strong> vous plaisez mutuellement !
+                </p>
+
+                {/* Actions */}
+                <div className="flex flex-col gap-4 w-full max-w-xs mx-auto">
+                    <Link
+                        to={`/chat/${user2?.id}`}
+                        className="flex h-16 items-center justify-center rounded-2xl bg-[#D4AF37] dark:bg-white text-white dark:text-[#101322] font-black uppercase tracking-widest text-xs shadow-xl shadow-[#D4AF37]/20 dark:shadow-white/5 active:scale-95 transition-all transition-colors duration-500"
+                    >
+                        Envoyer un message
+                    </Link>
+                    <Link
+                        to="/discovery"
+                        className="flex h-16 items-center justify-center rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 text-gray-400 dark:text-white font-black uppercase tracking-widest text-xs active:scale-95 transition-all transition-colors duration-500"
+                    >
+                        Continuer à swiper
+                    </Link>
+                </div>
+            </motion.div>
+        </div>
+    );
+}
