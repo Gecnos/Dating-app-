@@ -1,0 +1,17 @@
+{
+  "project_info": {
+    "project_number": "VOTRE_NUMERO_DE_PROJET",
+    "project_id": "lumi-app-placeholder",
+    "storage_bucket": "lumi-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:VOTRE_ID_APP_ANDROID",
+        "android_client_info": {
+          "package_name": "com.lumi.dating"
+        }
+      }
+    }
+  ]
+}
