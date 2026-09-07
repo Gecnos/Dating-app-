@@ -8,6 +8,7 @@ use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -217,11 +218,14 @@ class UserController extends Controller
             $query->where('gender', $request->gender);
         }
 
+        // Age range via date_of_birth directly, portable across drivers
+        // (EXTRACT(YEAR FROM AGE(...)) is Postgres-only and crashes on
+        // SQLite/MySQL).
         if ($request->filled('age_min')) {
-            $query->whereRaw('EXTRACT(YEAR FROM AGE(date_of_birth)) >= ?', [$request->age_min]);
+            $query->whereDate('date_of_birth', '<=', now()->subYears((int) $request->age_min)->toDateString());
         }
         if ($request->filled('age_max')) {
-            $query->whereRaw('EXTRACT(YEAR FROM AGE(date_of_birth)) <= ?', [$request->age_max]);
+            $query->whereDate('date_of_birth', '>', now()->subYears((int) $request->age_max + 1)->toDateString());
         }
 
         if ($request->filled('intention_id')) {
@@ -230,29 +234,34 @@ class UserController extends Controller
 
         if ($request->filled('search')) {
             $s = $request->search;
-            $query->where(function($q) use ($s) {
-                $q->where('name', 'ilike', "%$s%")
-                  ->orWhere('bio', 'ilike', "%$s%")
-                  ->orWhere('city', 'ilike', "%$s%")
-                  ->orWhereRaw('interests::text ilike ?', ["%$s%"]);
+            // ilike + ::text cast are Postgres-only; plain "like" is
+            // case-insensitive on SQLite/MySQL by default and portable.
+            $likeOp = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+            $query->where(function($q) use ($s, $likeOp) {
+                $q->where('name', $likeOp, "%$s%")
+                  ->orWhere('bio', $likeOp, "%$s%")
+                  ->orWhere('city', $likeOp, "%$s%")
+                  ->orWhere('interests', $likeOp, "%$s%");
             });
         }
 
-        if ($request->filled('distance') && $me->latitude && $me->longitude) {
-            $lat = $me->latitude;
-            $lon = $me->longitude;
-            $dist = $request->distance;
-            
-            $query->whereRaw("(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) <= ?", [
-                $lat, $lon, $lat, $dist
-            ]);
-        }
+        $filterByDistance = $request->filled('distance') && $me->latitude && $me->longitude;
 
-        $profiles = $query->limit(40)->get()->map(function($user) use ($me) {
+        // The haversine trig functions (acos/radians/sin/cos) used to be run
+        // in raw SQL, which only exists on Postgres — SQLite doesn't ship
+        // them, so this crashed there. Filter/limit in PHP instead, reusing
+        // the same calculateDistance() already used for display below.
+        $profiles = $query->limit($filterByDistance ? 300 : 40)->get()->map(function($user) use ($me) {
             $user->age = $user->date_of_birth ? \Carbon\Carbon::parse($user->date_of_birth)->age : null;
             $user->distance_km = round($this->calculateDistance($me->latitude, $me->longitude, $user->latitude, $user->longitude), 1);
             return $user;
         });
+
+        if ($filterByDistance) {
+            $profiles = $profiles->filter(fn($user) => $user->distance_km <= $request->distance)
+                ->values()
+                ->take(40);
+        }
 
         return response()->json([
             'profiles' => $profiles,
