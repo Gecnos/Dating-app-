@@ -12,6 +12,7 @@ import Profile from '../pages/Profile';
 import Likes from '../pages/Likes';
 import Login from '../pages/Auth/Login';
 import Register from '../pages/Auth/Register';
+import AuthCallback from '../pages/Auth/AuthCallback';
 
 // Onboarding
 import BasicInformation from '../pages/Onboarding/BasicInformation';
@@ -31,7 +32,6 @@ import BlockedUsers from '../pages/BlockedUsers';
 import Help from '../pages/Help';
 import Terms from '../pages/Legal/Terms';
 import Privacy from '../pages/Legal/Privacy';
-import CreditsVIP from '../pages/CreditsVIP';
 
 import Explorer from '../pages/Explorer';
 import MatchSuccess from '../pages/MatchSuccess';
@@ -39,10 +39,27 @@ import MatchSuccess from '../pages/MatchSuccess';
 
 import SplashScreen from '../components/ui/SplashScreen';
 
+// Mirrors LoginController::getOnboardingStep() so a user who abandoned
+// onboarding mid-way can't reach the rest of the app with an incomplete
+// profile (e.g. no intention_id or avatar) by navigating there directly.
+const getOnboardingStep = (user) => {
+    if (!user.gender || !user.date_of_birth) return 'basic';
+    if (!user.intention_id) return 'intentions';
+    if (!user.interests || user.interests.length < 3) return 'interests';
+    if (!user.avatar) return 'photos';
+    return 'completed';
+};
+
 const ProtectedRoute = ({ children }) => {
     const { user, isLoading } = useAuth();
     if (isLoading) return <SplashScreen />;
     if (!user) return <Navigate to="/login" replace />;
+
+    const step = getOnboardingStep(user);
+    if (step !== 'completed') {
+        return <Navigate to={`/onboarding/${step}`} replace />;
+    }
+
     return children;
 };
 
@@ -52,6 +69,7 @@ export default function AppRoutes() {
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
 
             {/* Onboarding Routes (Protected?) - Usually yes */}
             <Route path="/onboarding/basic" element={<ProtectedRoute><BasicInformation /></ProtectedRoute>} />
@@ -86,8 +104,6 @@ export default function AppRoutes() {
                 <Route path="/help" element={<Help />} />
                 <Route path="/legal/terms" element={<Terms />} />
                 <Route path="/legal/privacy" element={<Privacy />} />
-                <Route path="/credits" element={<CreditsVIP />} />
-
                 <Route path="*" element={<Navigate to="/discovery" replace />} />
             </Route>
         </Routes>

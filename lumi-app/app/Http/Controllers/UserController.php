@@ -144,11 +144,17 @@ class UserController extends Controller
             $excludeIds = array_unique(array_merge($swipedIds, $blockedByMe, $blockedMe, $reportedByMe, [$me->id]));
     
             // GILI Algorithm: Gender → Intention → Location → Interests
+            // Cap the candidate pool before scoring in PHP: without this, every
+            // eligible user in the whole database gets loaded into memory and
+            // scored/sorted on every cache miss, which gets slower as the user
+            // base grows. A random sample of 300 is plenty to pick a top-20 from.
             return User::whereNotIn('id', $excludeIds)
                 ->where('is_ghost_mode', false)
                 ->with(['intention', 'photos'])
                 // 1. Gender Filter: Same or specific preference
-                ->where('gender', $me->gender === 'Homme' ? 'Femme' : 'Homme') 
+                ->where('gender', $me->gender === 'Homme' ? 'Femme' : 'Homme')
+                ->inRandomOrder()
+                ->limit(300)
                 ->get()
                 ->map(function($user) use ($me) {
                     // Calculate score

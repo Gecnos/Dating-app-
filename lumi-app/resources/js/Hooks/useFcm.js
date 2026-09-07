@@ -84,11 +84,13 @@ export const requestForToken = async () => {
     }
 };
 
-export const onMessageListener = () =>
-    new Promise((resolve) => {
-        if (!messaging) return;
-        onMessage(messaging, (payload) => {
-            console.log("Payload received: ", payload);
-            resolve(payload);
-        });
+// Subscribes to foreground FCM messages (app open, tab focused) and returns
+// an unsubscribe function. A single onMessage listener is kept per call, so
+// callers must unsubscribe on cleanup instead of leaving stacked listeners.
+export const onForegroundMessage = (callback) => {
+    if (!messaging) return () => {};
+    return onMessage(messaging, (payload) => {
+        console.log("FCM: Foreground message received:", payload);
+        callback(payload);
     });
+};

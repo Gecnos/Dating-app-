@@ -8,14 +8,12 @@ export default function HelpCenter() {
     const categories = [
         { id: 'security', title: 'Ma Sécurité', subtitle: 'Conseils et outils de protection', icon: 'shield', featured: true },
         { id: 'account', title: 'Mon Compte', subtitle: 'Gérer ses infos', icon: 'person', featured: false },
-        { id: 'wallet', title: 'Crédits & Paiements', subtitle: 'Paiements locaux', icon: 'account_balance_wallet', featured: false },
         { id: 'matches', title: 'Matchs & Chat', subtitle: 'Interaction & UX', icon: 'favorite', featured: false }
     ];
 
     const popularArticles = [
         { id: 1, title: 'Comment vérifier mon profil ?', icon: 'verified', color: '#D4AF37' },
-        { id: 2, title: 'Signaler un comportement suspect', icon: 'report_problem', color: '#ef4444' },
-        { id: 3, title: 'Gérer mon abonnement Premium', icon: 'diamond', color: '#0f2cbd' }
+        { id: 2, title: 'Signaler un comportement suspect', icon: 'report_problem', color: '#ef4444' }
     ];
 
     return (

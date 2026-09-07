@@ -18,10 +18,6 @@ export default function Help() {
             a: "Le mode fantôme vous rend invisible aux autres utilisateurs. Vous pouvez continuer à swiper, mais vous ne serez vu que par les personnes que vous avez likées."
         },
         {
-            q: "C'est quoi les crédits Lumi ?",
-            a: "Les crédits permettent d'accéder à des fonctionnalités premium comme voir qui vous a liké, envoyer des super likes, etc."
-        },
-        {
             q: "Comment supprimer mon compte ?",
             a: "Allez dans Paramètres > Supprimer mon compte (en bas de page). Attention, cette action est irréversible."
         }

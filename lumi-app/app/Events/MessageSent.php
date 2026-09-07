@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class MessageSent implements ShouldBroadcast, \Illuminate\Contracts\Queue\ShouldQueue
+class MessageSent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -22,7 +22,6 @@ class MessageSent implements ShouldBroadcast, \Illuminate\Contracts\Queue\Should
     public function __construct(Message $message)
     {
         $this->message = $message;
-        $this->queue = 'default';
     }
 
     /**
@@ -54,9 +53,12 @@ class MessageSent implements ShouldBroadcast, \Illuminate\Contracts\Queue\Should
             'id' => $this->message->id,
             'content' => $this->message->content,
             'from_id' => $this->message->from_id,
+            'to_id' => $this->message->to_id,
             'type' => $this->message->type,
             'media_path' => $this->message->media_path,
-            'created_at' => $this->message->created_at->diffForHumans(),
+            'duration' => $this->message->duration,
+            'is_read' => $this->message->is_read,
+            'created_at' => $this->message->created_at->toJSON(),
         ];
     }
 }

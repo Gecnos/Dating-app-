@@ -8,7 +8,6 @@ export default function Likes() {
     const [activeTab, setActiveTab] = useState('received');
     const [receivedLikes, setReceivedLikes] = useState([]);
     const [sentLikes, setSentLikes] = useState([]);
-    const [isPremium, setIsPremium] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const { getCachedData, setCachedData } = useCache();
@@ -26,7 +25,6 @@ export default function Likes() {
             console.log("Serving Likes from cache");
             setReceivedLikes(cached.receivedLikes);
             setSentLikes(cached.sentLikes);
-            setIsPremium(cached.isPremium);
             setLoading(false);
             return;
         }
@@ -39,7 +37,6 @@ export default function Likes() {
 
             setReceivedLikes(data.receivedLikes || []);
             setSentLikes(data.sentLikes || []);
-            setIsPremium(data.isPremium || false);
 
             setCachedData(CACHE_KEY, data, 300); // 5 mins
         } catch (error) {
@@ -62,10 +59,6 @@ export default function Likes() {
             <header className="sticky top-0 z-50 bg-white dark:bg-[#101322] border-b border-black/5 dark:border-white/10 px-6 py-4 transition-colors duration-500">
                 <div className="flex items-center justify-between max-w-lg mx-auto">
                     <h1 className="text-xl font-black tracking-tight uppercase italic text-[#101322] dark:text-white transition-colors duration-500">Vos Coups de Cœur</h1>
-                    <div className="flex items-center gap-2 bg-[#D4AF37]/10 dark:bg-[#D4AF37]/20 px-3 py-1.5 rounded-full border border-[#D4AF37]/20 dark:border-[#D4AF37]/30">
-                        <span className="material-symbols-outlined text-[#D4AF37] text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
-                        <span className="text-[10px] font-black text-[#D4AF37] uppercase tracking-wider">{isPremium ? 'Membre Premium' : 'Lumi Free'}</span>
-                    </div>
                 </div>
 
                 {/* Tabs */}
@@ -149,20 +142,6 @@ export default function Likes() {
                                 ? "Ne découragez pas ! Votre profil sera bientôt remarqué."
                                 : "N'hésitez pas à envoyer des likes pour briser la glace !"}
                         </p>
-                    </div>
-                )}
-
-                {/* Premium CTA if not premium */}
-                {!loading && activeTab === 'received' && !isPremium && receivedLikes.length > 0 && (
-                    <div className="mt-12 p-8 rounded-[2.5rem] bg-[#D4AF37] text-[#101322] shadow-2xl shadow-[#D4AF37]/20 relative overflow-hidden">
-                        <div className="relative z-10">
-                            <h4 className="text-2xl font-black leading-tight mb-2 italic tracking-tighter uppercase">Boostez vos chances</h4>
-                            <p className="text-xs font-bold opacity-70 mb-8 leading-relaxed">Voyez instantanément qui vous a liké et passez directement au match.</p>
-                            <Link to="/credits" className="inline-flex w-full items-center justify-center h-14 rounded-2xl bg-[#101322] text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] active:scale-95 transition-all shadow-xl">
-                                Devenir Premium
-                            </Link>
-                        </div>
-                        <span className="material-symbols-outlined absolute -top-4 -right-4 text-8xl text-white/10 rotate-12">crown</span>
                     </div>
                 )}
             </main>

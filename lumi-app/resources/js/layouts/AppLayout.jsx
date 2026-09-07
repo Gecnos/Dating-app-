@@ -1,14 +1,17 @@
 import { useEffect } from 'react';
-import { useLocation, Outlet } from 'react-router-dom';
+import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { requestForToken } from '../hooks/useFcm';
+import { requestForToken, onForegroundMessage } from '../hooks/useFcm';
 import LocationTracker from '../components/shared/LocationTracker';
 import { useAuth } from '../contexts/AuthProvider';
+import { useToast } from '../contexts/ToastContext';
 import NavigationBar from '../components/shared/NavigationBar';
 
 export default function AppLayout() {
     const { user } = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
+    const { info } = useToast();
     const url = location.pathname;
 
     // Initialize global events listener
@@ -20,6 +23,41 @@ export default function AppLayout() {
             requestForToken();
         }
     }, [user]);
+
+    // Foreground push notifications (app open, tab focused): FCM doesn't
+    // surface these as OS notifications, so show an in-app toast instead.
+    useEffect(() => {
+        if (!user) return;
+
+        const unsubscribe = onForegroundMessage((payload) => {
+            const targetUrl = payload?.data?.url || payload?.data?.click_action;
+            const title = payload?.notification?.title || 'Lumi';
+            const body = payload?.notification?.body || '';
+            info(
+                body ? `${title} — ${body}` : title,
+                5000,
+                targetUrl ? () => navigate(targetUrl) : undefined
+            );
+        });
+
+        return unsubscribe;
+    }, [user]);
+
+    // Background push notifications clicked while a tab is already open:
+    // the service worker can only focus that tab, not change its route, so
+    // it posts the target URL here for the SPA router to navigate to.
+    useEffect(() => {
+        if (!('serviceWorker' in navigator)) return;
+
+        const handleMessage = (event) => {
+            if (event.data?.type === 'notification-click' && event.data.url) {
+                navigate(event.data.url);
+            }
+        };
+
+        navigator.serviceWorker.addEventListener('message', handleMessage);
+        return () => navigator.serviceWorker.removeEventListener('message', handleMessage);
+    }, [navigate]);
 
     useEffect(() => {
         // Check local storage for theme preference

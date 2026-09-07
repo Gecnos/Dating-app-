@@ -126,7 +126,6 @@ class MatchController extends Controller
         return response()->json([
             'receivedLikes' => $receivedLikes,
             'sentLikes' => $sentLikes,
-            'isPremium' => $me->credits > 0
         ]);
     }
 }

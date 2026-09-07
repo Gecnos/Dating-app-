@@ -36,7 +36,6 @@ class BootstrapController extends Controller
                 'reverb_host' => env('VITE_REVERB_HOST'),
                 'reverb_port' => env('VITE_REVERB_PORT'),
                 'features' => [
-                    'premium_enabled' => true,
                     'ghost_mode_enabled' => true,
                 ]
             ]
