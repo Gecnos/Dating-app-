@@ -13,6 +13,7 @@ class LikeNotification implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $liker;
     public $targetId;
 
     /**

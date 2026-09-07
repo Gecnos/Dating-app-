@@ -92,13 +92,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/blocks', [App\Http\Controllers\BlockController::class, 'store']);
     Route::delete('/blocks/{user}', [App\Http\Controllers\BlockController::class, 'destroy']);
     
-    // Messaging
-    Route::get('/chat', [ChatController::class, 'list']);
+    // Messaging (GET /chat is already registered above with a cache.control
+    // middleware — don't duplicate it here, the second definition just wins
+    // silently and drops that middleware)
     Route::get('/chat/{user}', [ChatController::class, 'show']);
     Route::get('/messages/{user}', [ChatController::class, 'fetchMessages']);
     Route::post('/messages', [ChatController::class, 'store']);
-    Route::get('/messages/unread/count', [ChatController::class, 'getUnreadCount']); // Check if this exists
-    
+
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index']);
     Route::post('/notifications/read', [App\Http\Controllers\NotificationController::class, 'markAsRead']);
