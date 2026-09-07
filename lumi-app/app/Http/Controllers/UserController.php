@@ -172,10 +172,18 @@ class UserController extends Controller
                     // Proximity Score (Weight: inverse of distance, max 100)
                     $score += max(0, 100 - ($distance * 2)); 
     
-                    // Interests Intersection (Weight: 20 per matching interest)
+                    // Interests Intersection (Weight: 20 per matching interest,
+                    // capped at 5 so a long shared interest list can't drown
+                    // out the intention/distance signal)
                     $common = array_intersect($user->interests ?? [], $me->interests ?? []);
-                    $score += count($common) * 20;
-    
+                    $score += min(count($common), 5) * 20;
+
+                    // Small recency bonus: active-in-the-last-week profiles
+                    // rank slightly above stale ones, all else equal.
+                    if ($user->updated_at && $user->updated_at->gt(now()->subWeek())) {
+                        $score += 10;
+                    }
+
                     $user->matching_score = $score;
                     return $user;
                 })

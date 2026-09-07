@@ -13,6 +13,9 @@ import Likes from '../pages/Likes';
 import Login from '../pages/Auth/Login';
 import Register from '../pages/Auth/Register';
 import AuthCallback from '../pages/Auth/AuthCallback';
+import ForgotPassword from '../pages/Auth/ForgotPassword';
+import ResetPassword from '../pages/Auth/ResetPassword';
+import EmailVerified from '../pages/Auth/EmailVerified';
 
 // Onboarding
 import BasicInformation from '../pages/Onboarding/BasicInformation';
@@ -70,6 +73,9 @@ export default function AppRoutes() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/email-verified" element={<EmailVerified />} />
 
             {/* Onboarding Routes (Protected?) - Usually yes */}
             <Route path="/onboarding/basic" element={<ProtectedRoute><BasicInformation /></ProtectedRoute>} />

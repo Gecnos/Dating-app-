@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL; // Import indispensable !
+use Illuminate\Auth\Notifications\ResetPassword;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,5 +25,12 @@ class AppServiceProvider extends ServiceProvider
         if (str_contains(config('app.url'), 'ngrok-free.app')) {
             URL::forceScheme('https');
         }
+
+        // Le lien de réinitialisation doit pointer vers la page SPA React
+        // (resources/js/Pages/Auth/ResetPassword.jsx), pas une vue Blade.
+        ResetPassword::createUrlUsing(function ($notifiable, string $token) {
+            return config('app.url') . '/reset-password?token=' . $token
+                . '&email=' . urlencode($notifiable->getEmailForPasswordReset());
+        });
     }
 }

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { requestForToken, onForegroundMessage } from '../hooks/useFcm';
@@ -6,13 +6,33 @@ import LocationTracker from '../components/shared/LocationTracker';
 import { useAuth } from '../contexts/AuthProvider';
 import { useToast } from '../contexts/ToastContext';
 import NavigationBar from '../components/shared/NavigationBar';
+import axios from '../api/axios';
 
 export default function AppLayout() {
     const { user } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
-    const { info } = useToast();
+    const { info, success, error } = useToast();
     const url = location.pathname;
+
+    // Soft, dismissible-per-session reminder — never blocks navigation or
+    // any feature, since there's no real mailer configured yet in most
+    // environments and a hard gate would lock everyone out.
+    const [verifyBannerDismissed, setVerifyBannerDismissed] = useState(false);
+    const [resendingVerification, setResendingVerification] = useState(false);
+    const showVerifyBanner = user && !user.email_verified_at && !verifyBannerDismissed;
+
+    const handleResendVerification = async () => {
+        setResendingVerification(true);
+        try {
+            const res = await axios.post('/email/resend');
+            success(res.data?.message || 'Email de vérification envoyé.');
+        } catch (err) {
+            error(err.response?.data?.message || "Échec de l'envoi.");
+        } finally {
+            setResendingVerification(false);
+        }
+    };
 
     // Initialize global events listener
 
@@ -91,6 +111,21 @@ export default function AppLayout() {
     return (
         <>
             <LocationTracker />
+            {showVerifyBanner && (
+                <div className="sticky top-0 z-40 bg-[#D4AF37] text-[#101322] px-4 py-2.5 flex items-center justify-between gap-3 text-xs font-bold">
+                    <span className="flex-1">Vérifiez votre email pour sécuriser votre compte.</span>
+                    <button
+                        onClick={handleResendVerification}
+                        disabled={resendingVerification}
+                        className="underline underline-offset-2 shrink-0 disabled:opacity-50"
+                    >
+                        {resendingVerification ? '...' : 'Renvoyer'}
+                    </button>
+                    <button onClick={() => setVerifyBannerDismissed(true)} className="shrink-0">
+                        <span className="material-symbols-outlined text-[18px] align-middle">close</span>
+                    </button>
+                </div>
+            )}
             <AnimatePresence mode="wait">
                 <motion.div
                     key={url}
