@@ -34,7 +34,7 @@ class AdminController extends Controller
                 'verification',
                 'Compte Vérifié !',
                 "Votre demande de vérification a été approuvée.",
-                '',
+                '/profile',
                 'verified',
                 '#4CAF50'
             ));
@@ -44,7 +44,7 @@ class AdminController extends Controller
                 'verification',
                 'Vérification Refusée',
                 "Votre photo de vérification n'était pas conforme. Veuillez réessayer.",
-                '',
+                '/profile',
                 'error',
                 '#F44336'
             ));

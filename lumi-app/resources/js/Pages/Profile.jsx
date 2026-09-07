@@ -105,46 +105,6 @@ export default function Profile() {
                 {/* Content Body */}
                 <div className="px-6 relative z-10 bg-white dark:bg-[#161b2e] rounded-t-[2rem] -mt-6 pt-8 transition-colors duration-500">
 
-                    {/* Credits Card (New Design) */}
-                    <div className="mb-8 p-6 rounded-[2rem] bg-[#E5B80B] text-white shadow-xl relative overflow-hidden">
-                        <div className="flex justify-between items-start mb-6">
-                            <div>
-                                <p className="text-white/80 text-xs font-medium mb-1">Mon Portefeuille</p>
-                                <h2 className="text-3xl font-bold">{user.credits || 0} Crédits</h2>
-                            </div>
-                            <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
-                                <span className="material-symbols-outlined text-2xl">account_balance_wallet</span>
-                            </div>
-                        </div>
-
-                        <Link
-                            to="/credits"
-                            className="block w-full py-3.5 bg-white text-[#E5B80B] font-bold text-center rounded-xl shadow-sm hover:bg-gray-50 active:scale-[0.98] transition-all text-sm"
-                        >
-                            Recharger
-                        </Link>
-                    </div>
-
-                    {/* Premium Card */}
-                    <div className="mb-8">
-                        <Link to="/credits" className="block relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#101322] to-[#2c3e50] shadow-xl group active:scale-[0.98] transition-all">
-                            <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16" />
-
-                            <div className="relative p-6 flex items-center justify-between">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="material-symbols-outlined text-[#D4AF37] text-xl">workspace_premium</span>
-                                        <h3 className="text-lg font-black italic tracking-tighter text-white uppercase">Lumi Premium</h3>
-                                    </div>
-                                    <p className="text-white/60 text-xs font-semibold max-w-[160px] leading-tight opacity-80">Boostez votre visibilité et débloquez tout.</p>
-                                </div>
-                                <div className="size-10 bg-[#D4AF37] rounded-full flex items-center justify-center text-[#101322] shadow-lg group-hover:scale-110 transition-transform">
-                                    <span className="material-symbols-outlined">arrow_forward</span>
-                                </div>
-                            </div>
-                        </Link>
-                    </div>
-
                     {/* Menu List */}
                     <div className="space-y-4 mb-8">
                         {menuItems.map((item, idx) => (

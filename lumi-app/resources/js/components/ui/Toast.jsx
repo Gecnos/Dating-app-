@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
+const Toast = ({ message, type = 'success', onClose, duration = 3000, onClick }) => {
     useEffect(() => {
         if (duration) {
             const timer = setTimeout(onClose, duration);
@@ -37,11 +37,12 @@ const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
             exit="exit"
             variants={variants}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg shadow-black/20 text-white min-w-[300px] backdrop-blur-md ${bgColors[type] || bgColors.info}`}
+            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg shadow-black/20 text-white min-w-[300px] backdrop-blur-md ${bgColors[type] || bgColors.info} ${onClick ? 'cursor-pointer' : ''}`}
+            onClick={onClick}
         >
             <span className="material-symbols-outlined text-[20px]">{icons[type]}</span>
             <p className="text-sm font-bold flex-1">{message}</p>
-            <button onClick={onClose} className="opacity-70 hover:opacity-100 transition-opacity">
+            <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="opacity-70 hover:opacity-100 transition-opacity">
                 <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
         </motion.div>

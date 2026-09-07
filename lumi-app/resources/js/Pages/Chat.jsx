@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from '../api/axios';
@@ -47,10 +47,10 @@ export default function Chat() {
     const cancelRecordingRef = useRef(false);
     const recorderRef = useRef(null);
     const timerRef = useRef(null);
+    const pendingScrollAdjustRef = useRef(null);
 
-    const { echo } = useNotifications(); // Or useWebSocket if not exposed. 
-    // Actually NotificationsContext doesn't expose echo. We need to import useWebSocket.
-    
+    const { echo } = useWebSocket();
+
     // Initial Load
     useEffect(() => {
         const controller = new AbortController();
@@ -117,8 +117,7 @@ export default function Chat() {
         // And filter events where from_id === chatWith.id
         const channel = echo.private(`chat.${authUser.id}`);
         
-        channel.listen('.MessageSent', (e) => {
-            const msg = e.message;
+        channel.listen('.message.sent', (msg) => {
             if (msg.from_id === parseInt(id)) {
                 setMessages(prev => {
                     // Avoid duplicates
@@ -126,20 +125,30 @@ export default function Chat() {
                     return [...prev, msg];
                 });
                 scrollToBottom();
-                // Mark as read immediately if we are viewing? 
+                // Mark as read immediately if we are viewing?
                 // Ideally send a read receipt
                 axios.post('/notifications/read', { type: 'message', from_id: id });
             }
         });
 
         return () => {
-            channel.stopListening('.MessageSent');
+            channel.stopListening('.message.sent');
         };
     }, [id, echo, chatWith, authUser.id]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
+
+    // Keep the viewport pinned to the same message after prepending older
+    // history, instead of letting the scroll position jump to the top.
+    useLayoutEffect(() => {
+        const container = scrollContainerRef.current;
+        if (pendingScrollAdjustRef.current != null && container) {
+            container.scrollTop = container.scrollHeight - pendingScrollAdjustRef.current;
+            pendingScrollAdjustRef.current = null;
+        }
+    }, [messages]);
 
     // Pagination Handler
     const handleScroll = async (e) => {
@@ -157,10 +166,8 @@ export default function Chat() {
                 }
 
                 if (olderMessages.length > 0) {
+                    pendingScrollAdjustRef.current = scrollContainerRef.current?.scrollHeight ?? null;
                     setMessages(prev => [...olderMessages, ...prev]);
-                    // Maintain scroll position roughly? 
-                    // This is tricky without exact height calc, but usually frameworks handle it.
-                    // For now, allow simple prepend.
                 }
             } catch (err) {
                 console.error("Failed to load older messages", err);

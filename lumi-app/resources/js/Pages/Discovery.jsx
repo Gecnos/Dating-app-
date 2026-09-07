@@ -11,13 +11,24 @@ export default function Discovery() {
     const [loading, setLoading] = useState(true);
     const [dragDirection, setDragDirection] = useState(null);
 
-    const { getCachedData, setCachedData } = useCache();
+    const { getCachedData, setCachedData, clearCache } = useCache();
 
     useEffect(() => {
         const controller = new AbortController();
         fetchProfiles(controller.signal);
         return () => controller.abort();
     }, []);
+
+    // Preload the next couple of profile photos so swiping doesn't show a
+    // loading flash while the new card's background image fetches.
+    useEffect(() => {
+        [profiles[currentIndex + 1], profiles[currentIndex + 2]].forEach((profile) => {
+            if (profile?.avatar) {
+                const img = new window.Image();
+                img.src = profile.avatar;
+            }
+        });
+    }, [profiles, currentIndex]);
 
     const fetchProfiles = async (signal) => {
         const cacheKey = 'discovery_profiles';
@@ -61,10 +72,8 @@ export default function Discovery() {
 
     const handleDragEnd = (event, info) => {
         if (info.offset.x > 100) {
-            setDragDirection('right');
             handleSwipe('liked');
         } else if (info.offset.x < -100) {
-            setDragDirection('left');
             handleSwipe('passed');
         } else {
             x.set(0);
@@ -76,6 +85,7 @@ export default function Discovery() {
         const target = profiles[currentIndex];
 
         // Optimistic
+        setDragDirection(status === 'liked' ? 'right' : 'left');
         x.set(0);
         setCurrentIndex((prev) => prev + 1);
 
@@ -216,7 +226,7 @@ export default function Discovery() {
                             <h3 className="text-xl font-bold text-[#101322] dark:text-white mb-2 transition-colors duration-500">Plus de profils à proximité</h3>
                             <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs mx-auto transition-colors duration-500">Revenez plus tard ou élargissez vos critères de recherche pour découvrir de nouvelles personnes.</p>
                         </div>
-                        <button onClick={() => { setCurrentIndex(0); fetchProfiles(); }} className="px-8 py-3 bg-[#D4AF37] text-white rounded-full font-bold text-sm uppercase tracking-widest shadow-lg shadow-[#D4AF37]/20 transition-transform active:scale-95">
+                        <button onClick={() => { clearCache('discovery_profiles'); setCurrentIndex(0); fetchProfiles(); }} className="px-8 py-3 bg-[#D4AF37] text-white rounded-full font-bold text-sm uppercase tracking-widest shadow-lg shadow-[#D4AF37]/20 transition-transform active:scale-95">
                             Recharger les profils
                         </button>
                     </div>

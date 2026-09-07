@@ -19,13 +19,12 @@ Route::post('/register', [App\Http\Controllers\Auth\LoginController::class, 'reg
 Route::middleware('auth:sanctum')->post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout']); // Fixing logout here as well to use Sanctum middleware if not already present, though "auth:sanctum" is correct.
 
 Route::get('/auth/google/url', [App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle']);
-Route::get('/auth/callback', [App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback']); // We might need this for the callback processing if we want API to handle it, but for SPA we usually handle token via frontend query param from the controller redirect.
-// Wait, the GoogleController::handleGoogleCallback redirects to /auth/callback?token=... 
-// So the backend route for the callback from Google (e.g. /auth/google/callback defined in services.php) needs to point to the controller.
-// In web.php we had: Route::get('auth/google/callback', ...); 
-// We should probably keep that in web.php or api.php but ensuring it uses sessions if Socialite needs it, OR stateless.
-// My GoogleController uses ->stateless(), so it should be fine in api.php or web.php.
-// Let's add it here to be safe and clean.
+// Google redirects to auth/google/callback (registered in web.php), which then
+// redirects the browser to /auth/callback?token=... — a frontend SPA route
+// (resources/js/Pages/Auth/AuthCallback.jsx) that finishes login client-side.
+// That path must NOT be registered here too, or it shadows the SPA route and
+// the callback controller ends up calling itself with no OAuth code, breaking
+// Google login every time.
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Illuminate\Http\Request $request) {
@@ -95,7 +94,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index']);
     Route::post('/notifications/read', [App\Http\Controllers\NotificationController::class, 'markAsRead']);
     Route::delete('/notifications/{id}', [App\Http\Controllers\NotificationController::class, 'destroy']);
-    Route::get('/notifications/latest', [App\Http\Controllers\NotificationController::class, 'getLatest']);
 
     // Broadcasting Auth
     Route::post('/broadcasting/auth', function (Illuminate\Http\Request $request) {

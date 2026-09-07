@@ -44,10 +44,8 @@ export const NotificationsProvider = ({ children }) => {
 
         // 1. Message Sent (Chat)
         const chatChannel = echo.private(`chat.${user.id}`);
-        chatChannel.listen('.MessageSent', (data) => {
-             console.log("NotificationsContext: Message Received", data);
-             // Verify if it's from someone else
-             const msg = data.message || data;
+        chatChannel.listen('.message.sent', (msg) => {
+             console.log("NotificationsContext: Message Received", msg);
              if (msg.from_id !== user.id) {
                  setUnreadMessagesCount(prev => prev + 1);
              }
