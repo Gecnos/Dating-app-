@@ -1,0 +1,32 @@
+{
+  "name": "Lumi - Rencontres Premium Bénin",
+  "short_name": "Lumi",
+  "description": "La première plateforme premium de rencontres au Bénin.",
+  "start_url": "/discovery",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101322",
+  "theme_color": "#101322",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
