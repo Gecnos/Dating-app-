@@ -16,7 +16,16 @@ use App\Http\Controllers\ChatController;
 // Auth
 Route::post('/login', [App\Http\Controllers\Auth\LoginController::class, 'login']);
 Route::post('/register', [App\Http\Controllers\Auth\LoginController::class, 'register']);
+Route::post('/password/forgot', [App\Http\Controllers\Auth\LoginController::class, 'forgotPassword']);
+Route::post('/password/reset', [App\Http\Controllers\Auth\LoginController::class, 'resetPassword']);
 Route::middleware('auth:sanctum')->post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout']); // Fixing logout here as well to use Sanctum middleware if not already present, though "auth:sanctum" is correct.
+
+// Email verification: soft/non-blocking — no `verified` middleware is applied
+// anywhere, this only powers the dismissible banner + resend button.
+Route::middleware(['auth:sanctum', 'throttle:3,1'])->post('/email/resend', [App\Http\Controllers\Auth\LoginController::class, 'resendVerificationEmail']);
+Route::get('/email/verify/{id}/{hash}', [App\Http\Controllers\Auth\LoginController::class, 'verifyEmail'])
+    ->middleware('signed')
+    ->name('verification.verify');
 
 Route::get('/auth/google/url', [App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle']);
 // Google redirects to auth/google/callback (registered in web.php), which then

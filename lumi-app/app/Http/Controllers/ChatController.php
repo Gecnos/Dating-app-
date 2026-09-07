@@ -188,7 +188,8 @@ class ChatController extends Controller
                     "{$sender->name} vous a envoyé un message.",
                     '/chat/' . $sender->id,
                     'chat_bubble',
-                    '#0f2cbd'
+                    '#0f2cbd',
+                    $sender->id
                 ));
 
                 // 2. Real-time Push Notification (FCM)

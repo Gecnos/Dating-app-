@@ -31,11 +31,23 @@ class NotificationController extends Controller
     }
 
     /**
-     * Marque toutes les notifications comme lues.
+     * Marque les notifications comme lues. Avec `type`/`from_id`, ne marque
+     * que celles de cette conversation (ex: en ouvrant un chat) ; sans
+     * filtre, marque tout (bouton "Tout marquer comme lu").
      */
-    public function markAsRead()
+    public function markAsRead(Request $request)
     {
-        Auth::user()->unreadNotifications->markAsRead();
+        $query = Auth::user()->unreadNotifications();
+
+        if ($request->filled('type')) {
+            $query->where('data->type', $request->type);
+        }
+        if ($request->filled('from_id')) {
+            $query->where('data->subject_id', (int) $request->from_id);
+        }
+
+        $query->update(['read_at' => now()]);
+
         return response()->json(['message' => 'Marquées comme lues']);
     }
 

@@ -146,6 +146,11 @@ export default function Login() {
                                 placeholder="••••••••"
                                 required
                             />
+                            <div className="text-right">
+                                <Link to="/forgot-password" className="text-[10px] font-black text-gray-400 hover:text-[#D4AF37] uppercase tracking-widest transition-colors">
+                                    Mot de passe oublié ?
+                                </Link>
+                            </div>
                         </div>
 
                         <button

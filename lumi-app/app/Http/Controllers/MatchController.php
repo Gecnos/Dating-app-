@@ -54,7 +54,8 @@ class MatchController extends Controller
                     "Vous avez matché avec {$currentUser->name}.",
                     '/match/success/' . $currentUser->id,
                     'favorite',
-                    '#D4AF37'
+                    '#D4AF37',
+                    $currentUser->id
                 ));
 
                 $currentUser->notify(new \App\Notifications\AppNotification(
@@ -63,7 +64,8 @@ class MatchController extends Controller
                     "Vous avez matché avec {$targetUser->name}.",
                     '/match/success/' . $targetUser->id,
                     'favorite',
-                    '#D4AF37'
+                    '#D4AF37',
+                    $targetUser->id
                 ));
 
                 // Real-time Push (FCM)
@@ -77,7 +79,31 @@ class MatchController extends Controller
                     'url' => '/match/success/' . $targetUser->id
                 ]);
             } else {
-                broadcast(new \App\Events\LikeNotification(Auth::user(), $request->target_id))->toOthers();
+                $currentUser = Auth::user();
+                broadcast(new \App\Events\LikeNotification($currentUser, $request->target_id))->toOthers();
+
+                // Persist the like as a real notification too, so it isn't
+                // lost the moment the recipient isn't online to see the
+                // live WebSocket badge bump.
+                $targetUser = User::find($request->target_id);
+                if ($targetUser) {
+                    $targetUser->notify(new \App\Notifications\AppNotification(
+                        'like',
+                        'Nouveau Like !',
+                        "{$currentUser->name} vous a liké.",
+                        '/likes',
+                        'favorite',
+                        '#D4AF37',
+                        $currentUser->id
+                    ));
+
+                    app(\App\Services\PushNotificationService::class)->sendToUser(
+                        $targetUser,
+                        'Lumi',
+                        "💛 {$currentUser->name} vous a liké !",
+                        ['type' => 'like', 'url' => '/likes']
+                    );
+                }
             }
         }
 

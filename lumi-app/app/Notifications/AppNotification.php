@@ -17,11 +17,16 @@ class AppNotification extends Notification
     private $icon;
     private $color;
     private $url;
+    private $subjectId;
 
     /**
      * Create a new notification instance.
+     *
+     * $subjectId identifies who/what this notification is about (e.g. the
+     * message sender's user id), so a client can later ask to mark just
+     * that conversation's notifications as read instead of all of them.
      */
-    public function __construct($type, $title, $content, $url = '/', $icon = 'notifications', $color = '#D4AF37')
+    public function __construct($type, $title, $content, $url = '/', $icon = 'notifications', $color = '#D4AF37', $subjectId = null)
     {
         $this->type = $type;
         $this->title = $title;
@@ -29,6 +34,7 @@ class AppNotification extends Notification
         $this->url = $url;
         $this->icon = $icon;
         $this->color = $color;
+        $this->subjectId = $subjectId;
     }
 
     /**
@@ -54,7 +60,8 @@ class AppNotification extends Notification
             'content' => $this->content,
             'url' => $this->url,
             'icon' => $this->icon,
-            'color' => $this->color
+            'color' => $this->color,
+            'subject_id' => $this->subjectId,
         ];
     }
 }
