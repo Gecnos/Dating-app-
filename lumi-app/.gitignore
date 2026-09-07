@@ -17,6 +17,9 @@
 /public/hot
 /public/storage
 /public/firebase-messaging-sw.js
+# Local Cloudinary fallback (CloudinaryService::uploadLocal) writes real files
+# here in dev/tests whenever Cloudinary isn't configured — not meant to be committed.
+/public/uploads
 /storage/*.key
 /storage/pail
 /vendor
