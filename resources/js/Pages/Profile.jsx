@@ -10,6 +10,16 @@ export default function Profile() {
     const [user, setUser] = useState(authUser || {});
     const [loading, setLoading] = useState(true);
 
+    const MISSING_FIELD_LABELS = {
+        bio: 'Ajoute une bio',
+        job: 'Indique ton métier',
+        education: 'Indique ta formation',
+        height: 'Ajoute ta taille',
+        city: 'Ajoute ta ville',
+        interests: 'Ajoute au moins 3 centres d\'intérêt',
+        photos: 'Ajoute au moins 2 photos',
+    };
+
     const menuItems = [
         { label: 'Modifier mon profil', icon: 'edit', route: '/profile/edit' },
         { label: 'Gérer mes photos', icon: 'photo_library', route: '/photos/manage' },
@@ -104,6 +114,28 @@ export default function Profile() {
 
                 {/* Content Body */}
                 <div className="px-6 relative z-10 bg-white dark:bg-[#161b2e] rounded-t-[2rem] -mt-6 pt-8 transition-colors duration-500">
+
+                    {/* Profile Completion */}
+                    {user.profile_completion && user.profile_completion.percentage < 100 && (
+                        <div className="mb-8 p-6 rounded-[2rem] bg-gray-50 dark:bg-white/5 border border-black/5 dark:border-white/10">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-xs font-black uppercase tracking-widest text-[#101322] dark:text-white">Profil complet à</h3>
+                                <span className="text-lg font-black italic text-[#D4AF37]">{user.profile_completion.percentage}%</span>
+                            </div>
+                            <div className="h-2 rounded-full bg-black/5 dark:bg-white/10 overflow-hidden mb-4">
+                                <div
+                                    className="h-full bg-[#D4AF37] rounded-full transition-all duration-500"
+                                    style={{ width: `${user.profile_completion.percentage}%` }}
+                                />
+                            </div>
+                            {user.profile_completion.missing.length > 0 && (
+                                <Link to="/profile/edit" className="flex items-center justify-between text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-[#D4AF37] transition-colors">
+                                    <span>{MISSING_FIELD_LABELS[user.profile_completion.missing[0]] || 'Complète ton profil'}</span>
+                                    <span className="material-symbols-outlined text-base">arrow_forward</span>
+                                </Link>
+                            )}
+                        </div>
+                    )}
 
                     {/* Menu List */}
                     <div className="space-y-4 mb-8">

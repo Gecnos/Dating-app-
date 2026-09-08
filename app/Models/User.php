@@ -65,6 +65,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'age',
         'masked_email',
         'avatar_url',
+        'profile_completion',
     ];
 
     /**
@@ -203,6 +204,49 @@ class User extends Authenticatable implements MustVerifyEmail
 
         // Ensure leading slash for relative paths
         return '/' . ltrim($this->avatar, '/');
+    }
+
+    /**
+     * Score de complétion du profil (0-100) + champs manquants, pour
+     * pousser l'utilisateur à finir son profil. Chaque critère pèse le
+     * même poids (~14%) sauf avoir au moins une photo, pondérée plus
+     * fort car c'est le facteur qui influence le plus le matching.
+     */
+    public function getProfileCompletionAttribute()
+    {
+        $photoCount = $this->relationLoaded('photos')
+            ? $this->photos->count()
+            : $this->photos()->count();
+
+        $criteria = [
+            'bio' => !empty($this->bio),
+            'job' => !empty($this->job),
+            'education' => !empty($this->education),
+            'height' => !empty($this->height),
+            'city' => !empty($this->city),
+            'interests' => count($this->interests ?? []) >= 3,
+            'photos' => $photoCount >= 2,
+        ];
+
+        $weights = [
+            'bio' => 15, 'job' => 12, 'education' => 12, 'height' => 10,
+            'city' => 12, 'interests' => 14, 'photos' => 25,
+        ];
+
+        $score = 0;
+        $missing = [];
+        foreach ($criteria as $key => $met) {
+            if ($met) {
+                $score += $weights[$key];
+            } else {
+                $missing[] = $key;
+            }
+        }
+
+        return [
+            'percentage' => min(100, $score),
+            'missing' => $missing,
+        ];
     }
 
     /**
