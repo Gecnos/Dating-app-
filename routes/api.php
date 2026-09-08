@@ -78,6 +78,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Security
     Route::get('/security/info', [App\Http\Controllers\SecurityController::class, 'getSecurityInfo']);
     Route::post('/security/password', [App\Http\Controllers\SecurityController::class, 'updatePassword'])->name('security.password.update');
+    Route::get('/security/sessions', [App\Http\Controllers\SecurityController::class, 'listSessions']);
+    Route::delete('/security/sessions/{id}', [App\Http\Controllers\SecurityController::class, 'revokeSession']);
+    Route::delete('/security/sessions', [App\Http\Controllers\SecurityController::class, 'revokeOtherSessions']);
     Route::delete('/user/delete', [App\Http\Controllers\UserController::class, 'destroy'])->name('user.destroy');
 
     // Profile verification (selfie submission — review is the /admin/verify routes below)
