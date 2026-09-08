@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import axios from '../api/axios';
 import { useCache } from '../contexts/CacheContext';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Discovery() {
     const navigate = useNavigate();
@@ -10,8 +11,10 @@ export default function Discovery() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [dragDirection, setDragDirection] = useState(null);
+    const [undoing, setUndoing] = useState(false);
 
     const { getCachedData, setCachedData, clearCache } = useCache();
+    const { error: toastError } = useToast();
 
     useEffect(() => {
         const controller = new AbortController();
@@ -102,6 +105,32 @@ export default function Discovery() {
         } catch (err) {
             console.error("Swipe error:", err);
             // Revert? Complex with stack. Just log for now.
+        }
+    };
+
+    const handleUndo = async () => {
+        if (currentIndex === 0 || undoing) return;
+        setUndoing(true);
+        try {
+            const response = await axios.post('/swipe/undo');
+            const restored = response.data.profile;
+            if (restored) {
+                setProfiles((prev) => {
+                    const next = [...prev];
+                    next.splice(currentIndex - 1, 0, restored);
+                    return next;
+                });
+            }
+            setCurrentIndex((prev) => prev - 1);
+            x.set(0);
+        } catch (err) {
+            if (err.response?.status === 422) {
+                toastError(err.response.data?.message || "Impossible d'annuler un match.");
+            } else if (err.response?.status !== 404) {
+                toastError("Échec de l'annulation.");
+            }
+        } finally {
+            setUndoing(false);
         }
     };
 
@@ -235,6 +264,14 @@ export default function Discovery() {
                 {/* Bottom Controls */}
                 {profiles.length > currentIndex && (
                     <div className="flex w-full justify-center gap-6 pt-8 items-center">
+                        <button
+                            onClick={handleUndo}
+                            disabled={currentIndex === 0 || undoing}
+                            className="flex size-11 items-center justify-center overflow-hidden rounded-full bg-white dark:bg-[#1a1f35] text-amber-500 shadow-xl transition-all active:scale-90 border border-black/5 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:pointer-events-none"
+                            title="Annuler le dernier swipe"
+                        >
+                            <span className="material-symbols-outlined text-xl">undo</span>
+                        </button>
                         <button
                             onClick={() => handleSwipe('passed')}
                             className="flex size-14 items-center justify-center overflow-hidden rounded-full bg-white dark:bg-[#1a1f35] text-red-500 shadow-xl transition-all active:scale-90 border border-black/5 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5"
