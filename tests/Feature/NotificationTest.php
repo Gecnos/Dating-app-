@@ -50,15 +50,11 @@ class NotificationTest extends TestCase
 
     public function test_verification_notification_links_to_profile(): void
     {
+        $admin = User::factory()->create(['is_admin' => true]);
         $user = User::factory()->create(['verification_selfie' => 'selfie.jpg', 'is_verified' => false]);
-        // AdminController has no registered route at all (no admin/role
-        // concept exists yet in this app — separate gap, out of scope here).
-        // Call the method directly to cover the notification-url fix made
-        // this session (it used to pass '' instead of '/profile').
-        (new \App\Http\Controllers\AdminController())->verify(
-            new \Illuminate\Http\Request(['action' => 'approve']),
-            $user->id
-        );
+
+        Sanctum::actingAs($admin);
+        $this->postJson("/api/admin/verify/{$user->id}/approve")->assertStatus(200);
 
         $notification = $user->fresh()->notifications->first();
         $this->assertSame('/profile', $notification->data['url']);

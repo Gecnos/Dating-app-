@@ -38,6 +38,7 @@ import Privacy from '../pages/Legal/Privacy';
 
 import Explorer from '../pages/Explorer';
 import MatchSuccess from '../pages/MatchSuccess';
+import Verify from '../pages/Verify';
 
 
 import SplashScreen from '../components/ui/SplashScreen';
@@ -110,6 +111,12 @@ export default function AppRoutes() {
                 <Route path="/help" element={<Help />} />
                 <Route path="/legal/terms" element={<Terms />} />
                 <Route path="/legal/privacy" element={<Privacy />} />
+
+                {/* Admin — being logged in is necessary but not sufficient; the
+                    backend enforces is_admin on every /api/admin/* call, this
+                    page just 403s cleanly for non-admins on load. */}
+                <Route path="/admin/verify" element={<Verify />} />
+
                 <Route path="*" element={<Navigate to="/discovery" replace />} />
             </Route>
         </Routes>
