@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Report;
 use App\Models\User;
-use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
@@ -24,11 +24,11 @@ class AdminController extends Controller
     /**
      * Approuve ou rejette la vérification d'un utilisateur.
      */
-    public function verify(Request $request, $id)
+    public function verify($id, $action)
     {
         $user = User::findOrFail($id);
-        
-        if ($request->action === 'approve') {
+
+        if ($action === 'approve') {
             $user->update(['is_verified' => true]);
             $user->notify(new \App\Notifications\AppNotification(
                 'verification',
@@ -51,6 +51,19 @@ class AdminController extends Controller
         }
 
         return response()->json(['message' => 'Action effectuée']);
+    }
+
+    /**
+     * Liste des signalements, urgents en premier.
+     */
+    public function reports()
+    {
+        $reports = Report::with(['reporter', 'reported'])
+            ->orderByRaw("priority = 'urgent' desc")
+            ->latest()
+            ->get();
+
+        return response()->json(['reports' => $reports]);
     }
 
     /**

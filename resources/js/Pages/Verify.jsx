@@ -1,11 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from '../api/axios';
-
 import { useToast } from '../contexts/ToastContext';
 
-export default function Verify({ users: initialUsers }) {
-    const [users, setUsers] = useState(initialUsers || []);
+export default function Verify() {
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
     const { success, error } = useToast();
+
+    useEffect(() => {
+        const controller = new AbortController();
+        fetchPending(controller.signal);
+        return () => controller.abort();
+    }, []);
+
+    const fetchPending = async (signal) => {
+        setLoading(true);
+        try {
+            const response = await axios.get('/admin/verify', { signal });
+            setUsers(response.data.users || []);
+        } catch (err) {
+            if (!axios.isCancel(err)) {
+                console.error("Failed to fetch pending verifications", err);
+                error("Impossible de charger les vérifications en attente.");
+            }
+        } finally {
+            if (!signal?.aborted) setLoading(false);
+        }
+    };
 
     const handleAction = async (id, action) => {
         try {
@@ -19,10 +40,18 @@ export default function Verify({ users: initialUsers }) {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+                <div className="size-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gray-100 p-8 font-sans">
             {/* Title managed by layout or effect */}
-            
+
             <div className="max-w-6xl mx-auto space-y-8">
                 <div className="flex items-center justify-between">
                     <div>

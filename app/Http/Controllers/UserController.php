@@ -56,6 +56,28 @@ class UserController extends Controller
     }
 
     /**
+     * Soumet (ou resoumet) un selfie de vérification de profil.
+     * Laisse is_verified à false : un admin doit approuver.
+     */
+    public function submitVerificationSelfie(Request $request)
+    {
+        $request->validate(['selfie' => 'required|string']);
+
+        $user = Auth::user();
+        $url = $this->cloudinary->uploadBase64($request->selfie);
+
+        $user->update([
+            'verification_selfie' => $url,
+            'is_verified' => false,
+        ]);
+
+        return response()->json([
+            'message' => 'Selfie envoyé, en attente de vérification.',
+            'verification_selfie' => $url,
+        ]);
+    }
+
+    /**
      * Page de gestion des photos.
      */
     public function photoManagement()

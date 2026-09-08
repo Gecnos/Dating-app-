@@ -80,6 +80,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/security/password', [App\Http\Controllers\SecurityController::class, 'updatePassword'])->name('security.password.update');
     Route::delete('/user/delete', [App\Http\Controllers\UserController::class, 'destroy'])->name('user.destroy');
 
+    // Profile verification (selfie submission — review is the /admin/verify routes below)
+    Route::post('/verification/selfie', [App\Http\Controllers\UserController::class, 'submitVerificationSelfie']);
+
+    // Admin
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('/verify', [App\Http\Controllers\AdminController::class, 'index']);
+        Route::post('/verify/{id}/{action}', [App\Http\Controllers\AdminController::class, 'verify']);
+        Route::get('/reports', [App\Http\Controllers\AdminController::class, 'reports']);
+        Route::get('/stats', [App\Http\Controllers\AdminController::class, 'stats']);
+    });
+
     // Swipe & Matches
     Route::post('/swipe', [App\Http\Controllers\MatchController::class, 'swipe'])->name('api.swipe');
     Route::post('/swipe/undo', [App\Http\Controllers\MatchController::class, 'undoLastSwipe']);
