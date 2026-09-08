@@ -93,6 +93,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/users/{id}/ban', [App\Http\Controllers\AdminController::class, 'banUser']);
         Route::post('/users/{id}/unban', [App\Http\Controllers\AdminController::class, 'unbanUser']);
         Route::delete('/users/{id}/photos/{photoId}', [App\Http\Controllers\AdminController::class, 'deleteUserPhoto']);
+        Route::post('/broadcast', [App\Http\Controllers\AdminController::class, 'broadcast']);
     });
 
     // Swipe & Matches
