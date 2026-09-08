@@ -49,6 +49,15 @@ class UserController extends Controller
             abort(404); // On fait semblant que le profil n'existe pas
         }
 
+        // Ne pas enregistrer la vue si le visiteur est lui-même en mode
+        // fantôme : il a choisi d'être invisible, ça inclut son activité.
+        if (!$me->is_ghost_mode) {
+            \App\Models\ProfileView::updateOrCreate(
+                ['viewer_id' => $me->id, 'viewed_id' => $user->id],
+                ['viewed_at' => now()]
+            );
+        }
+
         return response()->json([
             'profile' => $user,
             'isMutual' => $isMutual
@@ -75,6 +84,26 @@ class UserController extends Controller
             'message' => 'Selfie envoyé, en attente de vérification.',
             'verification_selfie' => $url,
         ]);
+    }
+
+    /**
+     * Qui a consulté mon profil, plus récent en premier.
+     */
+    public function profileViews()
+    {
+        $views = \App\Models\ProfileView::where('viewed_id', Auth::id())
+            ->with('viewer')
+            ->orderByDesc('viewed_at')
+            ->get()
+            ->map(function ($view) {
+                return [
+                    'id' => $view->id,
+                    'user' => $view->viewer,
+                    'viewed_at' => $view->viewed_at,
+                ];
+            });
+
+        return response()->json(['views' => $views]);
     }
 
     /**
