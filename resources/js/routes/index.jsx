@@ -40,6 +40,7 @@ import Explorer from '../pages/Explorer';
 import MatchSuccess from '../pages/MatchSuccess';
 import Verify from '../pages/Verify';
 import AdminReports from '../pages/AdminReports';
+import AdminDashboard from '../pages/AdminDashboard';
 
 
 import SplashScreen from '../components/ui/SplashScreen';
@@ -118,6 +119,7 @@ export default function AppRoutes() {
                     page just 403s cleanly for non-admins on load. */}
                 <Route path="/admin/verify" element={<Verify />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
                 <Route path="*" element={<Navigate to="/discovery" replace />} />
             </Route>
