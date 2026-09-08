@@ -98,6 +98,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/chat/{user}', [ChatController::class, 'show']);
     Route::get('/messages/{user}', [ChatController::class, 'fetchMessages']);
     Route::post('/messages', [ChatController::class, 'store']);
+    Route::post('/messages/{id}/react', [ChatController::class, 'react']);
+    Route::post('/typing', [ChatController::class, 'typing']);
 
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index']);
