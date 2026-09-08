@@ -22,6 +22,7 @@ export default function Settings() {
     });
 
     const [ghostMode, setGhostMode] = useState(authUser?.is_ghost_mode || false);
+    const [submittingSelfie, setSubmittingSelfie] = useState(false);
 
     const [securityInfo, setSecurityInfo] = useState({
         masked_email: '',
@@ -74,6 +75,30 @@ export default function Settings() {
                 console.error("Error fetching security info:", error);
             }
         }
+    };
+
+    const handleSelfieUpload = (e) => {
+        const file = e.target.files[0];
+        e.target.value = ''; // allow re-selecting the same file later
+        if (!file) return;
+
+        setSubmittingSelfie(true);
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            try {
+                const res = await axios.post('/verification/selfie', { selfie: reader.result });
+                if (setAuthUser && authUser) {
+                    setAuthUser({ ...authUser, verification_selfie: res.data.verification_selfie, is_verified: false });
+                }
+                success('Selfie envoyé ! On vérifie ça rapidement.');
+            } catch (err) {
+                console.error(err);
+                error("Échec de l'envoi du selfie.");
+            } finally {
+                setSubmittingSelfie(false);
+            }
+        };
+        reader.readAsDataURL(file);
     };
 
     const toggleDarkMode = () => setDarkMode(!darkMode);
@@ -182,6 +207,30 @@ export default function Settings() {
                             </div>
                             <span className="material-symbols-outlined text-gray-400 text-sm group-hover:translate-x-1 transition-transform">chevron_right</span>
                         </button>
+
+                        <label className="w-full text-left p-5 flex items-center justify-between group active:bg-black/5 dark:active:bg-white/5 transition-all cursor-pointer">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#D4AF37]/10 text-[#D4AF37] transition-colors duration-500">
+                                    <span className="material-symbols-outlined text-xl">verified</span>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold">Vérifier mon profil</p>
+                                    <p className="text-[9px] text-gray-500">
+                                        {authUser.is_verified
+                                            ? 'Profil vérifié ✓'
+                                            : authUser.verification_selfie
+                                                ? 'En attente de vérification'
+                                                : 'Envoyez un selfie pour obtenir le badge vérifié'}
+                                    </p>
+                                </div>
+                            </div>
+                            {submittingSelfie ? (
+                                <div className="size-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <span className="material-symbols-outlined text-gray-400 text-sm">photo_camera</span>
+                            )}
+                            <input type="file" accept="image/*" capture="user" className="hidden" onChange={handleSelfieUpload} disabled={submittingSelfie} />
+                        </label>
                     </div>
                 </section>
 

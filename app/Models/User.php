@@ -44,6 +44,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'city',
         'is_ghost_mode',
         'password_changed_at',
+        'verification_selfie',
     ];
 
     /**
