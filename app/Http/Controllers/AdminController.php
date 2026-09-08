@@ -7,7 +7,9 @@ use App\Models\Message;
 use App\Models\Report;
 use App\Models\User;
 use App\Models\UserPhoto;
+use App\Notifications\AppNotification;
 use App\Services\CloudinaryService;
+use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
@@ -149,5 +151,38 @@ class AdminController extends Controller
                 'new_users_this_week' => User::where('created_at', '>=', now()->subWeek())->count(),
             ]
         ]);
+    }
+
+    /**
+     * Envoie une notification in-app a tous les utilisateurs (alerte
+     * securite, annonce...). Chunk pour ne jamais charger tous les
+     * utilisateurs en memoire d'un coup.
+     */
+    public function broadcast(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:100',
+            'content' => 'required|string|max:500',
+            'url' => 'nullable|string|max:255',
+        ]);
+
+        $url = $validated['url'] ?? '/';
+        $count = 0;
+
+        User::chunk(200, function ($users) use ($validated, $url, &$count) {
+            foreach ($users as $user) {
+                $user->notify(new AppNotification(
+                    'announcement',
+                    $validated['title'],
+                    $validated['content'],
+                    $url,
+                    'campaign',
+                    '#D4AF37'
+                ));
+                $count++;
+            }
+        });
+
+        return response()->json(['message' => 'Diffuse.', 'notified_count' => $count]);
     }
 }

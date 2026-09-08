@@ -41,6 +41,7 @@ import MatchSuccess from '../pages/MatchSuccess';
 import Verify from '../pages/Verify';
 import AdminReports from '../pages/AdminReports';
 import AdminDashboard from '../pages/AdminDashboard';
+import AdminBroadcast from '../pages/AdminBroadcast';
 
 
 import SplashScreen from '../components/ui/SplashScreen';
@@ -120,6 +121,7 @@ export default function AppRoutes() {
                 <Route path="/admin/verify" element={<Verify />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/broadcast" element={<AdminBroadcast />} />
 
                 <Route path="*" element={<Navigate to="/discovery" replace />} />
             </Route>
