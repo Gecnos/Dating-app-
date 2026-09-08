@@ -4,9 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Models\User;
+use App\Models\UserPhoto;
+use App\Services\CloudinaryService;
 
 class AdminController extends Controller
 {
+    protected $cloudinary;
+
+    public function __construct(CloudinaryService $cloudinary)
+    {
+        $this->cloudinary = $cloudinary;
+    }
+
     /**
      * Liste des utilisateurs en attente de vérification.
      */
@@ -58,12 +67,67 @@ class AdminController extends Controller
      */
     public function reports()
     {
-        $reports = Report::with(['reporter', 'reported'])
+        $reports = Report::with(['reporter', 'reported.photos'])
             ->orderByRaw("priority = 'urgent' desc")
             ->latest()
             ->get();
 
         return response()->json(['reports' => $reports]);
+    }
+
+    /**
+     * Marque un signalement comme traite (sans forcement bannir personne -
+     * garde une trace qu'un admin l'a regarde).
+     */
+    public function resolveReport($id)
+    {
+        $report = Report::findOrFail($id);
+        $report->update(['status' => 'reviewed']);
+
+        return response()->json(['message' => 'Signalement marque comme traite.']);
+    }
+
+    /**
+     * Suspend un compte : coupe l'acces immediatement en revoquant tous ses
+     * tokens Sanctum actifs, pas seulement les connexions futures.
+     */
+    public function banUser($id)
+    {
+        $user = User::findOrFail($id);
+        $user->forceFill(['is_banned' => true, 'banned_at' => now()])->save();
+        $user->tokens()->delete();
+
+        return response()->json(['message' => 'Compte suspendu.']);
+    }
+
+    public function unbanUser($id)
+    {
+        $user = User::findOrFail($id);
+        $user->forceFill(['is_banned' => false, 'banned_at' => null])->save();
+
+        return response()->json(['message' => 'Compte reactive.']);
+    }
+
+    /**
+     * Moderation : supprime une photo du profil d'un utilisateur signale.
+     * Les signalements portent sur un utilisateur entier (pas de lien vers
+     * une photo precise dans le modele actuel), donc l'admin choisit
+     * laquelle retirer depuis la galerie complete.
+     */
+    public function deleteUserPhoto($userId, $photoId)
+    {
+        $photo = UserPhoto::where('user_id', $userId)->findOrFail($photoId);
+        $user = $photo->user;
+
+        $this->cloudinary->deleteImage($photo->url);
+        $photo->delete();
+
+        if ($user->avatar === $photo->url) {
+            $next = $user->photos()->orderBy('order')->first();
+            $user->update(['avatar' => $next ? $next->url : null]);
+        }
+
+        return response()->json(['message' => 'Photo supprimee.']);
     }
 
     /**
