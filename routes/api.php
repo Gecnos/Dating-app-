@@ -82,6 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Swipe & Matches
     Route::post('/swipe', [App\Http\Controllers\MatchController::class, 'swipe'])->name('api.swipe');
+    Route::post('/swipe/undo', [App\Http\Controllers\MatchController::class, 'undoLastSwipe']);
     Route::get('/matches', [App\Http\Controllers\MatchController::class, 'index']); // Added this
 
     
