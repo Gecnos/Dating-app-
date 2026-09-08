@@ -49,6 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // User API
     Route::post('/user/location', [App\Http\Controllers\UserController::class, 'updateLocation']);
     Route::post('/user/ghost-mode', [App\Http\Controllers\UserController::class, 'toggleGhostMode']);
+    Route::post('/preferences/search', [App\Http\Controllers\UserController::class, 'updateSearchPreferences']);
     // Counts - Private Cache 30s
     Route::middleware('cache.control:private,30')->get('/user/counts', [App\Http\Controllers\UserController::class, 'counts']);
     Route::post('/fcm-token', [App\Http\Controllers\UserController::class, 'updateFcmToken']);
