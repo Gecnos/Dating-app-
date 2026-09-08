@@ -114,6 +114,33 @@ class MatchController extends Controller
     }
 
     /**
+     * Annule le dernier swipe (like ou pass) de l'utilisateur, pour le
+     * refaire apparaître dans la découverte. Un match déjà mutuel ne peut
+     * pas être annulé ici : ça toucherait aussi la ligne de l'autre
+     * utilisateur, ses notifications et d'éventuels messages déjà échangés.
+     */
+    public function undoLastSwipe(Request $request)
+    {
+        $last = MatchModel::where('user_id', Auth::id())->latest('id')->first();
+
+        if (!$last) {
+            return response()->json(['message' => 'Rien à annuler.'], 404);
+        }
+
+        if ($last->is_mutual) {
+            return response()->json(['message' => 'Impossible d\'annuler un match.'], 422);
+        }
+
+        $target = User::with(['intention', 'photos'])->find($last->target_id);
+        $last->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'profile' => $target,
+        ]);
+    }
+
+    /**
      * Affiche la page des Likes (reçus et envoyés).
      */
     public function index()
