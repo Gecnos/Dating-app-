@@ -42,6 +42,7 @@ import Verify from '../pages/Verify';
 import AdminReports from '../pages/AdminReports';
 import AdminDashboard from '../pages/AdminDashboard';
 import AdminBroadcast from '../pages/AdminBroadcast';
+import AdminActivityLog from '../pages/AdminActivityLog';
 
 
 import SplashScreen from '../components/ui/SplashScreen';
@@ -122,6 +123,7 @@ export default function AppRoutes() {
                 <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/broadcast" element={<AdminBroadcast />} />
+                <Route path="/admin/activity-log" element={<AdminActivityLog />} />
 
                 <Route path="*" element={<Navigate to="/discovery" replace />} />
             </Route>
