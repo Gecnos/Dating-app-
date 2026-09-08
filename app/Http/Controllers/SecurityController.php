@@ -51,4 +51,50 @@ class SecurityController extends Controller
             'can_change_password' => !$user->password_changed_at || $user->password_changed_at->lt(Carbon::now()->subDays(90)),
         ]);
     }
+
+    /**
+     * Liste les sessions actives (tokens Sanctum) de l'utilisateur.
+     */
+    public function listSessions(Request $request)
+    {
+        $currentId = $request->user()->currentAccessToken()->id;
+
+        $sessions = $request->user()->tokens()
+            ->orderByDesc('last_used_at')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($token) use ($currentId) {
+                return [
+                    'id' => $token->id,
+                    'created_at' => $token->created_at,
+                    'last_used_at' => $token->last_used_at,
+                    'is_current' => $token->id === $currentId,
+                ];
+            });
+
+        return response()->json(['sessions' => $sessions]);
+    }
+
+    /**
+     * Revoque une session precise (doit appartenir a l'utilisateur).
+     */
+    public function revokeSession(Request $request, $id)
+    {
+        $token = $request->user()->tokens()->where('id', $id)->firstOrFail();
+        $token->delete();
+
+        return response()->json(['message' => 'Session déconnectée.']);
+    }
+
+    /**
+     * Revoque toutes les sessions sauf celle en cours.
+     */
+    public function revokeOtherSessions(Request $request)
+    {
+        $currentId = $request->user()->currentAccessToken()->id;
+
+        $request->user()->tokens()->where('id', '!=', $currentId)->delete();
+
+        return response()->json(['message' => 'Tous les autres appareils ont été déconnectés.']);
+    }
 }
