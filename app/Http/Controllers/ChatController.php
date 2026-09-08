@@ -6,6 +6,8 @@ use App\Models\Message;
 use App\Models\MatchModel;
 use App\Models\User;
 use App\Events\MessageSent;
+use App\Events\MessageReacted;
+use App\Events\UserTyping;
 use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -114,10 +116,54 @@ class ChatController extends Controller
 
         return response()->json([
             'chatWith' => User::where('id', $user_id)
-                ->select(['id', 'name', 'avatar', 'updated_at', 'is_ghost_mode'])
+                ->select(['id', 'name', 'avatar', 'updated_at', 'is_ghost_mode', 'interests'])
                 ->firstOrFail(),
             'messages' => $messages
         ]);
+    }
+
+    /**
+     * Notifie l'autre participant qu'on est en train d'écrire. Aucune
+     * persistance : juste un broadcast ephemere sur son canal, comme pour
+     * les messages.
+     */
+    public function typing(Request $request)
+    {
+        $request->validate(['to_id' => 'required|exists:users,id']);
+
+        broadcast(new UserTyping(Auth::id(), $request->to_id))->toOthers();
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    /**
+     * Ajoute/retire une reaction emoji sur un message (une seule reaction
+     * par utilisateur par message ; retaper le meme emoji la retire).
+     */
+    public function react(Request $request, $id)
+    {
+        $request->validate(['emoji' => 'required|string|max:8']);
+
+        $message = Message::where(function ($q) {
+            $q->where('from_id', Auth::id())->orWhere('to_id', Auth::id());
+        })->findOrFail($id);
+
+        $reactions = $message->reactions ?? [];
+        $userId = (string) Auth::id();
+
+        if (($reactions[$userId] ?? null) === $request->emoji) {
+            unset($reactions[$userId]);
+        } else {
+            $reactions[$userId] = $request->emoji;
+        }
+
+        $message->reactions = $reactions;
+        $message->save();
+
+        $otherId = $message->from_id === Auth::id() ? $message->to_id : $message->from_id;
+        broadcast(new MessageReacted($message, $otherId))->toOthers();
+
+        return response()->json(['reactions' => $reactions ?: (object) []]);
     }
 
     /**

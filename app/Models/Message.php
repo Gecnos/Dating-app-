@@ -18,6 +18,11 @@ class Message extends Model
         'media_path',
         'duration',
         'is_read',
+        'reactions',
+    ];
+
+    protected $casts = [
+        'reactions' => 'array',
     ];
 
     public function sender()
