@@ -68,16 +68,21 @@ class MatchController extends Controller
                     $targetUser->id
                 ));
 
-                // Real-time Push (FCM)
+                // Real-time Push (FCM) — respects each recipient's preference;
+                // the in-app notifications above are always created regardless.
                 $pushService = app(\App\Services\PushNotificationService::class);
-                $pushService->sendToUser($targetUser, 'Lumi', "✨ Nouveau Match ! Vous et {$currentUser->name} vous plaisez.", [
-                    'type' => 'match',
-                    'url' => '/match/success/' . $currentUser->id
-                ]);
-                $pushService->sendToUser($currentUser, 'Lumi', "✨ Nouveau Match ! Vous et {$targetUser->name} vous plaisez.", [
-                    'type' => 'match',
-                    'url' => '/match/success/' . $targetUser->id
-                ]);
+                if ($targetUser->notify_push_matches) {
+                    $pushService->sendToUser($targetUser, 'Lumi', "✨ Nouveau Match ! Vous et {$currentUser->name} vous plaisez.", [
+                        'type' => 'match',
+                        'url' => '/match/success/' . $currentUser->id
+                    ]);
+                }
+                if ($currentUser->notify_push_matches) {
+                    $pushService->sendToUser($currentUser, 'Lumi', "✨ Nouveau Match ! Vous et {$targetUser->name} vous plaisez.", [
+                        'type' => 'match',
+                        'url' => '/match/success/' . $targetUser->id
+                    ]);
+                }
             } else {
                 $currentUser = Auth::user();
                 broadcast(new \App\Events\LikeNotification($currentUser, $request->target_id))->toOthers();
@@ -97,12 +102,14 @@ class MatchController extends Controller
                         $currentUser->id
                     ));
 
-                    app(\App\Services\PushNotificationService::class)->sendToUser(
-                        $targetUser,
-                        'Lumi',
-                        "💛 {$currentUser->name} vous a liké !",
-                        ['type' => 'like', 'url' => '/likes']
-                    );
+                    if ($targetUser->notify_push_likes) {
+                        app(\App\Services\PushNotificationService::class)->sendToUser(
+                            $targetUser,
+                            'Lumi',
+                            "💛 {$currentUser->name} vous a liké !",
+                            ['type' => 'like', 'url' => '/likes']
+                        );
+                    }
                 }
             }
         }

@@ -45,6 +45,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_ghost_mode',
         'password_changed_at',
         'verification_selfie',
+        'notify_push_messages',
+        'notify_push_matches',
+        'notify_push_likes',
+        'notify_push_announcements',
     ];
 
     /**
@@ -83,6 +87,10 @@ class User extends Authenticatable implements MustVerifyEmail
             'languages' => 'array',
             'is_ghost_mode' => 'boolean',
             'password_changed_at' => 'datetime',
+            'notify_push_messages' => 'boolean',
+            'notify_push_matches' => 'boolean',
+            'notify_push_likes' => 'boolean',
+            'notify_push_announcements' => 'boolean',
         ];
     }
 

@@ -238,7 +238,13 @@ class ChatController extends Controller
                     $sender->id
                 ));
 
-                // 2. Real-time Push Notification (FCM)
+                // 2. Real-time Push Notification (FCM) — respects the
+                // recipient's preference; the in-app notification above is
+                // always created regardless.
+                if (!$recipient->notify_push_messages) {
+                    return;
+                }
+
                 $fcmBody = "Nouveau message de {$sender->name}";
                 if ($message->type === 'image') {
                     $fcmBody = "📷 {$sender->name} vous a envoyé une photo";
