@@ -49,6 +49,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'notify_push_matches',
         'notify_push_likes',
         'notify_push_announcements',
+        'pref_age_min',
+        'pref_age_max',
+        'pref_max_distance_km',
     ];
 
     /**
