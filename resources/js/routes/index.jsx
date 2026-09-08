@@ -30,6 +30,7 @@ import PhotoManagement from '../pages/PhotoManagement';
 
 // Settings & Static
 import Settings from '../pages/Settings';
+import SearchPreferences from '../pages/SearchPreferences';
 import Notifications from '../pages/Notifications';
 import BlockedUsers from '../pages/BlockedUsers';
 import Help from '../pages/Help';
@@ -110,6 +111,7 @@ export default function AppRoutes() {
 
                 {/* Settings & Static */}
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/settings/search-preferences" element={<SearchPreferences />} />
                 <Route path="/settings/notifications" element={<Notifications />} />
                 <Route path="/settings/blocked" element={<BlockedUsers />} />
                 <Route path="/help" element={<Help />} />

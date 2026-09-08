@@ -373,6 +373,19 @@ export default function Settings() {
                                 <div className={`w-11 h-6 rounded-full peer transition-all ${ghostMode ? 'bg-[#D4AF37] after:translate-x-full after:border-white' : 'bg-gray-200'} after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all`}></div>
                             </label>
                         </div>
+
+                        <Link to="/settings/search-preferences" className="w-full text-left p-5 flex items-center justify-between group active:bg-black/5 dark:active:bg-white/5 transition-colors">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#D4AF37]/10 text-[#D4AF37] transition-colors duration-500">
+                                    <span className="material-symbols-outlined text-xl">tune</span>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold">Préférences de recherche</p>
+                                    <p className="text-[9px] text-gray-500">Âge et distance pour la découverte</p>
+                                </div>
+                            </div>
+                            <span className="material-symbols-outlined text-gray-400 text-sm group-hover:translate-x-1 transition-transform">chevron_right</span>
+                        </Link>
                     </div>
                 </section>
 
