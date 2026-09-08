@@ -29,7 +29,9 @@ export default function Chat() {
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
     const [showOptions, setShowOptions] = useState(false);
-    
+    const [isOtherTyping, setIsOtherTyping] = useState(false);
+    const [reactionPickerFor, setReactionPickerFor] = useState(null);
+
     // Pagination
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -39,7 +41,9 @@ export default function Chat() {
     const [reportModal, setReportModal] = useState(false);
     const [reportReason, setReportReason] = useState('');
     const [reportDescription, setReportDescription] = useState('');
-    const reportReasons = ['Harcèlement', 'Faux profil', 'Spam', 'Contenu inapproprié', 'Autre'];
+    // "Urgence / Danger immédiat" is treated as high-priority server-side
+    // (see ReportController) to surface it first to the team reviewing reports.
+    const reportReasons = ['Urgence / Danger immédiat', 'Harcèlement', 'Faux profil', 'Spam', 'Contenu inapproprié', 'Autre'];
 
     // Refs
     const scrollContainerRef = useRef(null);
@@ -48,6 +52,8 @@ export default function Chat() {
     const recorderRef = useRef(null);
     const timerRef = useRef(null);
     const pendingScrollAdjustRef = useRef(null);
+    const lastTypingSentAtRef = useRef(0);
+    const otherTypingTimeoutRef = useRef(null);
 
     const { echo } = useWebSocket();
 
@@ -131,8 +137,22 @@ export default function Chat() {
             }
         });
 
+        channel.listen('.user.typing', (e) => {
+            if (e.from_id !== parseInt(id)) return;
+            setIsOtherTyping(true);
+            clearTimeout(otherTypingTimeoutRef.current);
+            otherTypingTimeoutRef.current = setTimeout(() => setIsOtherTyping(false), 3000);
+        });
+
+        channel.listen('.message.reacted', (e) => {
+            setMessages(prev => prev.map(m => m.id === e.message_id ? { ...m, reactions: e.reactions } : m));
+        });
+
         return () => {
             channel.stopListening('.message.sent');
+            channel.stopListening('.user.typing');
+            channel.stopListening('.message.reacted');
+            clearTimeout(otherTypingTimeoutRef.current);
         };
     }, [id, echo, chatWith, authUser.id]);
 
@@ -176,6 +196,49 @@ export default function Chat() {
             }
         }
     };
+
+    // Throttled: at most one /typing call every 2s while the user keeps typing,
+    // instead of one per keystroke.
+    const handleTyping = () => {
+        const now = Date.now();
+        if (now - lastTypingSentAtRef.current < 2000) return;
+        lastTypingSentAtRef.current = now;
+        axios.post('/typing', { to_id: id }).catch(() => {});
+    };
+
+    const REACTION_EMOJIS = ['❤️', '😂', '😮', '😢', '👍', '🔥'];
+
+    const handleReact = async (messageId, emoji) => {
+        setReactionPickerFor(null);
+        // Optimistic: toggle locally first.
+        setMessages(prev => prev.map(m => {
+            if (m.id !== messageId) return m;
+            const reactions = { ...(m.reactions || {}) };
+            const key = String(authUser.id);
+            if (reactions[key] === emoji) {
+                delete reactions[key];
+            } else {
+                reactions[key] = emoji;
+            }
+            return { ...m, reactions };
+        }));
+
+        try {
+            await axios.post(`/messages/${messageId}/react`, { emoji });
+        } catch (err) {
+            console.error("Failed to react", err);
+        }
+    };
+
+    const commonInterests = (chatWith?.interests || []).filter(i => (authUser.interests || []).includes(i));
+    const icebreakers = commonInterests.length > 0
+        ? commonInterests.slice(0, 2).map(i => `Toi aussi t'es fan de ${i} ? Raconte-moi !`)
+            .concat([`Salut ${chatWith?.name?.split(' ')[0] || ''} ! Comment se passe ta journée ?`])
+        : [
+            `Salut ${chatWith?.name?.split(' ')[0] || ''} ! Comment se passe ta journée ?`,
+            "Qu'est-ce qui t'a donné envie de swiper à droite ? 😄",
+            "Un lieu à Cotonou que tu recommandes absolument ?",
+        ];
 
     const handleSend = async () => {
         if (!newMessage.trim()) return;
@@ -391,9 +454,13 @@ export default function Chat() {
                         </div>
                         <div className="cursor-pointer">
                             <h2 className="font-bold text-sm text-[#101322] dark:text-white leading-tight">{chatWith.name}</h2>
-                            <span className={`text-xs ${chatWith.is_online ? 'text-green-500' : 'text-gray-400'}`}>
-                                {chatWith.is_online ? 'En ligne' : 'Hors ligne'}
-                            </span>
+                            {isOtherTyping ? (
+                                <span className="text-xs text-[#D4AF37] font-semibold italic">en train d'écrire...</span>
+                            ) : (
+                                <span className={`text-xs ${chatWith.is_online ? 'text-green-500' : 'text-gray-400'}`}>
+                                    {chatWith.is_online ? 'En ligne' : 'Hors ligne'}
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -433,9 +500,11 @@ export default function Chat() {
                             <motion.div
                                 initial={{ opacity: 0, x: isMine ? 20 : -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}
+                                className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} relative`}
                             >
-                                <div className={`max-w-[80%] ${isMine
+                                <div
+                                    onDoubleClick={() => !msg.is_optimistic && setReactionPickerFor(reactionPickerFor === msg.id ? null : msg.id)}
+                                    className={`max-w-[80%] ${isMine
                                     ? 'bg-[#D4AF37] text-[#101322] rounded-[1.5rem] rounded-tr-lg'
                                     : 'bg-white dark:bg-[#161b2e] text-[#101322] dark:text-white rounded-[1.5rem] rounded-tl-lg border border-black/5 dark:border-white/5'} px-4 py-3 shadow-sm relative group`}>
 
@@ -456,7 +525,49 @@ export default function Chat() {
                                         )}
                                         {msg.is_optimistic && <span className="material-symbols-outlined text-[10px] animate-pulse">schedule</span>}
                                     </div>
+
+                                    {!msg.is_optimistic && (
+                                        <button
+                                            onClick={() => setReactionPickerFor(reactionPickerFor === msg.id ? null : msg.id)}
+                                            className={`absolute -bottom-3 ${isMine ? 'left-0' : 'right-0'} size-6 rounded-full bg-white dark:bg-[#1a1f35] border border-black/5 dark:border-white/10 shadow-sm items-center justify-center hidden group-hover:flex`}
+                                        >
+                                            <span className="material-symbols-outlined text-[12px] text-gray-400">add_reaction</span>
+                                        </button>
+                                    )}
                                 </div>
+
+                                {msg.reactions && Object.keys(msg.reactions).length > 0 && (
+                                    <div className={`flex gap-0.5 mt-1 ${isMine ? 'flex-row-reverse' : ''}`}>
+                                        {Object.entries(
+                                            Object.values(msg.reactions).reduce((acc, emoji) => ({ ...acc, [emoji]: (acc[emoji] || 0) + 1 }), {})
+                                        ).map(([emoji, count]) => (
+                                            <span key={emoji} className="text-[11px] bg-gray-100 dark:bg-white/10 rounded-full px-2 py-0.5 shadow-sm">
+                                                {emoji}{count > 1 ? ` ${count}` : ''}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <AnimatePresence>
+                                    {reactionPickerFor === msg.id && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 5, scale: 0.9 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 5, scale: 0.9 }}
+                                            className={`flex gap-1 mt-1 bg-white dark:bg-[#1a1f35] rounded-full px-2 py-1.5 shadow-xl border border-black/5 dark:border-white/10 ${isMine ? 'self-end' : 'self-start'}`}
+                                        >
+                                            {REACTION_EMOJIS.map(emoji => (
+                                                <button
+                                                    key={emoji}
+                                                    onClick={() => handleReact(msg.id, emoji)}
+                                                    className="text-lg hover:scale-125 transition-transform active:scale-95"
+                                                >
+                                                    {emoji}
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </motion.div>
                         </React.Fragment>
                     );
@@ -466,6 +577,19 @@ export default function Chat() {
 
             {/* Input Area */}
             <div className="p-4 bg-white dark:bg-[#161b2e] border-t border-black/5 dark:border-white/5 transition-colors duration-500 sticky bottom-0">
+                {messages.length === 0 && (
+                    <div className="flex gap-2 overflow-x-auto pb-3 no-scrollbar">
+                        {icebreakers.map((line, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setNewMessage(line)}
+                                className="shrink-0 text-xs font-medium text-left px-4 py-2.5 rounded-2xl bg-gray-100 dark:bg-[#1a1f35] text-gray-600 dark:text-gray-300 hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] transition-colors max-w-[220px]"
+                            >
+                                {line}
+                            </button>
+                        ))}
+                    </div>
+                )}
                 <div className="flex items-center gap-2">
                     {!isRecording && (
                         <button onClick={() => document.getElementById('galleryInput').click()} className="size-10 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
@@ -487,7 +611,7 @@ export default function Chat() {
                             <input
                                 type="text"
                                 value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
+                                onChange={(e) => { setNewMessage(e.target.value); handleTyping(); }}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                                 placeholder="Message..."
                                 className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 px-2 text-[#101322] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 font-medium"
