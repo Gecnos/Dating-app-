@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MatchModel;
+use App\Models\Message;
 use App\Models\Report;
 use App\Models\User;
 use App\Models\UserPhoto;
@@ -140,6 +142,11 @@ class AdminController extends Controller
                 'total_users' => User::count(),
                 'verified_users' => User::where('is_verified', true)->count(),
                 'pending_verifications' => User::whereNotNull('verification_selfie')->where('is_verified', false)->count(),
+                // Each mutual match is stored as two rows (one per direction),
+                // so divide by 2 for the actual pair count.
+                'total_matches' => intdiv(MatchModel::where('is_mutual', true)->count(), 2),
+                'messages_last_24h' => Message::where('created_at', '>=', now()->subDay())->count(),
+                'new_users_this_week' => User::where('created_at', '>=', now()->subWeek())->count(),
             ]
         ]);
     }
