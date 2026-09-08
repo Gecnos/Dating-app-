@@ -88,7 +88,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/verify', [App\Http\Controllers\AdminController::class, 'index']);
         Route::post('/verify/{id}/{action}', [App\Http\Controllers\AdminController::class, 'verify']);
         Route::get('/reports', [App\Http\Controllers\AdminController::class, 'reports']);
+        Route::post('/reports/{id}/resolve', [App\Http\Controllers\AdminController::class, 'resolveReport']);
         Route::get('/stats', [App\Http\Controllers\AdminController::class, 'stats']);
+        Route::post('/users/{id}/ban', [App\Http\Controllers\AdminController::class, 'banUser']);
+        Route::post('/users/{id}/unban', [App\Http\Controllers\AdminController::class, 'unbanUser']);
+        Route::delete('/users/{id}/photos/{photoId}', [App\Http\Controllers\AdminController::class, 'deleteUserPhoto']);
     });
 
     // Swipe & Matches
