@@ -23,6 +23,15 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
+
+            if ($user->is_banned) {
+                Auth::logout();
+                return response()->json([
+                    'message' => 'Ce compte a été suspendu.',
+                    'errors' => ['email' => ['Ce compte a été suspendu.']]
+                ], 403);
+            }
+
             $token = $user->createToken('auth-token')->plainTextToken;
 
             return response()->json([
