@@ -49,6 +49,15 @@ class UserController extends Controller
             abort(404); // On fait semblant que le profil n'existe pas
         }
 
+        // Ne pas enregistrer la vue si le visiteur est lui-même en mode
+        // fantôme : il a choisi d'être invisible, ça inclut son activité.
+        if (!$me->is_ghost_mode) {
+            \App\Models\ProfileView::updateOrCreate(
+                ['viewer_id' => $me->id, 'viewed_id' => $user->id],
+                ['viewed_at' => now()]
+            );
+        }
+
         return response()->json([
             'profile' => $user,
             'isMutual' => $isMutual
@@ -75,6 +84,26 @@ class UserController extends Controller
             'message' => 'Selfie envoyé, en attente de vérification.',
             'verification_selfie' => $url,
         ]);
+    }
+
+    /**
+     * Qui a consulté mon profil, plus récent en premier.
+     */
+    public function profileViews()
+    {
+        $views = \App\Models\ProfileView::where('viewed_id', Auth::id())
+            ->with('viewer')
+            ->orderByDesc('viewed_at')
+            ->get()
+            ->map(function ($view) {
+                return [
+                    'id' => $view->id,
+                    'user' => $view->viewer,
+                    'viewed_at' => $view->viewed_at,
+                ];
+            });
+
+        return response()->json(['views' => $views]);
     }
 
     /**
@@ -171,11 +200,23 @@ class UserController extends Controller
             // eligible user in the whole database gets loaded into memory and
             // scored/sorted on every cache miss, which gets slower as the user
             // base grows. A random sample of 300 is plenty to pick a top-20 from.
-            return User::whereNotIn('id', $excludeIds)
+            $query = User::whereNotIn('id', $excludeIds)
                 ->where('is_ghost_mode', false)
                 ->with(['intention', 'photos'])
                 // 1. Gender Filter: Same or specific preference
-                ->where('gender', $me->gender === 'Homme' ? 'Femme' : 'Homme')
+                ->where('gender', $me->gender === 'Homme' ? 'Femme' : 'Homme');
+
+            // Age preference, portable across drivers (see explorer() for
+            // why EXTRACT(YEAR FROM AGE(...)) isn't used — Postgres-only,
+            // crashes on sqlite).
+            if ($me->pref_age_min) {
+                $query->whereDate('date_of_birth', '<=', now()->subYears($me->pref_age_min)->toDateString());
+            }
+            if ($me->pref_age_max) {
+                $query->whereDate('date_of_birth', '>', now()->subYears($me->pref_age_max + 1)->toDateString());
+            }
+
+            $candidates = $query
                 ->inRandomOrder()
                 ->limit(300)
                 ->get()
@@ -209,7 +250,16 @@ class UserController extends Controller
 
                     $user->matching_score = $score;
                     return $user;
-                })
+                });
+
+            // Distance preference: same reasoning as explorer() — the
+            // haversine trig functions aren't portable in raw SQL, so filter
+            // in PHP using the distance_km already computed above.
+            if ($me->pref_max_distance_km) {
+                $candidates = $candidates->filter(fn($user) => $user->distance_km <= $me->pref_max_distance_km)->values();
+            }
+
+            return $candidates
                 ->sortByDesc('matching_score')
                 ->values()
                 ->take(20);
@@ -457,6 +507,48 @@ class UserController extends Controller
         return response()->json(['message' => 'Position mise à jour.']);
     }
 
+    /**
+     * Enregistre les préférences de recherche (âge, distance) utilisées par
+     * discovery(). Chaque champ est optionnel : l'omettre/le vider retire
+     * le filtre correspondant plutôt que de le remettre à une valeur par défaut.
+     */
+    public function updateSearchPreferences(Request $request)
+    {
+        $validated = $request->validate([
+            'pref_age_min' => 'nullable|integer|min:18|max:99',
+            'pref_age_max' => 'nullable|integer|min:18|max:99',
+            'pref_max_distance_km' => 'nullable|integer|min:1',
+        ]);
+
+        if (
+            array_key_exists('pref_age_min', $validated) && $validated['pref_age_min'] !== null &&
+            array_key_exists('pref_age_max', $validated) && $validated['pref_age_max'] !== null &&
+            $validated['pref_age_min'] > $validated['pref_age_max']
+        ) {
+            return response()->json([
+                'message' => "L'âge minimum ne peut pas dépasser l'âge maximum.",
+                'errors' => ['pref_age_min' => ["L'âge minimum ne peut pas dépasser l'âge maximum."]],
+            ], 422);
+        }
+
+        $user = Auth::user();
+        $user->update($validated);
+
+        // Preferences changed — the 10-minute discovery cache would
+        // otherwise keep serving the old, unfiltered/differently-filtered
+        // list until it naturally expires.
+        Cache::forget("discovery_user_{$user->id}");
+
+        return response()->json([
+            'message' => 'Préférences enregistrées.',
+            'preferences' => [
+                'pref_age_min' => $user->pref_age_min,
+                'pref_age_max' => $user->pref_age_max,
+                'pref_max_distance_km' => $user->pref_max_distance_km,
+            ],
+        ]);
+    }
+
      public function toggleGhostMode(Request $request)
     {
         $user = Auth::user();
@@ -465,6 +557,31 @@ class UserController extends Controller
 
         return response()->json([
             'is_ghost_mode' => $user->is_ghost_mode
+        ]);
+    }
+
+    /**
+     * Met à jour les préférences de notifications push de l'utilisateur.
+     * Ne touche jamais aux notifications in-app (toujours créées), juste
+     * à l'envoi FCM.
+     */
+    public function updateNotificationPreferences(Request $request)
+    {
+        $validated = $request->validate([
+            'notify_push_messages' => 'sometimes|boolean',
+            'notify_push_matches' => 'sometimes|boolean',
+            'notify_push_likes' => 'sometimes|boolean',
+            'notify_push_announcements' => 'sometimes|boolean',
+        ]);
+
+        $user = Auth::user();
+        $user->update($validated);
+
+        return response()->json([
+            'notify_push_messages' => $user->notify_push_messages,
+            'notify_push_matches' => $user->notify_push_matches,
+            'notify_push_likes' => $user->notify_push_likes,
+            'notify_push_announcements' => $user->notify_push_announcements,
         ]);
     }
 

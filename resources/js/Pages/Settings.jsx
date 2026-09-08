@@ -31,6 +31,9 @@ export default function Settings() {
     });
 
     const [showPasswordForm, setShowPasswordForm] = useState(false);
+    const [showSessions, setShowSessions] = useState(false);
+    const [sessions, setSessions] = useState([]);
+    const [sessionsLoading, setSessionsLoading] = useState(false);
     const [passwordData, setPasswordData] = useState({
         current_password: '',
         password: '',
@@ -144,6 +147,61 @@ export default function Settings() {
         }
     };
 
+    const fetchSessions = async () => {
+        setSessionsLoading(true);
+        try {
+            const res = await axios.get('/security/sessions');
+            setSessions(res.data.sessions || []);
+        } catch (err) {
+            console.error("Error fetching sessions:", err);
+            error("Impossible de charger les sessions.");
+        } finally {
+            setSessionsLoading(false);
+        }
+    };
+
+    const openSessions = () => {
+        setShowSessions(true);
+        fetchSessions();
+    };
+
+    const revokeSession = (id) => {
+        confirm({
+            title: "Déconnecter cette session",
+            message: "Cet appareil devra se reconnecter pour accéder à votre compte.",
+            confirmText: "Déconnecter",
+            onConfirm: async () => {
+                try {
+                    await axios.delete(`/security/sessions/${id}`);
+                    setSessions(prev => prev.filter(s => s.id !== id));
+                    success("Session déconnectée.");
+                } catch (err) {
+                    console.error(err);
+                    error("Erreur lors de la déconnexion.");
+                }
+            }
+        });
+    };
+
+    const revokeOtherSessions = () => {
+        confirm({
+            title: "Déconnecter tous les autres appareils",
+            message: "Toutes vos sessions actives, sauf celle-ci, seront déconnectées.",
+            isDangerous: true,
+            confirmText: "Tout déconnecter",
+            onConfirm: async () => {
+                try {
+                    await axios.delete('/security/sessions');
+                    setSessions(prev => prev.filter(s => s.is_current));
+                    success("Autres appareils déconnectés.");
+                } catch (err) {
+                    console.error(err);
+                    error("Erreur lors de la déconnexion.");
+                }
+            }
+        });
+    };
+
     const handleDeleteAccount = () => {
         confirm({
             title: "Supprimer mon compte",
@@ -203,6 +261,22 @@ export default function Settings() {
                                 <div>
                                     <p className="text-xs font-bold">Changer le mot de passe</p>
                                     <p className="text-[9px] text-gray-500 italic">Mise à jour : {securityInfo.password_last_changed}</p>
+                                </div>
+                            </div>
+                            <span className="material-symbols-outlined text-gray-400 text-sm group-hover:translate-x-1 transition-transform">chevron_right</span>
+                        </button>
+
+                        <button
+                            onClick={openSessions}
+                            className="w-full text-left p-5 flex items-center justify-between group active:bg-black/5 dark:active:bg-white/5 transition-all"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400 transition-colors duration-500">
+                                    <span className="material-symbols-outlined text-xl">devices</span>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold">Sessions actives</p>
+                                    <p className="text-[9px] text-gray-500 italic">Voir et déconnecter vos appareils</p>
                                 </div>
                             </div>
                             <span className="material-symbols-outlined text-gray-400 text-sm group-hover:translate-x-1 transition-transform">chevron_right</span>
@@ -269,6 +343,18 @@ export default function Settings() {
                 <section className="space-y-4">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 ml-2 transition-colors duration-500">Préférences</h3>
                     <div className="rounded-3xl border bg-white dark:bg-[#161b2e] border-black/5 dark:border-white/5 shadow-sm divide-y divide-black/5 dark:divide-white/5 transition-colors duration-500">
+                        <Link to="/settings/notification-preferences" className="w-full text-left p-5 flex items-center justify-between group active:bg-black/5 dark:active:bg-white/5 transition-colors">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#D4AF37]/10 text-[#D4AF37] transition-colors duration-500">
+                                    <span className="material-symbols-outlined text-xl">notifications_active</span>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold">Notifications push</p>
+                                    <p className="text-[9px] text-gray-500">Choisir quelles alertes recevoir</p>
+                                </div>
+                            </div>
+                            <span className="material-symbols-outlined text-gray-400 text-sm group-hover:translate-x-1 transition-transform">chevron_right</span>
+                        </Link>
                         {/* Dark Mode Toggle */}
                         <div className="p-5 flex items-center justify-between">
                             <div className="flex items-center gap-4">
@@ -299,6 +385,19 @@ export default function Settings() {
                                 <div className={`w-11 h-6 rounded-full peer transition-all ${ghostMode ? 'bg-[#D4AF37] after:translate-x-full after:border-white' : 'bg-gray-200'} after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all`}></div>
                             </label>
                         </div>
+
+                        <Link to="/settings/search-preferences" className="w-full text-left p-5 flex items-center justify-between group active:bg-black/5 dark:active:bg-white/5 transition-colors">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#D4AF37]/10 text-[#D4AF37] transition-colors duration-500">
+                                    <span className="material-symbols-outlined text-xl">tune</span>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold">Préférences de recherche</p>
+                                    <p className="text-[9px] text-gray-500">Âge et distance pour la découverte</p>
+                                </div>
+                            </div>
+                            <span className="material-symbols-outlined text-gray-400 text-sm group-hover:translate-x-1 transition-transform">chevron_right</span>
+                        </Link>
                     </div>
                 </section>
 
@@ -384,6 +483,65 @@ export default function Settings() {
                                     </button>
                                 </div>
                             </form>
+                        </motion.div>
+                    </div>
+                )}
+
+                {showSessions && (
+                    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center p-0 sm:p-6 bg-black/80 backdrop-blur-md">
+                        <motion.div
+                            initial={{ y: "100%", opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: "100%", opacity: 0 }}
+                            className="bg-white dark:bg-[#161b2e] w-full max-w-sm rounded-t-[2.5rem] sm:rounded-[2.5rem] p-8 border border-black/5 dark:border-white/10 shadow-2xl max-h-[80vh] overflow-y-auto"
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-black italic tracking-tighter text-[#101322] dark:text-white">Sessions actives</h2>
+                                <button onClick={() => setShowSessions(false)} className="size-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5">
+                                    <span className="material-symbols-outlined text-lg">close</span>
+                                </button>
+                            </div>
+
+                            {sessionsLoading ? (
+                                <div className="flex justify-center py-8">
+                                    <div className="size-8 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {sessions.map(session => (
+                                        <div key={session.id} className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-bold flex items-center gap-2">
+                                                    {session.is_current ? 'Cette session' : 'Autre appareil'}
+                                                    {session.is_current && (
+                                                        <span className="text-[8px] font-black uppercase tracking-widest bg-[#D4AF37]/20 text-[#D4AF37] px-2 py-0.5 rounded-full">Actuelle</span>
+                                                    )}
+                                                </p>
+                                                <p className="text-[9px] text-gray-500 italic truncate">
+                                                    {session.last_used_at ? `Active ${new Date(session.last_used_at).toLocaleString()}` : `Créée ${new Date(session.created_at).toLocaleString()}`}
+                                                </p>
+                                            </div>
+                                            {!session.is_current && (
+                                                <button
+                                                    onClick={() => revokeSession(session.id)}
+                                                    className="shrink-0 text-[10px] font-black uppercase text-red-500 tracking-widest hover:underline"
+                                                >
+                                                    Déconnecter
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+
+                                    {sessions.length > 1 && (
+                                        <button
+                                            onClick={revokeOtherSessions}
+                                            className="w-full mt-2 py-4 rounded-2xl bg-red-500/10 text-red-500 font-black text-xs uppercase tracking-widest active:scale-95 transition-all"
+                                        >
+                                            Déconnecter tous les autres appareils
+                                        </button>
+                                    )}
+                                </div>
+                            )}
                         </motion.div>
                     </div>
                 )}

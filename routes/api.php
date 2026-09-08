@@ -49,6 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // User API
     Route::post('/user/location', [App\Http\Controllers\UserController::class, 'updateLocation']);
     Route::post('/user/ghost-mode', [App\Http\Controllers\UserController::class, 'toggleGhostMode']);
+    Route::post('/preferences/notifications', [App\Http\Controllers\UserController::class, 'updateNotificationPreferences']);
+    Route::post('/preferences/search', [App\Http\Controllers\UserController::class, 'updateSearchPreferences']);
     // Counts - Private Cache 30s
     Route::middleware('cache.control:private,30')->get('/user/counts', [App\Http\Controllers\UserController::class, 'counts']);
     Route::post('/fcm-token', [App\Http\Controllers\UserController::class, 'updateFcmToken']);
@@ -57,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/explorer', [App\Http\Controllers\UserController::class, 'explorer']);
     Route::get('/profile/edit', [App\Http\Controllers\UserController::class, 'edit']);
     Route::post('/profile/update', [App\Http\Controllers\UserController::class, 'update']);
+    Route::get('/profile/views', [App\Http\Controllers\UserController::class, 'profileViews']);
     Route::get('/user/{id}', [App\Http\Controllers\UserController::class, 'show']);
 
     // Photo Management
@@ -78,6 +81,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Security
     Route::get('/security/info', [App\Http\Controllers\SecurityController::class, 'getSecurityInfo']);
     Route::post('/security/password', [App\Http\Controllers\SecurityController::class, 'updatePassword'])->name('security.password.update');
+    Route::get('/security/sessions', [App\Http\Controllers\SecurityController::class, 'listSessions']);
+    Route::delete('/security/sessions/{id}', [App\Http\Controllers\SecurityController::class, 'revokeSession']);
+    Route::delete('/security/sessions', [App\Http\Controllers\SecurityController::class, 'revokeOtherSessions']);
     Route::delete('/user/delete', [App\Http\Controllers\UserController::class, 'destroy'])->name('user.destroy');
 
     // Profile verification (selfie submission — review is the /admin/verify routes below)
