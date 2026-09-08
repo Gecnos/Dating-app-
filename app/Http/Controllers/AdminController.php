@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdminActivityLog;
 use App\Models\MatchModel;
 use App\Models\Message;
 use App\Models\Report;
@@ -10,6 +11,7 @@ use App\Models\UserPhoto;
 use App\Notifications\AppNotification;
 use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -51,6 +53,13 @@ class AdminController extends Controller
                 'verified',
                 '#4CAF50'
             ));
+
+            AdminActivityLog::create([
+                'admin_id' => Auth::id(),
+                'action' => 'verify.approve',
+                'target_type' => 'user',
+                'target_id' => $user->id,
+            ]);
         } else {
             $user->update(['verification_selfie' => null]);
             $user->notify(new \App\Notifications\AppNotification(
@@ -61,6 +70,13 @@ class AdminController extends Controller
                 'error',
                 '#F44336'
             ));
+
+            AdminActivityLog::create([
+                'admin_id' => Auth::id(),
+                'action' => 'verify.reject',
+                'target_type' => 'user',
+                'target_id' => $user->id,
+            ]);
         }
 
         return response()->json(['message' => 'Action effectuée']);
@@ -88,6 +104,13 @@ class AdminController extends Controller
         $report = Report::findOrFail($id);
         $report->update(['status' => 'reviewed']);
 
+        AdminActivityLog::create([
+            'admin_id' => Auth::id(),
+            'action' => 'report.resolve',
+            'target_type' => 'report',
+            'target_id' => $report->id,
+        ]);
+
         return response()->json(['message' => 'Signalement marque comme traite.']);
     }
 
@@ -101,6 +124,13 @@ class AdminController extends Controller
         $user->forceFill(['is_banned' => true, 'banned_at' => now()])->save();
         $user->tokens()->delete();
 
+        AdminActivityLog::create([
+            'admin_id' => Auth::id(),
+            'action' => 'user.ban',
+            'target_type' => 'user',
+            'target_id' => $user->id,
+        ]);
+
         return response()->json(['message' => 'Compte suspendu.']);
     }
 
@@ -108,6 +138,13 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
         $user->forceFill(['is_banned' => false, 'banned_at' => null])->save();
+
+        AdminActivityLog::create([
+            'admin_id' => Auth::id(),
+            'action' => 'user.unban',
+            'target_type' => 'user',
+            'target_id' => $user->id,
+        ]);
 
         return response()->json(['message' => 'Compte reactive.']);
     }
@@ -122,6 +159,7 @@ class AdminController extends Controller
     {
         $photo = UserPhoto::where('user_id', $userId)->findOrFail($photoId);
         $user = $photo->user;
+        $photoUrl = $photo->url;
 
         $this->cloudinary->deleteImage($photo->url);
         $photo->delete();
@@ -130,6 +168,14 @@ class AdminController extends Controller
             $next = $user->photos()->orderBy('order')->first();
             $user->update(['avatar' => $next ? $next->url : null]);
         }
+
+        AdminActivityLog::create([
+            'admin_id' => Auth::id(),
+            'action' => 'photo.delete',
+            'target_type' => 'user',
+            'target_id' => $user->id,
+            'details' => ['photo_id' => (int) $photoId, 'photo_url' => $photoUrl],
+        ]);
 
         return response()->json(['message' => 'Photo supprimee.']);
     }
@@ -183,6 +229,29 @@ class AdminController extends Controller
             }
         });
 
+        AdminActivityLog::create([
+            'admin_id' => Auth::id(),
+            'action' => 'broadcast.send',
+            'target_type' => null,
+            'target_id' => null,
+            'details' => ['title' => $validated['title'], 'notified_count' => $count],
+        ]);
+
         return response()->json(['message' => 'Diffuse.', 'notified_count' => $count]);
+    }
+
+    /**
+     * Journal des actions admin, plus recentes en premier.
+     */
+    public function activityLog()
+    {
+        // Order by id, not created_at: the timestamp column only has
+        // second-level precision, so two actions in the same second would
+        // otherwise tie and sort in a database-dependent order.
+        $logs = AdminActivityLog::with('admin:id,name')
+            ->latest('id')
+            ->paginate(50);
+
+        return response()->json($logs);
     }
 }
