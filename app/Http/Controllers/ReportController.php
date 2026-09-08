@@ -42,6 +42,7 @@ class ReportController extends Controller
             'reported_id' => $request->reported_id,
             'reason' => $request->reason,
             'description' => $request->description,
+            'priority' => $request->reason === 'Urgence / Danger immédiat' ? 'urgent' : 'normal',
         ]);
 
         return response()->json($report, 201);

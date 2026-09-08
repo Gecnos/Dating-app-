@@ -15,6 +15,7 @@ class Report extends Model
         'reason',
         'description',
         'status',
+        'priority',
     ];
 
     public function reporter()
