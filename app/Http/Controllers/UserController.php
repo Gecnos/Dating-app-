@@ -560,6 +560,31 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * Met à jour les préférences de notifications push de l'utilisateur.
+     * Ne touche jamais aux notifications in-app (toujours créées), juste
+     * à l'envoi FCM.
+     */
+    public function updateNotificationPreferences(Request $request)
+    {
+        $validated = $request->validate([
+            'notify_push_messages' => 'sometimes|boolean',
+            'notify_push_matches' => 'sometimes|boolean',
+            'notify_push_likes' => 'sometimes|boolean',
+            'notify_push_announcements' => 'sometimes|boolean',
+        ]);
+
+        $user = Auth::user();
+        $user->update($validated);
+
+        return response()->json([
+            'notify_push_messages' => $user->notify_push_messages,
+            'notify_push_matches' => $user->notify_push_matches,
+            'notify_push_likes' => $user->notify_push_likes,
+            'notify_push_announcements' => $user->notify_push_announcements,
+        ]);
+    }
+
     public function updateFcmToken(Request $request)
     {
         $request->validate([

@@ -343,6 +343,18 @@ export default function Settings() {
                 <section className="space-y-4">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 ml-2 transition-colors duration-500">Préférences</h3>
                     <div className="rounded-3xl border bg-white dark:bg-[#161b2e] border-black/5 dark:border-white/5 shadow-sm divide-y divide-black/5 dark:divide-white/5 transition-colors duration-500">
+                        <Link to="/settings/notification-preferences" className="w-full text-left p-5 flex items-center justify-between group active:bg-black/5 dark:active:bg-white/5 transition-colors">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#D4AF37]/10 text-[#D4AF37] transition-colors duration-500">
+                                    <span className="material-symbols-outlined text-xl">notifications_active</span>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold">Notifications push</p>
+                                    <p className="text-[9px] text-gray-500">Choisir quelles alertes recevoir</p>
+                                </div>
+                            </div>
+                            <span className="material-symbols-outlined text-gray-400 text-sm group-hover:translate-x-1 transition-transform">chevron_right</span>
+                        </Link>
                         {/* Dark Mode Toggle */}
                         <div className="p-5 flex items-center justify-between">
                             <div className="flex items-center gap-4">
