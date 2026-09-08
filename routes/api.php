@@ -57,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/explorer', [App\Http\Controllers\UserController::class, 'explorer']);
     Route::get('/profile/edit', [App\Http\Controllers\UserController::class, 'edit']);
     Route::post('/profile/update', [App\Http\Controllers\UserController::class, 'update']);
+    Route::get('/profile/views', [App\Http\Controllers\UserController::class, 'profileViews']);
     Route::get('/user/{id}', [App\Http\Controllers\UserController::class, 'show']);
 
     // Photo Management

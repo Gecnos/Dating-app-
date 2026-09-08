@@ -27,6 +27,7 @@ import PhotoGallery from '../pages/Onboarding/PhotoGallery';
 import EditProfile from '../pages/EditProfile';
 import ProfileDetails from '../pages/ProfileDetails';
 import PhotoManagement from '../pages/PhotoManagement';
+import ProfileViews from '../pages/ProfileViews';
 
 // Settings & Static
 import Settings from '../pages/Settings';
@@ -105,6 +106,7 @@ export default function AppRoutes() {
                 {/* Profile & Features */}
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/edit" element={<EditProfile />} />
+                <Route path="/profile/views" element={<ProfileViews />} />
                 <Route path="/profile/:id" element={<ProfileDetails />} />
                 <Route path="/photos/manage" element={<PhotoManagement />} />
 

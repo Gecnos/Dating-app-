@@ -23,6 +23,7 @@ export default function Profile() {
     const menuItems = [
         { label: 'Modifier mon profil', icon: 'edit', route: '/profile/edit' },
         { label: 'Gérer mes photos', icon: 'photo_library', route: '/photos/manage' },
+        { label: 'Qui a vu mon profil', icon: 'visibility', route: '/profile/views' },
         { label: 'Paramètres', icon: 'settings', route: '/settings' },
         { label: 'Aide & Sécurité', icon: 'security', route: '/help' },
     ];
